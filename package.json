@@ -1,0 +1,27 @@
+{
+  "name": "jamovi-compiler",
+  "version": "0.1.0",
+  "description": "The jamovi compiler",
+  "main": "index.js",
+  "bin": {
+    "jmc": "index.js"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "test": "npm start -- ../Rjamovi-example"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jamovi/jamovi-compiler.git"
+  },
+  "author": "Jonathon Love <jon@thon.cc>",
+  "bugs": {
+    "url": "https://github.com/jamovi/jamovi-compiler/issues"
+  },
+  "homepage": "https://github.com/jamovi/jamovi-compiler#readme",
+  "dependencies": {
+    "browserify": "^13.1.0",
+    "js-yaml": "^3.6.1",
+    "underscore": "^1.8.3"
+  }
+}

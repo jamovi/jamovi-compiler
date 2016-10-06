@@ -1,0 +1,26 @@
+
+# This file is a generated template, your changes will not be overwritten
+
+<%= analysis.name %>Class <- R6::R6Class(
+    "<%= analysis.name %>Class",
+    inherit = jmvcore::Analysis,
+    public = list(
+        initialize = function(datasetId, analysisId) {
+            super$initialize(
+                datasetId=datasetId,
+                analysisId=analysisId,
+                package='<%= analysis.package %>',
+                name='<%= analysis.name %>')
+        }),
+    private = list(
+        .run = function() {
+
+            # `self$options` contains the options
+            # `self$data` contains the data
+            # `self$results` contains the results object (to populate)
+
+        },
+        .init = function() {
+
+        })
+)
