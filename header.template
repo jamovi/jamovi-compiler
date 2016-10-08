@@ -10,11 +10,15 @@
                     return '\n            ' + option.name + ' = NULL';
                 return '\n            ' + option.name + ' = ' + imports.sourcify(option['default']);
             }).join()
-            %>, ...) {
+            %>) {
 
-            super$initialize(package='<%= analysis.package %>', name='<%= analysis.name %>', ...)
+            super$initialize(package='<%= analysis.package %>', name='<%= analysis.name %>')
         <%=analysis.options.filter(o => o.type !== 'Data').map(option => {
                 return '\n            private$..' + option.name + ' <- ' + imports.optionify(option);
+                }).join('')
+            %>
+        <%=analysis.options.filter(o => o.type !== 'Data').map(option => {
+                return '\n            self$.addOption(private$..' + option.name + ')';
                 }).join('')
             %>
         }),

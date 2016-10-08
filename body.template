@@ -4,14 +4,6 @@
 <%= analysis.name %>Class <- R6::R6Class(
     "<%= analysis.name %>Class",
     inherit = jmvcore::Analysis,
-    public = list(
-        initialize = function(datasetId, analysisId) {
-            super$initialize(
-                datasetId=datasetId,
-                analysisId=analysisId,
-                package='<%= analysis.package %>',
-                name='<%= analysis.name %>')
-        }),
     private = list(
         .run = function() {
 
