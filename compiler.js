@@ -81,14 +81,13 @@ const optionify = function(option, optionName, optionValue) {
     if (typeof optionValue === 'undefined')
         optionValue = option.name;
 
-    let str = 'jmvcore::Option' + option.type + '$new(self, "' + optionName + '", ' + optionValue
+    let str = 'jmvcore::Option' + option.type + '$new("' + optionName + '", ' + optionValue
 
     for (let prop in option) {
         if (prop === 'type' ||
             prop === 'name' ||
             prop === 'title' ||
-            prop === 'description' ||
-            prop === 'default')
+            prop === 'description')
                 continue;
 
         str += ', ' + prop + '=' + sourcify(option[prop], optionName, 'NULL');
