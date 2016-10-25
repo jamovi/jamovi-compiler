@@ -9,6 +9,7 @@ const fs = require('fs');
 const browserify = require('browserify');
 
 const compiler = require('./compiler');
+const uicompiler = require('./uicompiler');
 
 const exists = function(path) {
     try {
@@ -71,7 +72,7 @@ for (let file of files) {
         console.log('wrote: ' + path.basename(oOutPath));
 
         if ( ! exists(sOutPath)) {
-            compiler(analysisPath, resultsPath, sTemplPath, sOutPath);
+            uicompiler(analysisPath, sTemplPath, sOutPath);
             console.log('wrote: ' + path.basename(sOutPath));
         }
 
