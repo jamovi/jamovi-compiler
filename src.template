@@ -11,13 +11,9 @@ var layout = ui.extend({
     label: "<%= analysis.name %>",
     type: "root",
     stage: 0,
-    controls: [
+    controls: <%= elements.controls %>,
 
-    ],
-
-    actions: [
-
-    ]
+    actions: <%= elements.actions %>
 });
 
 module.exports = { ui : layout, options: options };
