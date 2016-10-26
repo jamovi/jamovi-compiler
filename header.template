@@ -32,6 +32,21 @@
     %>)
 )
 
+<%= analysis.name %>Base <- R6::R6Class(
+    "<%= analysis.name %>Base",
+    inherit = jmvcore::Analysis,
+    public = list(
+        initialize = function(options, data=NULL, datasetId="", analysisId="") {
+            super$initialize(
+                package = '<%= analysis.package %>',
+                name = '<%= analysis.name %>',
+                version = c(<%= analysis.version.split('.').join(',') %>),
+                options = options,
+                data = data,
+                datasetId = datasetId,
+                analysisId = analysisId)
+        }))
+
 <%= analysis.name %> <- function(<%=analysis.options.map(option => {
     if (_.isUndefined(option['default']))
         return '\n    ' + option.name;
@@ -45,10 +60,8 @@
     %>)
 
     analysis <- <%= analysis.name %>Class$new(
-        package = '<%= analysis.package %>',
-        name = '<%= analysis.name %>',
-        data = data,
-        options = options)
+        options = options,
+        data = data)
 
     analysis$run()
     analysis$render()

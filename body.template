@@ -3,16 +3,13 @@
 
 <%= analysis.name %>Class <- R6::R6Class(
     "<%= analysis.name %>Class",
-    inherit = jmvcore::Analysis,
+    inherit = <%= analysis.name %>Base,
     private = list(
         .run = function() {
 
-            # `self$options` contains the options
             # `self$data` contains the data
+            # `self$options` contains the options
             # `self$results` contains the results object (to populate)
-
-        },
-        .init = function() {
 
         })
 )
