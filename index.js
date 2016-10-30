@@ -26,10 +26,18 @@ if (process.argv.length > 2)
     rootDir = process.argv[2];
 rootDir = path.resolve(rootDir);
 
-if ( ! exists(path.join(rootDir, 'DESCRIPTION'))) {
+let descPath = path.join(rootDir, 'DESCRIPTION');
+
+if ( ! exists(descPath)) {
     console.log('a DESCRIPTION file could not be found\n\nYou must be in the current directory of an R package, or provide a path to one\n');
     process.exit(1);
 }
+
+let descContent = fs.readFileSync(descPath, 'utf-8');
+let packageMatch = descContent.match(/^Package: *(.+)$/m);
+if (packageMatch === null)
+    throw 'DESCRIPTION file does not contain a package name';
+let packageName = packageMatch[1];
 
 let defDir = path.join(rootDir, 'inst', 'jamovi');
 let rDir = path.join(rootDir, 'R');
@@ -60,15 +68,15 @@ for (let file of files) {
         let oTemplPath = path.join(__dirname, 'options.template');
         let sTemplPath = path.join(__dirname, 'src.template');
 
-        compiler(analysisPath, resultsPath, hTemplPath, hOutPath);
+        compiler(packageName, analysisPath, resultsPath, hTemplPath, hOutPath);
         console.log('wrote: ' + path.basename(hOutPath));
 
         if ( ! exists(bOutPath)) {
-            compiler(analysisPath, resultsPath, bTemplPath, bOutPath);
+            compiler(packageName, analysisPath, resultsPath, bTemplPath, bOutPath);
             console.log('wrote: ' + path.basename(bOutPath));
         }
 
-        compiler(analysisPath, resultsPath, oTemplPath, oOutPath);
+        compiler(packageName, analysisPath, resultsPath, oTemplPath, oOutPath);
         console.log('wrote: ' + path.basename(oOutPath));
 
         if ( ! exists(sOutPath)) {

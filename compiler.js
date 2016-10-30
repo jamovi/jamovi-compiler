@@ -11,11 +11,12 @@ const reject = function(filePath, message) {
     throw path.basename(filePath) + ' ' + message;
 }
 
-const compile = function(analysisPath, resultsPath, templPath, outPath) {
+const compile = function(packageName, analysisPath, resultsPath, templPath, outPath) {
 
     let content;
     content = fs.readFileSync(analysisPath, 'utf-8');
     let analysis = yaml.safeLoad(content);
+
     let results;
     try {
         content = fs.readFileSync(resultsPath, 'utf-8');
@@ -31,12 +32,10 @@ const compile = function(analysisPath, resultsPath, templPath, outPath) {
         reject(analysisPath, 'does not contain an analysis title');
     if (typeof analysis.version === 'undefined' || ! semver.valid(analysis.version))
         reject(analysisPath, 'does not contain a valid version');
-    if (typeof analysis.api === 'undefined')
-        reject(analysisPath, 'does not specify an API version');
-    if (typeof analysis.api !== 'number')
-        reject(analysisPath, 'specifies a non-numeric API version');
-    if (analysis.api > 1)
-        reject(analysisPath, 'uses a newer API version (requires a newer jamovi-compiler)');
+    if (typeof analysis.jmc === 'undefined' || ! semver.valid(analysis.jmc))
+        reject(analysisPath, 'does not contain a valid minimum compiler version (jmc)');
+    if (semver.gt(analysis.jmc, '1.0.0'))
+        reject(analysisPath, 'requires a newer jamovi-compiler');
 
     let template = fs.readFileSync(templPath, 'utf-8');
     let compiler = _.template(template);
@@ -46,7 +45,7 @@ const compile = function(analysisPath, resultsPath, templPath, outPath) {
         optionify : optionify
     }
 
-    let object = { analysis : analysis, results : results, imports : imports };
+    let object = { packageName, analysis, results, imports };
     content = compiler(object);
 
     fs.writeFileSync(outPath, content);

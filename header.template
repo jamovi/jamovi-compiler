@@ -10,9 +10,9 @@
                     return '\n            ' + option.name + ' = NULL';
                 return '\n            ' + option.name + ' = ' + imports.sourcify(option['default']);
             }).join()
-            %>) {
+            %>, ...) {
 
-            super$initialize(package='<%= analysis.package %>', name='<%= analysis.name %>')
+            super$initialize(package='<%= packageName %>', name='<%= analysis.name %>', ...)
         <%=analysis.options.filter(o => o.type !== 'Data').map(option => {
                 return '\n            private$..' + option.name + ' <- ' + imports.optionify(option);
                 }).join('')
@@ -36,15 +36,16 @@
     "<%= analysis.name %>Base",
     inherit = jmvcore::Analysis,
     public = list(
-        initialize = function(options, data=NULL, datasetId="", analysisId="") {
+        initialize = function(options, data=NULL, datasetId="", analysisId="", revision=0) {
             super$initialize(
-                package = '<%= analysis.package %>',
+                package = '<%= packageName %>',
                 name = '<%= analysis.name %>',
                 version = c(<%= analysis.version.split('.').join(',') %>),
                 options = options,
                 data = data,
                 datasetId = datasetId,
-                analysisId = analysisId)
+                analysisId = analysisId,
+                revision = revision)
         }))
 
 <%= analysis.name %> <- function(<%=analysis.options.map(option => {
