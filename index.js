@@ -7,49 +7,57 @@ console.log('\njamovi compiler\n');
 const path = require('path');
 const fs = require('fs');
 const browserify = require('browserify');
+const yaml = require('js-yaml');
 
 const compiler = require('./compiler');
 const uicompiler = require('./uicompiler');
+const compileR = require('./compilerr');
+const parseR = require('./parser');
+const utils = require('./utils');
 
-const exists = function(path) {
-    try {
-        fs.statSync(path);
-    }
-    catch (e) {
-        return false;
-    }
-    return true;
-}
-
-let rootDir = '.';
+let srcDir = '.';
 if (process.argv.length > 2)
-    rootDir = process.argv[2];
-rootDir = path.resolve(rootDir);
+    srcDir = process.argv[2];
+srcDir = path.resolve(srcDir);
 
-let descPath = path.join(rootDir, 'DESCRIPTION');
+let defDir = path.join(srcDir, 'jamovi');
+let rDir = path.join(srcDir, 'R');
+let uiDir = path.join(srcDir, 'jamovi/ui');
 
-if ( ! exists(descPath)) {
-    console.log('a DESCRIPTION file could not be found\n\nYou must be in the current directory of an R package, or provide a path to one\n');
-    process.exit(1);
-}
+if ( ! utils.exists(defDir))
+    fs.mkdirSync(defDir);
 
-let descContent = fs.readFileSync(descPath, 'utf-8');
-let packageMatch = descContent.match(/^Package: *(.+)$/m);
-if (packageMatch === null)
-    throw 'DESCRIPTION file does not contain a package name';
-let packageName = packageMatch[1];
-
-let defDir = path.join(rootDir, 'inst', 'jamovi');
-let rDir = path.join(rootDir, 'R');
-let uiDir = path.join(rootDir, 'ui');
-
-if ( ! exists(rDir))
+if ( ! utils.exists(rDir))
     fs.mkdirSync(rDir);
 
-if ( ! exists(uiDir))
+if ( ! utils.exists(uiDir))
     fs.mkdirSync(uiDir);
 
 let files = fs.readdirSync(defDir);
+let packageInfo = parseR(srcDir);
+
+let buildingModule = false;
+let outDir;
+let uiOutDir;
+let yamlOutDir;
+if (process.argv.length > 3) {
+
+    outDir = path.join(path.resolve(process.argv[3]), packageInfo.name);
+    if ( ! utils.exists(outDir))
+        fs.mkdirSync(outDir);
+
+    uiOutDir = path.join(outDir, 'ui');
+    if ( ! utils.exists(uiOutDir))
+        fs.mkdirSync(uiOutDir);
+
+    yamlOutDir = path.join(outDir, 'analyses');
+    if ( ! utils.exists(yamlOutDir))
+        fs.mkdirSync(yamlOutDir);
+
+    buildingModule = true;
+}
+
+let waits = [ ]
 
 for (let file of files) {
 
@@ -59,33 +67,80 @@ for (let file of files) {
         let resultsPath = path.join(defDir, basename + '.r.yaml');
         let hOutPath = path.join(rDir, basename + '.h.R');
         let bOutPath = path.join(rDir, basename + '.b.R');
-        let oOutPath = path.join(uiDir, basename + '.options.js');
         let sOutPath = path.join(uiDir, basename + '.src.js');
-        let uOutPath = path.join(defDir, basename + '.js');
+        let oOutPath = path.join(uiDir, basename + '.options.js');
 
         let hTemplPath = path.join(__dirname, 'header.template');
         let bTemplPath = path.join(__dirname, 'body.template');
         let oTemplPath = path.join(__dirname, 'options.template');
         let sTemplPath = path.join(__dirname, 'src.template');
 
-        compiler(packageName, analysisPath, resultsPath, hTemplPath, hOutPath);
+        compiler(packageInfo.name, analysisPath, resultsPath, hTemplPath, hOutPath);
         console.log('wrote: ' + path.basename(hOutPath));
 
-        if ( ! exists(bOutPath)) {
-            compiler(packageName, analysisPath, resultsPath, bTemplPath, bOutPath);
+        if ( ! utils.exists(bOutPath)) {
+            compiler(packageInfo.name, analysisPath, resultsPath, bTemplPath, bOutPath);
             console.log('wrote: ' + path.basename(bOutPath));
         }
 
-        compiler(packageName, analysisPath, resultsPath, oTemplPath, oOutPath);
+        compiler(packageInfo.name, analysisPath, resultsPath, oTemplPath, oOutPath);
         console.log('wrote: ' + path.basename(oOutPath));
 
-        if ( ! exists(sOutPath)) {
+        if ( ! utils.exists(sOutPath)) {
             uicompiler(analysisPath, sTemplPath, sOutPath);
             console.log('wrote: ' + path.basename(sOutPath));
         }
 
-        let stream = fs.createWriteStream(uOutPath);
-        browserify(sOutPath, { standalone: 'module' }).bundle().pipe(stream);
-        console.log('wrote: ' + path.basename(uOutPath));
+        if (buildingModule) {
+
+            let uOutPath = path.join(uiOutDir, basename + '.js');
+
+            waits.push(Promise.resolve().then(() => {
+                let stream = fs.createWriteStream(uOutPath);
+                return new Promise((resolve) => {
+                    browserify(sOutPath, { standalone: 'module' })
+                        .bundle().pipe(stream);
+                    stream.on('close', resolve);
+                });
+            }));
+
+            let content = fs.readFileSync(analysisPath);
+            fs.writeFileSync(path.join(yamlOutDir, basename + '.a.yaml'), content);
+
+            content = fs.readFileSync(resultsPath);
+            fs.writeFileSync(path.join(yamlOutDir, basename + '.r.yaml'), content);
+
+            console.log('wrote: ' + path.basename(uOutPath));
+        }
+
+        let content = fs.readFileSync(analysisPath, 'utf-8');
+        let analysis = yaml.safeLoad(content);
+        let aObj = {
+            title: ('title' in analysis ? analysis.title : analyis.name),
+            name: analysis.name,
+            description: ('description' in analysis ? analysis.description : null),
+        };
+
+        packageInfo.analyses.push(aObj);
     }
 }
+
+Promise.all(waits).then(() => {  // wait for all the browserifies to finish
+
+    if (buildingModule) {
+
+        let outDir = path.join(path.resolve(process.argv[3]), packageInfo.name);
+        if ( ! utils.exists(outDir))
+            fs.mkdirSync(outDir);
+
+        let indexPath = path.join(defDir, '0000.yaml');
+        let content;
+        if (utils.exists('defDir'))
+            content = fs.readFileSync(resultsPath);
+        else
+            content = yaml.safeDump(packageInfo);
+        fs.writeFileSync(path.join(outDir, 'jamovi.yaml'), content);
+
+        compileR(srcDir, outDir);
+    }
+});

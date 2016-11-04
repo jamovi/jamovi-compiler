@@ -8,7 +8,7 @@
         initialize = function(<%=analysis.options.filter(o => o.type !== 'Data').map(option => {
                 if (typeof(option['default']) === 'undefined')
                     return '\n            ' + option.name + ' = NULL';
-                return '\n            ' + option.name + ' = ' + imports.sourcify(option['default']);
+                return '\n            ' + option.name + ' = ' + imports.sourcifyOption(option['default']);
             }).join()
             %>, ...) {
 
@@ -32,6 +32,8 @@
     %>)
 )
 
+<%= analysis.name %>Results <- <%= imports.resultsify(results, '', true) %>
+
 <%= analysis.name %>Base <- R6::R6Class(
     "<%= analysis.name %>Base",
     inherit = jmvcore::Analysis,
@@ -42,6 +44,7 @@
                 name = '<%= analysis.name %>',
                 version = c(<%= analysis.version.split('.').join(',') %>),
                 options = options,
+                results = <%= analysis.name %>Results$new(options=options),
                 data = data,
                 datasetId = datasetId,
                 analysisId = analysisId,
@@ -51,7 +54,7 @@
 <%= analysis.name %> <- function(<%=analysis.options.map(option => {
     if (_.isUndefined(option['default']))
         return '\n    ' + option.name;
-    return '\n    ' + option.name + ' = ' + imports.sourcify(option['default']);
+    return '\n    ' + option.name + ' = ' + imports.sourcifyOption(option['default']);
 }).join()
 %>) {
 
@@ -59,6 +62,9 @@
         return '\n        ' + option.name + ' = ' + option.name;
     }).join()
     %>)
+
+    results <- <%= analysis.name %>Results$new(
+        options = options)
 
     analysis <- <%= analysis.name %>Class$new(
         options = options,
