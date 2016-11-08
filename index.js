@@ -8,6 +8,7 @@ const path = require('path');
 const fs = require('fs');
 const browserify = require('browserify');
 const yaml = require('js-yaml');
+const AdmZip = require('adm-zip');
 
 const compiler = require('./compiler');
 const uicompiler = require('./uicompiler');
@@ -38,19 +39,21 @@ let packageInfo = parseR(srcDir);
 
 let buildingModule = false;
 let outDir;
+let modDir;
 let uiOutDir;
 let yamlOutDir;
 if (process.argv.length > 3) {
 
-    outDir = path.join(path.resolve(process.argv[3]), packageInfo.name);
-    if ( ! utils.exists(outDir))
-        fs.mkdirSync(outDir);
+    outDir = path.resolve(process.argv[3]);
+    modDir = path.join(outDir, packageInfo.name);
+    if ( ! utils.exists(modDir))
+        fs.mkdirSync(modDir);
 
-    uiOutDir = path.join(outDir, 'ui');
+    uiOutDir = path.join(modDir, 'ui');
     if ( ! utils.exists(uiOutDir))
         fs.mkdirSync(uiOutDir);
 
-    yamlOutDir = path.join(outDir, 'analyses');
+    yamlOutDir = path.join(modDir, 'analyses');
     if ( ! utils.exists(yamlOutDir))
         fs.mkdirSync(yamlOutDir);
 
@@ -107,8 +110,10 @@ for (let file of files) {
             let content = fs.readFileSync(analysisPath);
             fs.writeFileSync(path.join(yamlOutDir, basename + '.a.yaml'), content);
 
-            content = fs.readFileSync(resultsPath);
-            fs.writeFileSync(path.join(yamlOutDir, basename + '.r.yaml'), content);
+            if (utils.exists(resultsPath)) {
+                content = fs.readFileSync(resultsPath);
+                fs.writeFileSync(path.join(yamlOutDir, basename + '.r.yaml'), content);
+            }
 
             console.log('wrote: ' + path.basename(uOutPath));
         }
@@ -118,8 +123,15 @@ for (let file of files) {
         let aObj = {
             title: ('title' in analysis ? analysis.title : analyis.name),
             name: analysis.name,
+            ns: packageInfo.name,
+            group: ('group' in analysis ? analysis.group : packageInfo.name),
             description: ('description' in analysis ? analysis.description : null),
         };
+
+        if ('subtitle' in analysis)
+            aObj.subtitle = analysis.subtitle;
+        if ('subgroup' in analysis)
+            aObj.subgroup = analysis.subgroup;
 
         packageInfo.analyses.push(aObj);
     }
@@ -129,18 +141,23 @@ Promise.all(waits).then(() => {  // wait for all the browserifies to finish
 
     if (buildingModule) {
 
-        let outDir = path.join(path.resolve(process.argv[3]), packageInfo.name);
-        if ( ! utils.exists(outDir))
-            fs.mkdirSync(outDir);
+        let modDir = path.join(path.resolve(process.argv[3]), packageInfo.name);
+        if ( ! utils.exists(modDir))
+            fs.mkdirSync(modDir);
 
         let indexPath = path.join(defDir, '0000.yaml');
         let content;
-        if (utils.exists('defDir'))
-            content = fs.readFileSync(resultsPath);
+        if (utils.exists(indexPath))
+            content = fs.readFileSync(indexPath);
         else
             content = yaml.safeDump(packageInfo);
-        fs.writeFileSync(path.join(outDir, 'jamovi.yaml'), content);
+        fs.writeFileSync(path.join(modDir, 'jamovi.yaml'), content);
 
-        compileR(srcDir, outDir);
+        compileR(srcDir, modDir);
+
+        let zipPath = path.join(outDir, packageInfo.name + '.jmo');
+        let zip = new AdmZip();
+        zip.addLocalFolder(modDir, packageInfo.name);
+        zip.writeZip(zipPath);
     }
-});
+}).catch(e => console.log(e));

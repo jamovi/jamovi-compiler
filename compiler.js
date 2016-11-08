@@ -23,7 +23,15 @@ const compile = function(packageName, analysisPath, resultsPath, templPath, outP
         results = yaml.safeLoad(content);
     }
     catch (e) {
-        results = null;
+        results = {
+            'name' : analysis.name,
+            'title': analysis.title,
+            'items': [ {
+                'name' : 'text',
+                'title': 'text',
+                'type' : 'Preformatted'
+            } ]
+        }
     }
 
     if (typeof analysis.name === 'undefined')
@@ -142,7 +150,7 @@ const sourcifyResults = function(object, indent) {
         str += ')';
     }
     else if (_.isObject(object)) {
-        if (object.type && (object.type === 'Table' || object.type === 'Image' || object.type === 'Array' || object.type === 'Group')) {
+        if (object.type && (object.type === 'Table' || object.type === 'Image' || object.type === 'Array' || object.type === 'Group' || object.type === 'Preformatted')) {
             str = resultsify(object, indent + '    ')
         }
         else {
