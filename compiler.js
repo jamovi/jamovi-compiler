@@ -56,6 +56,10 @@ const compile = function(packageName, analysisPath, resultsPath, templPath, outP
 };
 
 const sourcifyOption = function(object, optionName, optionValue, indent) {
+
+    if (indent === undefined)
+        indent = '            ';
+
     let str = '';
     if (object === null) {
         str = 'NULL';
