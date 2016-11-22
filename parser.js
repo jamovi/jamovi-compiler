@@ -10,7 +10,7 @@ const parse = function(srcDir) {
     let descPath = path.join(srcDir, 'DESCRIPTION');
 
     if ( ! utils.exists(descPath)) {
-        console.log('a DESCRIPTION file could not be found\n\nYou must be in the current directory of an R package, or provide a path to one\n');
+        console.log('a DESCRIPTION file could not be found\n\nIs the path specified an R/jamovi package?\n');
         process.exit(1);
     }
 

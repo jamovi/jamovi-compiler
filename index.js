@@ -5,10 +5,14 @@
 console.log('\njamovi compiler\n');
 
 const path = require('path');
-const fs = require('fs');
+const fs = require('fs-extra');
 const browserify = require('browserify');
 const yaml = require('js-yaml');
-const AdmZip = require('adm-zip');
+const JSZip = require('jszip');
+const walkSync = require('walk-sync');
+
+const temp = require('temp');
+temp.track();
 
 const compiler = require('./compiler');
 const uicompiler = require('./uicompiler');
@@ -16,10 +20,74 @@ const compileR = require('./compilerr');
 const parseR = require('./parser');
 const utils = require('./utils');
 
-let srcDir = '.';
-if (process.argv.length > 2)
-    srcDir = process.argv[2];
-srcDir = path.resolve(srcDir);
+let usage = 'Usage:\n';
+usage += '    jmc path [--build]\n';
+usage += '    jmc path --prepare\n';
+usage += '    jmc path --install location\n';
+
+let isBuilding = true;
+let isInstalling = false;
+let installPath = '';
+
+if (process.argv.length <= 2) {
+    console.log(usage);
+    process.exit(0);
+}
+else if (process.argv.length > 3) {
+
+    let command = process.argv[3];
+    switch (command) {
+        case '--prepare':
+            isBuilding = false;
+            isInstalling = false;
+            break;
+        case '--build':
+            isBuilding = true;
+            isInstalling = false;
+            break;
+        case '--install':
+            isBuilding = false;
+            isInstalling = true;
+
+            if (process.argv.length < 5) {
+                console.log(usage);
+                process.exit(1);
+            }
+
+            break;
+        default:
+            console.log(usage);
+            process.exit(1);
+    }
+}
+
+let srcDir = path.resolve(process.argv[2]);
+
+if ( ! utils.exists(srcDir)) {
+    console.log("path '%s' does not exist\n".replace('%s', process.argv[2]));
+    process.exit(1);
+}
+
+let installDir;
+
+if (isInstalling) {
+    installDir = path.resolve(process.argv[4])
+    if ( ! utils.exists(installDir)) {
+        console.log("path '%s' does not exist\n".replace('%s', process.argv[4]));
+        process.exit(1);
+    }
+}
+
+let packageInfo;
+
+try {
+    packageInfo = parseR(srcDir);
+}
+catch (e) {
+    console.log(e);
+    console.log();
+    process.exit(1);
+}
 
 let defDir = path.join(srcDir, 'jamovi');
 let rDir = path.join(srcDir, 'R');
@@ -35,30 +103,29 @@ if ( ! utils.exists(uiDir))
     fs.mkdirSync(uiDir);
 
 let files = fs.readdirSync(defDir);
-let packageInfo = parseR(srcDir);
 
-let buildingModule = false;
-let outDir;
+
 let modDir;
 let uiOutDir;
 let yamlOutDir;
-if (process.argv.length > 3) {
 
-    outDir = path.resolve(process.argv[3]);
-    modDir = path.join(outDir, packageInfo.name);
-    if ( ! utils.exists(modDir))
-        fs.mkdirSync(modDir);
+if (isBuilding) {
+    modDir = temp.mkdirSync(packageInfo.name);
+}
+else if (isInstalling) {
+    modDir = path.join(installDir, packageInfo.name);
+    fs.emptyDirSync(modDir);
+}
 
+if (isBuilding || isInstalling) {
     uiOutDir = path.join(modDir, 'ui');
     if ( ! utils.exists(uiOutDir))
         fs.mkdirSync(uiOutDir);
-
     yamlOutDir = path.join(modDir, 'analyses');
     if ( ! utils.exists(yamlOutDir))
         fs.mkdirSync(yamlOutDir);
-
-    buildingModule = true;
 }
+
 
 let waits = [ ]
 
@@ -94,7 +161,7 @@ for (let file of files) {
             console.log('wrote: ' + path.basename(sOutPath));
         }
 
-        if (buildingModule) {
+        if (isBuilding || isInstalling) {
 
             let uOutPath = path.join(uiOutDir, basename + '.js');
 
@@ -139,11 +206,7 @@ for (let file of files) {
 
 Promise.all(waits).then(() => {  // wait for all the browserifies to finish
 
-    if (buildingModule) {
-
-        let modDir = path.join(path.resolve(process.argv[3]), packageInfo.name);
-        if ( ! utils.exists(modDir))
-            fs.mkdirSync(modDir);
+    if (isBuilding || isInstalling) {
 
         let indexPath = path.join(defDir, '0000.yaml');
         let content;
@@ -155,9 +218,27 @@ Promise.all(waits).then(() => {  // wait for all the browserifies to finish
 
         compileR(srcDir, modDir);
 
-        let zipPath = path.join(outDir, packageInfo.name + '.jmo');
-        let zip = new AdmZip();
-        zip.addLocalFolder(modDir, packageInfo.name);
-        zip.writeZip(zipPath);
+        if (isBuilding) {
+
+            let zipPath = packageInfo.name + '.jmo';
+            let zip = new JSZip();
+            let paths = walkSync(modDir, { directories: false });
+
+            for (let relPath of paths) {
+                let archivePath = path.join(packageInfo.name, relPath);
+                let fullPath = path.join(modDir, relPath);
+                let contents = fs.readFileSync(fullPath);
+                zip.file(archivePath, contents);
+            }
+
+            return new Promise((resolve, reject) => {
+                zip.generateAsync({ type: 'nodebuffer' }).then(content => {
+                    fs.writeFileSync(zipPath, content);
+                    console.log('wrote module: ' + path.basename(zipPath) + '\n');
+                    resolve();
+                }, err => console.log(err))
+            });
+        }
     }
+
 }).catch(e => console.log(e));

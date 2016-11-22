@@ -26,11 +26,6 @@ const compile = function(packageName, analysisPath, resultsPath, templPath, outP
         results = {
             'name' : analysis.name,
             'title': analysis.title,
-            'items': [ {
-                'name' : 'text',
-                'title': 'text',
-                'type' : 'Preformatted'
-            } ]
         }
     }
 
@@ -188,13 +183,17 @@ const resultsify = function(item, indent, root) {
         if (root)
             name = ''
 
+        let items = item.items;
+        if (items === undefined)
+            items = [ ];
+
         str += 'R6::R6Class(';
         str += '\n    ' + indent + 'inherit = jmvcore::Group,';
 
         str += '\n    ' + indent + 'active = list(';
 
         let sep = '';
-        for (let child of item.items) {
+        for (let child of items) {
             str += sep + '\n        ' + indent + child.name + ' = function() private$..' + child.name
             sep = ',';
         }
@@ -204,7 +203,7 @@ const resultsify = function(item, indent, root) {
         str += '\n    ' + indent + 'private = list(';
 
         sep = '';
-        for (let child of item.items) {
+        for (let child of items) {
             str += sep + '\n    ' + indent + '    ..' + child.name + ' = NA'
             sep = ',';
         }
@@ -214,10 +213,10 @@ const resultsify = function(item, indent, root) {
         str += '\n    ' + indent + '    initialize=function(options) {';
         str += '\n    ' + indent + '        super$initialize(options=options, name="' + name + '", title="' + title + '")';
 
-        for (let child of item.items)
+        for (let child of items)
             str += '\n    ' + indent + '        private$..' + child.name + ' <- ' + sourcifyResults(child, indent + '        ');
 
-        for (let child of item.items)
+        for (let child of items)
             str += '\n    ' + indent + '        self$add(private$..' + child.name + ')';
 
         str += '}'
