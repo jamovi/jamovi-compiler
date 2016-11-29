@@ -155,7 +155,7 @@ const constructors = {
     },
 
     Bool: function(item, indent) {
-        return indent + '{ name: "' + item.name + '",   type:"checkbox", label: "' + item.title + '" }';
+        return indent + '{ name: "' + item.name + '", type:"checkbox", label: "' + item.title + '" }';
     },
 
     List: function(item, indent) {

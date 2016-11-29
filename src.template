@@ -8,7 +8,7 @@ var options = require("./<%= analysis.name.toLowerCase() %>.options");
 
 var layout = ui.extend({
 
-    label: "<%= analysis.name %>",
+    label: "<%= analysis.title %>",
     type: "root",
     stage: 0,
     controls: <%= elements.controls %>,
