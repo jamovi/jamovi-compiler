@@ -36,11 +36,17 @@ const parse = function(srcDir) {
     for (let entry of entries)
         obj[entry[0].trim()] = entry[1].trim();
 
+    let authors = [ ];
+    if ('Author' in obj) {
+        authors = obj.Author.split(',');
+        authors = authors.map(author => author.trim())
+    }
+
     return {
         title: ('Title' in obj ? obj.Title : packageName),
         name: packageName,
         version: ('Version' in obj ? obj.Version : '0.0.0'),
-        author: ('Author' in obj ? obj.Author : '(no author)'),
+        authors: authors,
         maintainer: ('Maintainer' in obj ? obj.Maintainer : '(no maintainer, sorry)'),
         date: ('Date' in obj ? obj.Date : '1970-01-01'),
         type: 'R',

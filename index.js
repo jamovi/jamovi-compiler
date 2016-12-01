@@ -23,11 +23,10 @@ const utils = require('./utils');
 let usage = 'Usage:\n';
 usage += '    jmc path [--build]\n';
 usage += '    jmc path --prepare\n';
-usage += '    jmc path --install location\n';
 
 let isBuilding = true;
 let isInstalling = false;
-let installPath = '';
+let isInstallingTo = false;
 
 if (process.argv.length <= 2) {
     console.log(usage);
@@ -39,15 +38,21 @@ else if (process.argv.length > 3) {
     switch (command) {
         case '--prepare':
             isBuilding = false;
-            isInstalling = false;
+            isInstallingTo = false;
             break;
         case '--build':
             isBuilding = true;
-            isInstalling = false;
+            isInstallingTo = false;
             break;
         case '--install':
-            isBuilding = false;
+            isBuilding = true;
             isInstalling = true;
+            isInstallingTo = false;
+            break;
+        case '--install-to':
+            isBuilding = false;
+            isInstalling = false;
+            isInstallingTo = true;
 
             if (process.argv.length < 5) {
                 console.log(usage);
@@ -70,7 +75,7 @@ if ( ! utils.exists(srcDir)) {
 
 let installDir;
 
-if (isInstalling) {
+if (isInstallingTo) {
     installDir = path.resolve(process.argv[4])
     if ( ! utils.exists(installDir)) {
         console.log("path '%s' does not exist\n".replace('%s', process.argv[4]));
@@ -112,12 +117,12 @@ let yamlOutDir;
 if (isBuilding) {
     modDir = temp.mkdirSync(packageInfo.name);
 }
-else if (isInstalling) {
+else if (isInstallingTo) {
     modDir = path.join(installDir, packageInfo.name);
     fs.emptyDirSync(modDir);
 }
 
-if (isBuilding || isInstalling) {
+if (isBuilding || isInstallingTo) {
     uiOutDir = path.join(modDir, 'ui');
     if ( ! utils.exists(uiOutDir))
         fs.mkdirSync(uiOutDir);
@@ -161,7 +166,7 @@ for (let file of files) {
             console.log('wrote: ' + path.basename(sOutPath));
         }
 
-        if (isBuilding || isInstalling) {
+        if (isBuilding || isInstallingTo) {
 
             let uOutPath = path.join(uiOutDir, basename + '.js');
 
@@ -187,18 +192,17 @@ for (let file of files) {
 
         let content = fs.readFileSync(analysisPath, 'utf-8');
         let analysis = yaml.safeLoad(content);
+        let title = ('title' in analysis ? analysis.title : analyis.name);
         let aObj = {
-            title: ('title' in analysis ? analysis.title : analyis.name),
+            title: title,
             name: analysis.name,
             ns: packageInfo.name,
-            group: ('group' in analysis ? analysis.group : packageInfo.name),
+            menuGroup:    ('menuGroup' in analysis ? analysis.menuGroup : packageInfo.name),
+            menuSubgroup: ('menuSubgroup' in analysis ? analysis.menuSubgroup : null),
+            menuTitle:    ('menuTitle' in analysis ? analysis.menuTitle : title),
+            menuSubtitle: ('menuSubTitle' in analysis ? analysis.menuSubtitle : null),
             description: ('description' in analysis ? analysis.description : null),
         };
-
-        if ('subtitle' in analysis)
-            aObj.subtitle = analysis.subtitle;
-        if ('subgroup' in analysis)
-            aObj.subgroup = analysis.subgroup;
 
         packageInfo.analyses.push(aObj);
     }
@@ -206,7 +210,7 @@ for (let file of files) {
 
 Promise.all(waits).then(() => {  // wait for all the browserifies to finish
 
-    if (isBuilding || isInstalling) {
+    if (isBuilding || isInstallingTo) {
 
         let indexPath = path.join(defDir, '0000.yaml');
         let content;
