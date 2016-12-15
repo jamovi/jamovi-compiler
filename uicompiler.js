@@ -75,7 +75,7 @@ const createUIElements = function(options) {
         controls += groupConstructors.close(getIndent(indentCount));
     controls += "   ]";
 
-    return { actions: "[]", controls: controls };
+    return { events: "[]", controls: controls };
 };
 
 const areControlsGroupCompatible = function(ctrl1, ctrl2) {
@@ -183,7 +183,7 @@ const constructors = {
         ctrl += indent + '   showColumnHeaders: false,\n'
         ctrl += indent + '   fullRowSelect: true,\n'
         ctrl += indent + '   columns: [\n'
-        ctrl += indent + '       { type: "listitem.termlabel", name: "column1", label: "", format: FormatDef.term, stretchFactor: 1 }\n';
+        ctrl += indent + '       { type: "listitem.termlabel", name: "column1", label: "", stretchFactor: 1 }\n';
         ctrl += indent + '   ]\n'
         ctrl += indent + "}";
         return ctrl;
@@ -199,7 +199,7 @@ const constructors = {
         ctrl += indent + '   showColumnHeaders: false,\n'
         ctrl += indent + '   fullRowSelect: true,\n'
         ctrl += indent + '   columns: [\n'
-        ctrl += indent + '       { type: "listitem.variablelabel", name: "column1", label: "", format: FormatDef.variable, stretchFactor: 1 }\n';
+        ctrl += indent + '       { type: "listitem.variablelabel", name: "column1", label: "", stretchFactor: 1 }\n';
         ctrl += indent + '   ]\n'
         ctrl += indent + "}";
         return ctrl;
@@ -216,7 +216,7 @@ const constructors = {
         ctrl += indent + '   showColumnHeaders: false,\n'
         ctrl += indent + '   fullRowSelect: true,\n'
         ctrl += indent + '   columns: [\n'
-        ctrl += indent + '       { type: "listitem.variablelabel", name: "column1", label: "", format: FormatDef.variable, stretchFactor: 1 }\n';
+        ctrl += indent + '       { type: "listitem.variablelabel", name: "column1", label: "", stretchFactor: 1 }\n';
         ctrl += indent + '   ]\n'
         ctrl += indent + "}";
         return ctrl;
@@ -236,16 +236,13 @@ const constructors = {
         if (item.template.type === 'Group') {
             for (let i = 0; i < item.template.elements.length; i++) {
                 var column = item.template.elements[i];
-                var columnFormat = "FormatDef.string";
                 var columnControl = "listitem.label";
                 var columnOptions = null;
                 switch (column.type) {
                     case "Variable":
-                        columnFormat = "FormatDef.variable";
                         columnControl = "listitem.variablelabel";
                         break;
                     case "List":
-                        columnFormat = "FormatDef.string";
                         columnControl = "listitem.combobox";
                         columnOptions = "[";
                         for (let j = 0; j < column.options.length; j++) {
@@ -255,7 +252,7 @@ const constructors = {
                         }
                         columnOptions += "]";
                 }
-                ctrl += indent + '       { type: "' + columnControl + '", name: "' + column.name + '", label: "", format: ' + columnFormat + ', stretchFactor: 1' + (columnOptions === null ? "" : (", options: " + columnOptions)) + ' }';
+                ctrl += indent + '       { type: "' + columnControl + '", name: "' + column.name + '", label: "", stretchFactor: 1' + (columnOptions === null ? "" : (", options: " + columnOptions)) + ' }';
                 if (i !== item.template.elements.length - 1)
                     ctrl += ',\n';
                 else
@@ -278,8 +275,8 @@ const constructors = {
         ctrl += indent + '   showColumnHeaders: false,\n'
         ctrl += indent + '   fullRowSelect: true,\n'
         ctrl += indent + '   columns: [\n'
-        ctrl += indent + '       { type: "listitem.variablelabel", name: "column1", label: "", format: FormatDef.variable, stretchFactor: 1 }\n';
-        ctrl += indent + '       { type: "listitem.variablelabel", name: "column2", label: "", format: FormatDef.variable, stretchFactor: 1 }\n';
+        ctrl += indent + '       { type: "listitem.variablelabel", name: "column1", label: "", stretchFactor: 1 }\n';
+        ctrl += indent + '       { type: "listitem.variablelabel", name: "column2", label: "", stretchFactor: 1 }\n';
         ctrl += indent + '   ]\n'
         ctrl += indent + "}";
 
