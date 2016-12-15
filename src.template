@@ -12,8 +12,10 @@ var layout = ui.extend({
     type: "root",
     stage: 0,
     controls: <%= elements.controls %>,
+});
 
-    actions: <%= elements.actions %>
+var actions: Actions.extend({
+    events: <%= elements.events %>
 });
 
 module.exports = { ui : layout, options: options };
