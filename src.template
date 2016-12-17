@@ -4,9 +4,9 @@
 
 'use strict';
 
-var options = require("./<%= analysis.name.toLowerCase() %>.options");
+const options = require("./<%= analysis.name.toLowerCase() %>.options");
 
-var layout = ui.extend({
+const layout = ui.extend({
 
     label: "<%= analysis.title %>",
     type: "root",
@@ -14,8 +14,8 @@ var layout = ui.extend({
     controls: <%= elements.controls %>,
 });
 
-var actions: Actions.extend({
+const actions = Actions.extend({
     events: <%= elements.events %>
 });
 
-module.exports = { ui : layout, options: options };
+module.exports = { ui : layout, actions: actions, options: options };
