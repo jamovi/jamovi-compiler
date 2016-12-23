@@ -6,7 +6,16 @@
 
 const options = require("./<%= analysis.name.toLowerCase() %>.options");
 
-const layout = ui.extend({
+const view = View.extend({
+
+    initialize: function(ui) {
+
+    },
+
+    events: <%= elements.events %>
+});
+
+view.layout = ui.extend({
 
     label: "<%= analysis.title %>",
     type: "root",
@@ -14,8 +23,4 @@ const layout = ui.extend({
     controls: <%= elements.controls %>,
 });
 
-const actions = Actions.extend({
-    events: <%= elements.events %>
-});
-
-module.exports = { ui : layout, actions: actions, options: options };
+module.exports = { view : view, options: options };
