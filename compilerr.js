@@ -98,7 +98,7 @@ const compile = function(srcDir, moduleDir) {
         imports = [ ];
     }
 
-    let rLibs = buildDir + ':' + path.join(__dirname, 'rlibs');
+    let rLibs = buildDir + path.delimiter + path.join(__dirname, 'rlibs');
 
     try {
 
