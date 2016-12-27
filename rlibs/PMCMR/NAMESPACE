@@ -1,0 +1,33 @@
+
+export(posthoc.kruskal.nemenyi.test, posthoc.friedman.nemenyi.test,
+       posthoc.kruskal.dunn.test, dunn.test.control,
+       posthoc.kruskal.conover.test, posthoc.friedman.conover.test,
+       vanWaerden.test, posthoc.vanWaerden.test, jonckheere.test,
+       posthoc.quade.test, durbin.test, posthoc.durbin.test,
+       get.pvalues)
+
+importFrom("stats", "complete.cases",
+           "pairwise.table", "pchisq",
+           "ptukey", "pnorm", "pt",
+           "p.adjust.methods", "p.adjust", "qnorm")
+
+S3method(posthoc.kruskal.nemenyi.test, default)
+S3method(posthoc.kruskal.nemenyi.test, formula)
+S3method(posthoc.kruskal.dunn.test, default)
+S3method(posthoc.kruskal.dunn.test, formula)
+S3method(posthoc.kruskal.conover.test, default)
+S3method(posthoc.kruskal.conover.test, formula)
+S3method(posthoc.friedman.nemenyi.test, default)
+S3method(posthoc.friedman.nemenyi.test, formula)
+S3method(posthoc.friedman.conover.test, default)
+S3method(vanWaerden.test, default)
+S3method(vanWaerden.test, formula)
+S3method(posthoc.vanWaerden.test, default)
+S3method(posthoc.vanWaerden.test, formula)
+S3method(jonckheere.test, default)
+S3method(posthoc.quade.test, default)
+S3method(durbin.test, default)
+S3method(durbin.test, formula)
+S3method(posthoc.durbin.test, default)
+S3method(print, PMCMR)
+S3method(summary, PMCMR)
