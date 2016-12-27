@@ -19,10 +19,12 @@ const uicompiler = require('./uicompiler');
 const compileR = require('./compilerr');
 const parseR = require('./parser');
 const utils = require('./utils');
+const install = require('./installer');
 
 let usage = 'Usage:\n';
 usage += '    jmc path [--build]\n';
 usage += '    jmc path --prepare\n';
+usage += '    jmc path --install\n';
 
 let isBuilding = true;
 let isInstalling = false;
@@ -239,10 +241,15 @@ Promise.all(waits).then(() => {  // wait for all the browserifies to finish
                 zip.generateAsync({ type: 'nodebuffer' }).then(content => {
                     fs.writeFileSync(zipPath, content);
                     console.log('wrote module: ' + path.basename(zipPath) + '\n');
-                    resolve();
+                    resolve(zipPath);
                 }, err => console.log(err))
             });
         }
     }
+
+}).then(path => {
+
+    if (isInstalling)
+        install(path);
 
 }).catch(e => console.log(e));
