@@ -10,6 +10,16 @@ const browserify = require('browserify');
 const yaml = require('js-yaml');
 const JSZip = require('jszip');
 const walkSync = require('walk-sync');
+const CLA = require('command-line-args');
+
+const ARGS = [
+    { name: 'build',   alias: 'b', type: String },
+    { name: 'prepare', alias: 'p', type: String },
+    { name: 'install', alias: 'i', type: String },
+    { name: 'check',   alias: 'c', type: Boolean },
+    { name: 'home', type: String },
+    { name: 'to',   type: String },
+];
 
 const temp = require('temp');
 temp.track();
@@ -19,68 +29,69 @@ const uicompiler = require('./uicompiler');
 const compileR = require('./compilerr');
 const parseR = require('./parser');
 const utils = require('./utils');
-const install = require('./installer');
+const installer = require('./installer');
 
 let usage = 'Usage:\n';
-usage += '    jmc path [--build]\n';
-usage += '    jmc path --prepare\n';
-usage += '    jmc path --install\n';
+usage += '    jmc --build path\n';
+usage += '    jmc --prepare path\n';
+usage += '    jmc --install path [--home path]\n';
+usage += '    jmc --check        [--home path]\n';
 
 let isBuilding = true;
 let isInstalling = false;
 let isInstallingTo = false;
 
-if (process.argv.length <= 2) {
-    console.log(usage);
+const args = CLA(ARGS);
+
+let srcDir;
+let installDir;
+
+if (args.check) {
+    installer.check(args.home);
     process.exit(0);
 }
-else if (process.argv.length > 3) {
+else if (args.install) {
 
-    let command = process.argv[3];
-    switch (command) {
-        case '--prepare':
-            isBuilding = false;
-            isInstallingTo = false;
-            break;
-        case '--build':
-            isBuilding = true;
-            isInstallingTo = false;
-            break;
-        case '--install':
-            isBuilding = true;
-            isInstalling = true;
-            isInstallingTo = false;
-            break;
-        case '--install-to':
-            isBuilding = false;
-            isInstalling = false;
-            isInstallingTo = true;
+    srcDir = args.install;
 
-            if (process.argv.length < 5) {
-                console.log(usage);
-                process.exit(1);
-            }
-
-            break;
-        default:
-            console.log(usage);
-            process.exit(1);
+    if ( ! args.to) {
+        isBuilding = true;
+        isInstalling = true;
+        isInstallingTo = false;
+    }
+    else {
+        installDir = args.to;
+        isBuilding = false;
+        isInstalling = false;
+        isInstallingTo = true;
     }
 }
-
-let srcDir = path.resolve(process.argv[2]);
-
-if ( ! utils.exists(srcDir)) {
-    console.log("path '%s' does not exist\n".replace('%s', process.argv[2]));
+else if (args.build) {
+    isBuilding = true;
+    isInstallingTo = false;
+    srcDir = args.build;
+}
+else if (args.prepare) {
+    isBuilding = false;
+    isInstallingTo = false;
+    srcDir = args.prepare;
+}
+else {
+    console.log(usage);
     process.exit(1);
 }
 
-let installDir;
+srcDir = path.resolve(srcDir);
+
+if ( ! utils.exists(srcDir)) {
+    console.log("path '%s' does not exist\n".replace('%s', srcDir));
+    process.exit(1);
+}
 
 if (isInstallingTo) {
-    installDir = path.resolve(process.argv[4])
+    installDir = path.resolve(installDir);
     if ( ! utils.exists(installDir)) {
-        console.log("path '%s' does not exist\n".replace('%s', process.argv[4]));
+        console.log("path '%s' does not exist\n".replace('%s', installDir));
         process.exit(1);
     }
 }
@@ -250,6 +261,6 @@ Promise.all(waits).then(() => {  // wait for all the browserifies to finish
 }).then(path => {
 
     if (isInstalling)
-        install(path);
+        installer.install(path, args.home);
 
 }).catch(e => console.log(e));

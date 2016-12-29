@@ -21,6 +21,7 @@
   "homepage": "https://github.com/jamovi/jamovi-compiler#readme",
   "dependencies": {
     "browserify": "^13.1.1",
+    "command-line-args": "^3.0.5",
     "fs-extra": "^1.0.0",
     "js-yaml": "^3.6.1",
     "jszip": "^3.1.3",
