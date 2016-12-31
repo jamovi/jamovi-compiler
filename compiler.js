@@ -35,10 +35,16 @@ const compile = function(packageName, analysisPath, resultsPath, templPath, outP
         reject(analysisPath, 'does not contain an analysis title');
     if (typeof analysis.version === 'undefined' || ! semver.valid(analysis.version))
         reject(analysisPath, 'does not contain a valid version');
-    if (typeof analysis.jmc === 'undefined' || ! semver.valid(analysis.jmc))
-        reject(analysisPath, 'does not contain a valid minimum compiler version (jmc)');
-    if (semver.gt(analysis.jmc, '1.0.0'))
-        reject(analysisPath, 'requires a newer jamovi-compiler');
+
+    if ('jas' in analysis) {
+        if (typeof analysis.jas !== 'string')
+            reject(analysisPath, 'does not contain a valid jamovi analysis spec (jas)');
+        let jas = analysis.jas.match(/^([0-9]+)\.([0-9]+)$/)
+        if (jas === null)
+            reject(analysisPath, 'does not contain a valid jamovi analysis spec (jas)');
+        if (jas[1] !== '1' || jas[2] !== '0')
+            reject(analysisPath, 'requires a newer jamovi-compiler');
+    }
 
     let template = fs.readFileSync(templPath, 'utf-8');
     let compiler = _.template(template);
