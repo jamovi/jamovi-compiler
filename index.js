@@ -96,20 +96,36 @@ if (isInstallingTo) {
     }
 }
 
-let packageInfo;
-
-try {
-    packageInfo = parseR(srcDir);
-}
-catch (e) {
-    console.log(e);
-    console.log();
-    process.exit(1);
-}
-
 let defDir = path.join(srcDir, 'jamovi');
 let rDir = path.join(srcDir, 'R');
 let uiDir = path.join(srcDir, 'jamovi/ui');
+let packageInfoPath = path.join(defDir, '0000.yaml');
+
+let packageInfo;
+
+if (utils.exists(packageInfoPath)) {
+    let content = fs.readFileSync(packageInfoPath);
+    packageInfo = yaml.safeLoad(content);
+    if ('jms' in packageInfo) {
+        if (packageInfo.jms !== '1.0') {
+            console.log('this module requires a newer jmc');
+            process.exit(1);
+        }
+    }
+    else {
+        packageInfo.jms = '1.0';
+    }
+}
+else {
+    try {
+        packageInfo = parseR(srcDir);
+    }
+    catch (e) {
+        console.log(e);
+        console.log();
+        process.exit(1);
+    }
+}
 
 if ( ! utils.exists(defDir))
     fs.mkdirSync(defDir);
@@ -210,27 +226,49 @@ for (let file of files) {
             title: title,
             name: analysis.name,
             ns: packageInfo.name,
-            menuGroup:    ('menuGroup' in analysis ? analysis.menuGroup : packageInfo.name),
-            menuSubgroup: ('menuSubgroup' in analysis ? analysis.menuSubgroup : null),
-            menuTitle:    ('menuTitle' in analysis ? analysis.menuTitle : title),
-            menuSubtitle: ('menuSubTitle' in analysis ? analysis.menuSubtitle : null),
-            description: ('description' in analysis ? analysis.description : null),
         };
 
-        packageInfo.analyses.push(aObj);
+        if ('menuGroup' in analysis)
+            aObj.menuGroup = analysis.menuGroup;
+        else
+            aObj.menuGroup = packageInfo.name;
+
+        if ('menuSubgroup' in analysis)
+            aObj.menuSubgroup = analysis.menuSubgroup;
+
+        if ('menuTitle' in analysis)
+            aObj.menuTitle = analysis.menuTitle;
+        else
+            aObj.menuTitle = title;
+
+        if ('menuSubtitle' in analysis)
+            aObj.menuSubtitle = analysis.menuSubtitle;
+        if ('description' in analysis)
+            aObj.description = analysis.description;
+        if (analysis.hidden === true)
+            aObj.hidden = analysis.hidden;
+
+        let found = false;
+        for (let existing of packageInfo.analyses) {
+            if (existing.name === analysis.name) {
+                Object.assign(existing, aObj);
+                found = true;
+                break;
+            }
+        }
+        if (found === false)
+            packageInfo.analyses.push(aObj);
     }
 }
 
 Promise.all(waits).then(() => {  // wait for all the browserifies to finish
 
+    let indexPath = path.join(defDir, '0000.yaml');
+    let content = yaml.safeDump(packageInfo);
+    fs.writeFileSync(indexPath, content);
+
     if (isBuilding || isInstallingTo) {
 
-        let indexPath = path.join(defDir, '0000.yaml');
-        let content;
-        if (utils.exists(indexPath))
-            content = fs.readFileSync(indexPath);
-        else
-            content = yaml.safeDump(packageInfo);
         fs.writeFileSync(path.join(modDir, 'jamovi.yaml'), content);
 
         compileR(srcDir, modDir);

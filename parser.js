@@ -46,12 +46,12 @@ const parse = function(srcDir) {
         title: ('Title' in obj ? obj.Title : packageName),
         name: packageName,
         version: ('Version' in obj ? obj.Version : '0.0.0'),
+        jms: '1.0',
         authors: authors,
         maintainer: ('Maintainer' in obj ? obj.Maintainer : '(no maintainer, sorry)'),
         date: ('Date' in obj ? obj.Date : '1970-01-01'),
         type: 'R',
         description: ('Description' in obj ? obj.Description : '(no description)'),
-        jmc: '1.0.0',
         analyses: [ ],
     };
 }
