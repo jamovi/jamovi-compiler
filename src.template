@@ -1,26 +1,23 @@
 
-// This file is an automatically generated template, it will not be subsequently
-// overwritten by the compiler, and may be edited
+// This file is an automatically generated and should not be edited
 
 'use strict';
 
-const options = require("./<%= analysis.name.toLowerCase() %>.options");
+const options = <%= JSON.stringify(analysis.options) %>;
 
 const view = View.extend({
 
-    initialize: function(ui) {
-
-    },
+    update: <%= elements.update %>,
 
     events: <%= elements.events %>
 });
 
 view.layout = ui.extend({
 
-    label: "<%= analysis.title %>",
+    label: "<%= elements.title %>",
     type: "root",
-    stage: 0,
-    controls: <%= elements.controls %>,
+    stage: <%= elements.stage %>, //0 - release, 1 - development, 2 - proposed
+    controls: <%= elements.controls %>
 });
 
 module.exports = { view : view, options: options };

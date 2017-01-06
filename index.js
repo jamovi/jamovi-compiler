@@ -169,14 +169,14 @@ for (let file of files) {
         let analysisPath = path.join(defDir, file);
         let basename = path.basename(analysisPath, '.a.yaml');
         let resultsPath = path.join(defDir, basename + '.r.yaml');
+        let uiPath = path.join(defDir, basename + '.u.yaml');
         let hOutPath = path.join(rDir, basename + '.h.R');
         let bOutPath = path.join(rDir, basename + '.b.R');
         let sOutPath = path.join(uiDir, basename + '.src.js');
-        let oOutPath = path.join(uiDir, basename + '.options.js');
 
         let hTemplPath = path.join(__dirname, 'header.template');
         let bTemplPath = path.join(__dirname, 'body.template');
-        let oTemplPath = path.join(__dirname, 'options.template');
+        let uTemplPath = path.join(__dirname, 'ui.template');
         let sTemplPath = path.join(__dirname, 'src.template');
 
         compiler(packageInfo.name, analysisPath, resultsPath, hTemplPath, hOutPath);
@@ -187,13 +187,8 @@ for (let file of files) {
             console.log('wrote: ' + path.basename(bOutPath));
         }
 
-        compiler(packageInfo.name, analysisPath, resultsPath, oTemplPath, oOutPath);
-        console.log('wrote: ' + path.basename(oOutPath));
+        uicompiler(analysisPath, uiPath, sTemplPath, uTemplPath, sOutPath);
 
-        if ( ! utils.exists(sOutPath)) {
-            uicompiler(analysisPath, sTemplPath, sOutPath);
-            console.log('wrote: ' + path.basename(sOutPath));
-        }
 
         if (isBuilding || isInstallingTo) {
 
