@@ -176,7 +176,6 @@ for (let file of files) {
 
         let hTemplPath = path.join(__dirname, 'header.template');
         let bTemplPath = path.join(__dirname, 'body.template');
-        let uTemplPath = path.join(__dirname, 'ui.template');
         let sTemplPath = path.join(__dirname, 'src.template');
 
         compiler(packageInfo.name, analysisPath, resultsPath, hTemplPath, hOutPath);
@@ -187,7 +186,7 @@ for (let file of files) {
             console.log('wrote: ' + path.basename(bOutPath));
         }
 
-        uicompiler(analysisPath, uiPath, sTemplPath, uTemplPath, sOutPath);
+        uicompiler(analysisPath, uiPath, sTemplPath, sOutPath);
 
 
         if (isBuilding || isInstallingTo) {

@@ -1,9 +1,0 @@
-
-# This file is an automatically generated template. It will NOT be subsequently
-# overwritten by the compiler and may be edited
-
-name:  <%= name %>
-title: <%= title %>
-jus:   '<%= version %>'
-
-<%= children %>

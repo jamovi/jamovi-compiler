@@ -6,12 +6,12 @@ const fs = require('fs');
 const yaml = require('js-yaml');
 const _ = require('underscore');
 
-const uicompile = function(analysisPath, uiPath, sTemplPath, uTemplPath, outPath) {
+const uicompile = function(analysisPath, uiPath, sTemplPath, outPath) {
 
     let content = fs.readFileSync(analysisPath, 'utf-8');
     let analysis = yaml.safeLoad(content);
 
-    let uiData = { title: analysis.title, name: analysis.name, version: "1.0", children: [] };
+    let uiData = { title: analysis.title, name: analysis.name, version: "1.0", stage: 0, children: [] };
 
     if (fs.existsSync(uiPath)) {
         uiData = yaml.safeLoad(fs.readFileSync(uiPath, 'utf-8'));
@@ -32,15 +32,10 @@ const uicompile = function(analysisPath, uiPath, sTemplPath, uTemplPath, outPath
             console.log("modified: " + path.basename(uiPath));
         for (let i = 0; i < added.length; i++)
             console.log("  - added ctrl: " + added[i].name);
+    }
 
-        let template = fs.readFileSync(uTemplPath, 'utf-8');
-        let compiler = _.template(template);
-
-        let object = { title: uiData.title, name: uiData.name, version: uiData.version, children: yaml.safeDump({ children: uiData.children }) };
-        content = compiler(object);
-
-        fs.writeFileSync(uiPath, content);
-
+    if (added.length > 0 || removed.length > 0) {
+        fs.writeFileSync(uiPath,  yaml.safeDump(uiData));
         console.log('wrote: ' + path.basename(uiPath));
     }
 
