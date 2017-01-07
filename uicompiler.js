@@ -23,7 +23,7 @@ const uicompile = function(analysisPath, uiPath, sTemplPath, outPath) {
     if (removed.length > 0) {
         console.log("modified: " + path.basename(uiPath));
         for (let i = 0; i < removed.length; i++)
-            console.log("  - removed ctrl: " + removed[i].name);
+            console.log("  - removed ctrl: " + ((removed[i].name === undefined) ? (removed[i].type + " - " + removed[i].label)  : removed[i].name));
     }
 
     let added = insertMissingControls(analysis.options, uiData);
@@ -71,11 +71,9 @@ const removeMissingOptions = function(options, parent) {
         else if (containsOption(optionName, options) === false) {
             list.push(ctrl);
             if (ctrl.children !== undefined && ctrl.children.length > 0) {
-
-                let newCtrl = groupConstructors.open_layoutbox();
+                let newCtrl = groupConstructors.open_LayoutBox();
                 for (let j = 0; j < ctrl.children.length; j++)
                     newCtrl.children.push(ctrl.children[j]);
-                    console.log(newCtrl);
                 parent.children[i] = newCtrl;
             }
             else {
@@ -348,12 +346,12 @@ const functionify = function(value, indent, args) {
 };
 
 const isPureContainerControl = function(ctrl) {
-    return ctrl.type === "layoutbox" || ctrl.type === "collapsebox" || ctrl.type === "supplier" || ctrl.type === "variablesupplier";
+    return ctrl.type === "LayoutBox" || ctrl.type === "CollapseBox" || ctrl.type === "Supplier" || ctrl.type === "VariableSupplier";
 };
 
 const isOptionControl = function(ctrl, optionName) {
     let isOptionCtrl = ctrl.optionId !== undefined ||
-            (ctrl.type === "supplier" || ctrl.type === "variablesupplier" || ctrl.type === "collapsebox" || ctrl.type === "label" || ctrl.type === "layoutbox") === false;
+            (ctrl.type === "Supplier" || ctrl.type === "VariableSupplier" || ctrl.type === "CollapseBox" || ctrl.type === "Label" || ctrl.type === "LayoutBox") === false;
 
     if (isOptionCtrl) {
         if (optionName !== undefined)
@@ -367,9 +365,9 @@ const isOptionControl = function(ctrl, optionName) {
 
 const areControlsCompatibleSibblings = function(ctrl1, ctrl2) {
 
-    if (ctrl1.type === 'checkbox' || ctrl1.type === 'radiobutton')
-        return ctrl2.type === 'checkbox' || ctrl2.type === 'radiobutton';
-    else if (ctrl2.type === 'checkbox' || ctrl2.type === 'radiobutton')
+    if (ctrl1.type === 'CheckBox' || ctrl1.type === 'RadioButton')
+        return ctrl2.type === 'CheckBox' || ctrl2.type === 'RadioButton';
+    else if (ctrl2.type === 'CheckBox' || ctrl2.type === 'RadioButton')
             return false
 
     return true;
@@ -398,37 +396,37 @@ const groupConstructors = {
             case "Variable":
             case "Pairs":
             case "Pair":
-                return "variablesupplier";
+                return "VariableSupplier";
             case "Terms":
             case "Term":
-                return "supplier";
+                return "Supplier";
             case "Array":
                 return null;
         }
 
-        return "layoutbox";
+        return "LayoutBox";
     },
 
-    open_layoutbox: function(margin) {
+    open_LayoutBox: function(margin) {
         var ctrl = {};
-        ctrl.type = "layoutbox";
+        ctrl.type = "LayoutBox";
         ctrl.margin = margin !== undefined ? margin : "large";
         ctrl.children = [ ];
         return ctrl;
     },
 
-    open_variablesupplier: function() {
+    open_VariableSupplier: function() {
         var ctrl = { };
-        ctrl.type = "variablesupplier"
+        ctrl.type = "VariableSupplier"
         ctrl.persistentItems = false;
         ctrl.stretchFactor = 1;
         ctrl.children = [ ];
         return ctrl;
     },
 
-    open_supplier: function() {
+    open_Supplier: function() {
         var ctrl = { };
-        ctrl.type = "supplier"
+        ctrl.type = "Supplier"
         ctrl.persistentItems = false;
         ctrl.stretchFactor = 1;
         ctrl.children = [ ];
@@ -441,7 +439,7 @@ const constructors = {
     Number: function(item) {
         let ctrl = { };
         ctrl.name = item.name;
-        ctrl.type = "textbox";
+        ctrl.type = "TextBox";
         ctrl.label = item.title;
         ctrl.format = "number";
         ctrl.inputPattern = "[0-9]+";
@@ -451,7 +449,7 @@ const constructors = {
     Bool: function(item) {
         let ctrl = { };
         ctrl.name = item.name;
-        ctrl.type = "checkbox";
+        ctrl.type = "CheckBox";
         ctrl.label = item.title;
         return ctrl
     },
@@ -459,7 +457,7 @@ const constructors = {
     List: function(item) {
         var ctrl = { };
         ctrl.name = item.name;
-        ctrl.type ="combobox";
+        ctrl.type ="ComboBox";
         ctrl.label = item.title;
         if (item.options.length > 0) {
             ctrl.options = [];
@@ -472,14 +470,14 @@ const constructors = {
     Terms: function(item) {
         var ctrl = { };
 
-        ctrl.type = "targetlistbox";
+        ctrl.type = "TargetListBox";
         ctrl.name = item.name;
         ctrl.label = (item.title ? item.title : "");
         ctrl.showColumnHeaders = false;
         ctrl.fullRowSelect = true;
         ctrl.columns = [];
         ctrl.columns.push( {
-            type: "listitem.termlabel",
+            type: "ListItem.TermLabel",
             name: "column1",
             label: "",
             stretchFactor: 1
@@ -492,14 +490,14 @@ const constructors = {
     Variables: function(item) {
         var ctrl = { };
 
-        ctrl.type = "variabletargetlistbox";
+        ctrl.type = "VariableTargetListBox";
         ctrl.name = item.name;
         ctrl.label = (item.title ? item.title : '');
         ctrl.showColumnHeaders = false;
         ctrl.fullRowSelect = true;
         ctrl.columns = [];
         ctrl.columns.push({
-            type: "listitem.variablelabel",
+            type: "ListItem.VariableLabel",
             name: "column1",
             label: "",
             stretchFactor: 1
@@ -510,7 +508,7 @@ const constructors = {
     Variable: function(item) {
         var ctrl = { };
 
-        ctrl.type = "variabletargetlistbox";
+        ctrl.type = "VariableTargetListBox";
         ctrl.name = item.name;
         ctrl.label = (item.title ? item.title : '');
         ctrl.maxItemCount = 1;
@@ -518,7 +516,7 @@ const constructors = {
         ctrl.fullRowSelect = true;
         ctrl.columns = [ ];
         ctrl.columns.push({
-            type: "listitem.variablelabel",
+            type: "ListItem.VariableLabel",
             name: "column1",
             label: "",
             stretchFactor: 1
@@ -530,7 +528,7 @@ const constructors = {
     Array: function(item) {
         var ctrl = { };
 
-        ctrl.type = "listbox";
+        ctrl.type = "ListBox";
         ctrl.name = item.name;
         ctrl.label = (item.title ? item.title : '');
         ctrl.showColumnHeaders = false;
@@ -542,17 +540,17 @@ const constructors = {
             for (let i = 0; i < item.template.elements.length; i++) {
                 var column = item.template.elements[i];
                 var columnData = {
-                    type: "listitem.label",
+                    type: "ListItem.Label",
                     name: column.name,
                     label: "",
                     stretchFactor: 1
                 }
                 switch (column.type) {
                     case "Variable":
-                        columnData.type = "listitem.variablelabel";
+                        columnData.type = "ListItem.VariableLabel";
                         break;
                     case "List":
-                        columnData.type = "listitem.combobox";
+                        columnData.type = "ListItem.ComboBox";
                         columnData.options = column.options;
                 }
 
@@ -566,21 +564,21 @@ const constructors = {
     Pairs: function(item) {
         var ctrl = { };
 
-        ctrl.type = "variabletargetlistbox";
+        ctrl.type = "VariableTargetListBox";
         ctrl.name = item.name;
         ctrl.label = (item.title ? item.title : '');
         ctrl.showColumnHeaders = false;
         ctrl.fullRowSelect = true;
         ctrl.columns = [ ];
         ctrl.columns.push({
-            type: "listitem.variablelabel",
+            type: "ListItem.VariableLabel",
             name: "column1",
             label: "",
             stretchFactor: 1
         });
 
         ctrl.columns.push({
-            type: "listitem.variablelabel",
+            type: "ListItem.VariableLabel",
             name: "column2",
             label: "",
             stretchFactor: 1
