@@ -59,18 +59,19 @@ const included = [
     'BayesFactor',
     'psych',
     'GPArotation',
+    'afex',
 ];
 
 const compile = function(srcDir, moduleDir) {
 
     let rDir = path.join(moduleDir, 'R');
-    let buildDir = path.join(srcDir, 'build')
+    let buildDir = path.join(srcDir, 'build', 'R');
 
     try {
         fs.statSync(buildDir);
     }
     catch (e) {
-        fs.mkdirSync(buildDir);
+        fs.mkdirsSync(buildDir);
     }
 
     let installed = fs.readdirSync(buildDir);
@@ -98,8 +99,6 @@ const compile = function(srcDir, moduleDir) {
         imports = [ ];
     }
 
-    let rLibs = buildDir + path.delimiter + path.join(__dirname, 'rlibs');
-
     try {
 
         depends = depends.concat(imports);
@@ -108,6 +107,11 @@ const compile = function(srcDir, moduleDir) {
 
         let cmd;
 
+        let rLibs = buildDir + path.delimiter + path.join(__dirname, 'rlibs');
+        let env = process.env;
+        env.R_LIBS = rLibs;
+        env.R_LIBS_USER = 'notthere';
+
         if (depends.length > 0) {
             console.log('Installing dependencies')
             console.log(depends.join(', '));
@@ -115,11 +119,11 @@ const compile = function(srcDir, moduleDir) {
             depends = depends.join("','");
 
             cmd = util.format('R --slave -e "utils::install.packages(c(\'%s\'), lib=\'%s\', repos=\'https://cran.r-project.org\', INSTALL_opts=c(\'--no-data\', \'--no-help\', \'--no-demo\'))"', depends, buildDir);
-            sh(cmd, { stdio: 'inherit', encoding: 'utf-8', env: { R_LIBS: rLibs, R_LIBS_USER: 'notthere' } } );
+            sh(cmd, { stdio: 'inherit', encoding: 'utf-8', env: env } );
         }
 
-        cmd = util.format('R CMD INSTALL "%s" --no-test-load "--library=%s"', srcDir, buildDir);
-        sh(cmd, { stdio: 'inherit', encoding: 'utf-8', env: { R_LIBS: rLibs, R_LIBS_USER: 'notthere' } } );
+        cmd = util.format('R CMD INSTALL "--library=%s" "%s"', buildDir, srcDir);
+        sh(cmd, { stdio: 'inherit', encoding: 'utf-8', env: env } );
     }
     catch (e) {
         // console.log(e)

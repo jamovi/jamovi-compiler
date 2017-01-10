@@ -98,7 +98,8 @@ if (isInstallingTo) {
 
 let defDir = path.join(srcDir, 'jamovi');
 let rDir = path.join(srcDir, 'R');
-let uiDir = path.join(srcDir, 'jamovi/ui');
+let jsBuildDir = path.join(srcDir, 'build', 'js');
+let jsSrcDir = path.join(defDir, 'js');
 let packageInfoPath = path.join(defDir, '0000.yaml');
 
 let packageInfo;
@@ -133,8 +134,13 @@ if ( ! utils.exists(defDir))
 if ( ! utils.exists(rDir))
     fs.mkdirSync(rDir);
 
-if ( ! utils.exists(uiDir))
-    fs.mkdirSync(uiDir);
+if (utils.exists(jsSrcDir)) {
+    fs.removeSync(jsBuildDir);
+    fs.copySync(jsSrcDir, jsBuildDir);
+}
+else {
+    fs.emptyDirSync(jsBuildDir);
+}
 
 let files = fs.readdirSync(defDir);
 
@@ -160,6 +166,9 @@ if (isBuilding || isInstallingTo) {
         fs.mkdirSync(yamlOutDir);
 }
 
+let pOutPath = path.join(rDir, 'jamovi.R');
+let pTemplPath = path.join(__dirname, 'package.template');
+fs.copySync(pTemplPath, pOutPath);
 
 let waits = [ ]
 
@@ -172,7 +181,7 @@ for (let file of files) {
         let uiPath = path.join(defDir, basename + '.u.yaml');
         let hOutPath = path.join(rDir, basename + '.h.R');
         let bOutPath = path.join(rDir, basename + '.b.R');
-        let sOutPath = path.join(uiDir, basename + '.src.js');
+        let sOutPath = path.join(jsBuildDir, basename + '.src.js');
 
         let hTemplPath = path.join(__dirname, 'header.template');
         let bTemplPath = path.join(__dirname, 'body.template');
@@ -258,6 +267,10 @@ for (let file of files) {
 Promise.all(waits).then(() => {  // wait for all the browserifies to finish
 
     let indexPath = path.join(defDir, '0000.yaml');
+
+    if (packageInfo.date instanceof Date)
+        packageInfo.date = packageInfo.date.toISOString().slice(0,10)
+
     let content = yaml.safeDump(packageInfo);
     fs.writeFileSync(indexPath, content);
 

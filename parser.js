@@ -20,16 +20,15 @@ const parse = function(srcDir) {
         throw 'DESCRIPTION file does not contain a package name';
     let packageName = packageMatch[1];
 
-    let descMatch = descContent.match(/\nDescription: ((.|\r?\n )+)\r?\n[A-Z]/);
+    descContent = descContent.replace(/\r?\n[ \t]/g, '').replace(/[\t ]+/g, ' ');
+
+    let descMatch = descContent.match(/Description: (.+)/);
     if (descMatch === null)
         throw 'DESCRIPTION file does not contain a description (irony much?)';
     let description = descMatch[1]
-    description = description.replace(/\r?\n/g, '');
-    description = description.replace(/  +/g, ' ');
 
-    let entries = descContent.match(/((.|\r?\n )+)\r?\n(?! )|$/g);
-    entries = entries.filter(entry => entry !== '');
-    entries = entries.map(entry => entry.replace(/\r?\n/g, ''));
+    let entries = descContent.split('\n');
+    entries = entries.filter(entry => entry.indexOf(':') !== -1);
     entries = entries.map(entry => entry.split(':'));
 
     let obj = { }

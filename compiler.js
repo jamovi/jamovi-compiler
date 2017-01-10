@@ -6,6 +6,7 @@ const fs = require('fs');
 const yaml = require('js-yaml');
 const _ = require('underscore');
 const semver = require('semver');
+const jsesc = require('jsesc');
 
 const reject = function(filePath, message) {
     throw path.basename(filePath) + ' ' + message;
@@ -72,7 +73,7 @@ const sourcifyOption = function(object, optionName, optionValue, indent) {
         str = '' + object;
     }
     else if (typeof(object) === 'string') {
-        str = '"' + object + '"';
+        str = jsesc(object, { json: true, wrap: true });
     }
     else if (_.isArray(object)) {
         str = 'list('
@@ -143,7 +144,7 @@ const sourcifyResults = function(object, indent) {
         str = '' + object;
     }
     else if (typeof(object) === 'string') {
-        str = '"' + object + '"';
+        str = jsesc(object, { json: true, wrap: true });
     }
     else if (_.isArray(object)) {
         str = 'list('
