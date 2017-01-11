@@ -7,6 +7,7 @@ const yaml = require('js-yaml');
 const _ = require('underscore');
 const semver = require('semver');
 const jsesc = require('jsesc');
+const wrap = require('word-wrap');
 
 const reject = function(filePath, message) {
     throw path.basename(filePath) + ' ' + message;
@@ -50,7 +51,7 @@ const compile = function(packageName, analysisPath, resultsPath, templPath, outP
     let template = fs.readFileSync(templPath, 'utf-8');
     let compiler = _.template(template);
 
-    let imports = { sourcifyOption, optionify, sourcifyResults, resultsify };
+    let imports = { sourcifyOption, optionify, sourcifyResults, resultsify, wrap };
     let object = { packageName, analysis, results, imports };
     content = compiler(object);
 

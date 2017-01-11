@@ -65,6 +65,23 @@
 
 #' <%= analysis.name %>
 #'
+<%= (analysis.description || '').split('\n').map(line => {
+        return imports.wrap(line, { indent: "#' ", width: 75 })
+    }).join("\n#'\n")
+%>
+<%= analysis.options.map(option => {
+    var desc;
+    desc = option.description;
+    if (typeof desc === 'object')
+        desc = desc.R;
+    if (desc === undefined)
+        desc = '.';
+    desc = '@param ' + option.name + ' ' + desc;
+    desc = desc.replace(/\s/g, ' ');
+    desc = imports.wrap(desc, { indent: "#'   ", width: 75 });
+    desc = desc.replace('  @param', '@param');
+    return desc;
+    }).join('\n') %>
 #' @export
 <%= analysis.name %> <- function(<%=analysis.options.map(option => {
     if (_.isUndefined(option['default']))
