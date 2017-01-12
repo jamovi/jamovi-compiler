@@ -63,7 +63,7 @@
                 revision = revision)
         }))
 
-#' <%= analysis.name %>
+#' <%= analysis.title %>
 #'
 <%= (analysis.description || '').split('\n').map(line => {
         return imports.wrap(line, { indent: "#' ", width: 75 })
