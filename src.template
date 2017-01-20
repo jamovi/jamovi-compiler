@@ -7,9 +7,8 @@ const options = <%= JSON.stringify(analysis.options) %>;
 
 const view = View.extend({
 
-    update: <%= elements.update %>,
+    <%= elements.events %>
 
-    events: <%= elements.events %>
 });
 
 view.layout = ui.extend({
