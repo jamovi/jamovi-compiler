@@ -235,7 +235,12 @@ const createUIElementsFromYaml = function(uiData) {
     if (uiData.stage === undefined)
         uiData.stage = 0;
 
-    return { events: "[\n" + data.events + "\n\t]", controls: "[\n" + data.ctrls + "\n\t]", update: functionify(uiData.update), title: uiData.title, name: uiData.name, stage: uiData.stage };
+    let mainEvents = uiData.events;
+    let events = "events: [\n" + data.events + "\n\t]";
+    for (let eventName in mainEvents)
+        events = events + ",\n\n\t" + eventName + ": " + functionify(mainEvents[eventName]);
+
+    return { events: events, controls: "[\n" + data.ctrls + "\n\t]", title: uiData.title, name: uiData.name, stage: uiData.stage };
 };
 
 const createChildTree = function(list, indent) {
@@ -346,7 +351,7 @@ const functionify = function(value, indent, args) {
 };
 
 const isPureContainerControl = function(ctrl) {
-    return ctrl.type === "LayoutBox" || ctrl.type === "CollapseBox" || ctrl.type === "Supplier" || ctrl.type === "VariableSupplier";
+    return ctrl.type === "LayoutBox" || ctrl.type === "CollapseBox" || ctrl.type === "Supplier" || ctrl.type === "VariableSupplier" || ctrl.type === "Label";
 };
 
 const isOptionControl = function(ctrl, optionName) {
