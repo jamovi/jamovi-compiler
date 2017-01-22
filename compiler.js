@@ -157,7 +157,7 @@ const sourcifyResults = function(object, indent) {
         str += ')';
     }
     else if (_.isObject(object)) {
-        if (object.type && (object.type === 'Table' || object.type === 'Image' || object.type === 'Array' || object.type === 'Group' || object.type === 'Preformatted')) {
+        if (object.type && (object.type === 'Table' || object.type === 'Image' || object.type === 'Array' || object.type === 'Group' || object.type === 'Preformatted' || object.type === 'Html')) {
             str = resultsify(object, indent + '    ')
         }
         else {
