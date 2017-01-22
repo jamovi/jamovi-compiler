@@ -420,6 +420,14 @@ const groupConstructors = {
         return ctrl;
     },
 
+    open_Label: function(label) {
+        var ctrl = {};
+        ctrl.type = "Label";
+        ctrl.label = label;
+        ctrl.children = [ ];
+        return ctrl;
+    },
+
     open_VariableSupplier: function() {
         var ctrl = { };
         ctrl.type = "VariableSupplier"
@@ -457,6 +465,21 @@ const constructors = {
         ctrl.type = "CheckBox";
         ctrl.label = item.title;
         return ctrl
+    },
+
+    NMXList: function(item) {
+        let ctrl = groupConstructors.open_Label(item.title);
+        for (let i = 0; i < item.options.length; i++) {
+            let option = item.options[i];
+            let checkbox = { };
+            checkbox.name = item.name + "_" + option.name;
+            checkbox.type = "CheckBox";
+            checkbox.label = item.title;
+            checkbox.checkedValue = option.name;
+            checkbox.optionId = item.name;
+            ctrl.children.push(checkbox);
+        }
+        return ctrl;
     },
 
     List: function(item) {
