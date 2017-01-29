@@ -9,10 +9,8 @@ const utils = require('./utils');
 const parse = function(srcDir) {
     let descPath = path.join(srcDir, 'DESCRIPTION');
 
-    if ( ! utils.exists(descPath)) {
-        console.log('a DESCRIPTION file could not be found\n\nIs the path specified an R/jamovi package?\n');
-        process.exit(1);
-    }
+    if ( ! utils.exists(descPath))
+        throw 'DESCRIPTION file could not be found\n\nIs the path specified an R/jamovi package?\n';
 
     let descContent = fs.readFileSync(descPath, 'utf-8');
     let packageMatch = descContent.match(/^Package: *(.+)$/m);

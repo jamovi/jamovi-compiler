@@ -1,0 +1,154 @@
+---
+Table:
+    "$schema": http://json-schema.org/draft-04/schema#
+    additionalProperties: false
+    required:
+      - columns
+    properties:
+        name:
+            type: string
+        type:
+            type: string
+        title:
+            type: string
+        columns:
+            type: array
+            items:
+                type: object
+                additionalProperties: false
+                properties:
+                    name:
+                        type: string
+                    title:
+                        type: string
+                    superTitle:
+                        type: string
+                    type:
+                        enum:
+                          - text
+                          - number
+                          - integer
+                    format:
+                        type: string
+                    content:
+                        type: string
+                    combineBelow:
+                        type: bool
+                    visible:
+                        type:
+                          - bool
+                          - string
+                required:
+                    - name
+        rows:
+            type:
+              - string
+              - integer
+        visible:
+            type:
+              - bool
+              - string
+        clearWith:
+            type:
+              - array
+              - null
+            items:
+                type: string
+        swapRowsColumns:
+            type: bool
+        notes:
+            type: object
+
+Image:
+    "$schema": http://json-schema.org/draft-04/schema#
+    additionalProperties: false
+    properties:
+        name:
+            type: string
+        type:
+            type: string
+        title:
+            type: string
+        width:
+            type: integer
+            min: 32
+        height:
+            type: integer
+            min: 32
+        renderFun:
+            type: string
+        requiresData:
+            type: bool
+        visible:
+            type:
+              - bool
+              - string
+        clearWith:
+            type:
+              - array
+              - null
+            items:
+                type: string
+
+Group:
+    "$schema": http://json-schema.org/draft-04/schema#
+    additionalProperties: false
+    properties:
+        name:
+            type: string
+        type:
+            type: string
+        title:
+            type: string
+        items:
+            type: array
+            items:
+                type: object
+                properties:
+                    name:
+                        type: string
+                    type:
+                        type: string
+                required:
+                  - name
+        visible:
+            type:
+              - bool
+              - string
+        clearWith:
+            type:
+              - array
+              - null
+            items:
+                type: string
+
+Array:
+    "$schema": http://json-schema.org/draft-04/schema#
+    additionalProperties: false
+    properties:
+        name:
+            type: string
+        type:
+            type: string
+        title:
+            type: string
+        items:
+            type:
+              - string
+              - integer
+            min: 0
+        template:
+            type: object
+            properties:
+                type:
+                    type: string
+        visible:
+            type:
+              - bool
+              - string
+        clearWith:
+            type:
+              - array
+              - null
+            items:
+                type: string

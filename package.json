@@ -7,6 +7,7 @@
     "jmc": "index.js"
   },
   "scripts": {
+    "test": "mocha",
     "start": "node index.js"
   },
   "repository": {
@@ -30,5 +31,9 @@
     "underscore": "^1.8.3",
     "walk-sync": "^0.3.1",
     "word-wrap": "^1.2.0"
+  },
+  "devDependencies": {
+    "jsonschema": "^1.1.1",
+    "mocha": "^3.2.0"
   }
 }

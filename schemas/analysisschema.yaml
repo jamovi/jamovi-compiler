@@ -1,0 +1,82 @@
+---
+"$schema": http://json-schema.org/draft-04/schema#
+
+definitions:
+    description:
+        oneOf:
+          - type: string
+          - type: object
+            properties:
+                - name: R
+                  type: string
+            required:
+                - R
+
+title: Analysis Definition Schema
+type: object
+additionalProperties: false
+properties:
+    name:
+        type: string
+        pattern: "^[A-Za-z][A-Za-z0-9]*$"
+    title:
+        type: string
+    version:
+        type: string
+        pattern: "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    menuGroup:
+        type: string
+    menuSubgroup:
+        type: string
+    menuTitle:
+        type: string
+    menuSubtitle:
+        type: string
+    jas:
+        type: string
+        pattern: "^[0-9]+\\.[0-9]+$"
+    pause:
+        type: array
+        minItems: 1
+        item:
+            type: object
+            additionalProperties: false
+            properties:
+                when:
+                    type: string
+                with:
+                    type: array
+                    items:
+                        type: string
+                        pattern: "^[A-Za-z][A-Za-z0-9]*$"
+    description:
+        '$ref': '#/definitions/description'
+    options:
+        type: array
+        items:
+            properties:
+                name:
+                    type: string
+                type:
+                    type: enum
+                        - Variable
+                        - Variables
+                        - Terms
+                        - Integer
+                        - Number
+                        - String
+                        - Bool
+                        - List
+                        - NMXList
+                        - Array
+                        - Pairs
+                required:
+                    - name
+                    - type
+required:
+    - name
+    - title
+    - jas
+    - version
+    - menuGroup
+    - options

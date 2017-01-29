@@ -9,15 +9,87 @@ const semver = require('semver');
 const jsesc = require('jsesc');
 const wrap = require('word-wrap');
 
+const validate = require('jsonschema').validate;
+
+let analysisSchemaPath = path.join(__dirname, 'schemas', 'analysisschema.yaml');
+let analysisSchema = yaml.safeLoad(fs.readFileSync(analysisSchemaPath));
+let resultsSchemaPath = path.join(__dirname, 'schemas', 'resultsschema.yaml');
+let resultsSchema = yaml.safeLoad(fs.readFileSync(resultsSchemaPath));
+let optionSchemasPath = path.join(__dirname, 'schemas', 'optionschemas.yaml');
+let optionSchemas = yaml.safeLoad(fs.readFileSync(optionSchemasPath));
+let resultsSchemasPath = path.join(__dirname, 'schemas', 'resultelementschemas.yaml');
+let resultsSchemas = yaml.safeLoad(fs.readFileSync(resultsSchemasPath));
+
 const reject = function(filePath, message) {
-    throw path.basename(filePath) + ' ' + message;
+    throw "Unable to compile '" + path.basename(filePath) + "':\n\t" + message;
+}
+
+const throwVError = function(report, name, filename) {
+    let errors = report.errors.map(e => {
+        return e.stack.replace(/instance/g, name);
+    }).join('\n\t');
+    reject(filename, errors)
+}
+
+const checkOption = function(option, name, from) {
+    if (option.type in optionSchemas) {
+        let schema = optionSchemas[option.type];
+        let report = validate(option, schema);
+        if ( ! report.valid)
+            throwVError(report, name, from);
+    }
+    if (option.type === 'Array') {
+        checkOption(option.template, name + '.template', from);
+    }
+    else if (option.type === 'Group') {
+        for (let i = 0; i < option.elements.length; i++)
+            checkOption(option.elements[i], name + '.elements[' + i + ']', from);
+    }
+}
+
+const checkResultsElement = function(element, name, from) {
+    if (element.type in resultsSchemas) {
+        let schema = resultsSchemas[element.type];
+        let report = validate(element, schema);
+        if ( ! report.valid)
+            throwVError(report, name, from);
+    }
+    if (element.type === 'Array') {
+        checkResultsElement(element.template, name + '.template', from);
+    }
+    else if (element.type === 'Group') {
+        for (let i = 0; i < element.items.length; i++)
+            checkResultsElement(element.items[i], name + '.items[' + i + ']', from);
+    }
 }
 
 const compile = function(packageName, analysisPath, resultsPath, templPath, outPath) {
 
     let content;
     content = fs.readFileSync(analysisPath, 'utf-8');
-    let analysis = yaml.safeLoad(content);
+
+    let analysis;
+    try {
+        analysis = yaml.safeLoad(content);
+    }
+    catch (e) {
+        reject(analysisPath, e.message);
+    }
+
+    if (analysis === null || typeof analysis.jas !== 'string')
+        reject(analysisPath, "no 'jas' present");
+
+    let jas = analysis.jas.match(/^([0-9]+)\.([0-9]+)$/)
+    if (jas[1] !== '1' || jas[2] !== '0')
+        reject(analysisPath, 'requires a newer jamovi-compiler');
+
+    let report;
+    report = validate(analysis, analysisSchema);
+    if ( ! report.valid)
+        throwVError(report, 'analysis', analysisPath);
+
+    for (let option of analysis.options)
+        checkOption(option, option.name, analysisPath);
 
     let results;
     try {
@@ -25,28 +97,22 @@ const compile = function(packageName, analysisPath, resultsPath, templPath, outP
         results = yaml.safeLoad(content);
     }
     catch (e) {
-        results = {
-            'name' : analysis.name,
-            'title': analysis.title,
-        }
+        reject(resultsPath, e.message);
     }
 
-    if (typeof analysis.name === 'undefined')
-        reject(analysisPath, 'does not contain an analysis name');
-    if (typeof analysis.title === 'undefined')
-        reject(analysisPath, 'does not contain an analysis title');
-    if (typeof analysis.version === 'undefined' || ! semver.valid(analysis.version))
-        reject(analysisPath, 'does not contain a valid version');
+    if (results === null || typeof results.jrs !== 'string')
+        reject(resultsPath, "no 'jrs' present");
 
-    if ('jas' in analysis) {
-        if (typeof analysis.jas !== 'string')
-            reject(analysisPath, 'does not contain a valid jamovi analysis spec (jas)');
-        let jas = analysis.jas.match(/^([0-9]+)\.([0-9]+)$/)
-        if (jas === null)
-            reject(analysisPath, 'does not contain a valid jamovi analysis spec (jas)');
-        if (jas[1] !== '1' || jas[2] !== '0')
-            reject(analysisPath, 'requires a newer jamovi-compiler');
-    }
+    let jrs = results.jrs.match(/^([0-9]+)\.([0-9]+)$/)
+    if (jrs[1] !== '1' || jrs[2] !== '0')
+        reject(resultsPath, 'requires a newer jamovi-compiler');
+
+    report = validate(results, resultsSchema);
+    if ( ! report.valid)
+        throwVError(report, 'results', resultsPath);
+
+    for (let i = 0; i < results.items.length; i++)
+        checkResultsElement(results.items[i], 'results.items[' + i + ']', resultsPath);
 
     let template = fs.readFileSync(templPath, 'utf-8');
     let compiler = _.template(template);
@@ -165,7 +231,7 @@ const sourcifyResults = function(object, indent) {
             let sep = '';
             for (let prop in object) {
                 let value = object[prop];
-                str += sep + '`' + prop + '`' + '=' + sourcifyResults(value, indent + '    ');
+                str += sep + '`' + prop + '`' + '=' + sourcifyResults(value, indent + '        ');
                 sep = ', '
             }
             str += ')';

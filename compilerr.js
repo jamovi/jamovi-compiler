@@ -47,19 +47,6 @@ const included = [
 
     'jmvcore',
     'R6',
-    'car',
-    'multcomp',
-    'ggplot2',
-    'PMCMR',
-    'lsmeans',
-    'lsr',
-    'vcd',
-    'vcdExtra',
-    'GGally',
-    'BayesFactor',
-    'psych',
-    'GPArotation',
-    'afex',
 ];
 
 const compile = function(srcDir, moduleDir) {
@@ -118,15 +105,14 @@ const compile = function(srcDir, moduleDir) {
 
             depends = depends.join("','");
 
-            cmd = util.format('R --slave -e "utils::install.packages(c(\'%s\'), lib=\'%s\', repos=\'https://cran.r-project.org\', INSTALL_opts=c(\'--no-data\', \'--no-help\', \'--no-demo\'))"', depends, buildDir);
-            sh(cmd, { stdio: 'inherit', encoding: 'utf-8', env: env } );
+            cmd = util.format('R --slave -e "utils::install.packages(c(\'%s\'), lib=\'%s\', repos=c(\'https://repo.jamovi.org\', \'https://cran.r-project.org\'), INSTALL_opts=c(\'--no-data\', \'--no-help\', \'--no-demo\'))"', depends, buildDir);
+            sh(cmd, { stdio: [0, 1, 1], encoding: 'utf-8', env: env } );
         }
 
         cmd = util.format('R CMD INSTALL "--library=%s" "%s"', buildDir, srcDir);
-        sh(cmd, { stdio: 'inherit', encoding: 'utf-8', env: env } );
+        sh(cmd, { stdio: [0, 1, 1], encoding: 'utf-8', env: env } );
     }
     catch (e) {
-        // console.log(e)
         throw 'Could not build module';
     }
 

@@ -31,281 +31,288 @@ const parseR = require('./parser');
 const utils = require('./utils');
 const installer = require('./installer');
 
-let usage = 'Usage:\n';
-usage += '    jmc --build path\n';
-usage += '    jmc --prepare path\n';
-usage += '    jmc --install path [--home path]\n';
-usage += '    jmc --check        [--home path]\n';
+try {
 
-let isBuilding = true;
-let isInstalling = false;
-let isInstallingTo = false;
+    let usage = 'Usage:\n';
+    usage += '    jmc --build path\n';
+    usage += '    jmc --prepare path\n';
+    usage += '    jmc --install path [--home path]\n';
+    usage += '    jmc --check        [--home path]\n';
 
-const args = CLA(ARGS);
+    let isBuilding = true;
+    let isInstalling = false;
+    let isInstallingTo = false;
 
-let srcDir;
-let installDir;
+    const args = CLA(ARGS);
 
-if (args.check) {
-    installer.check(args.home);
-    process.exit(0);
-}
-else if (args.install) {
+    let srcDir;
+    let installDir;
 
-    srcDir = args.install;
+    if (args.check) {
+        installer.check(args.home);
+        process.exit(0);
+    }
+    else if (args.install) {
 
-    if ( ! args.to) {
+        srcDir = args.install;
+
+        if ( ! args.to) {
+            isBuilding = true;
+            isInstalling = true;
+            isInstallingTo = false;
+        }
+        else {
+            installDir = args.to;
+            isBuilding = false;
+            isInstalling = false;
+            isInstallingTo = true;
+        }
+    }
+    else if (args.build) {
         isBuilding = true;
-        isInstalling = true;
         isInstallingTo = false;
+        srcDir = args.build;
+    }
+    else if (args.prepare) {
+        isBuilding = false;
+        isInstallingTo = false;
+        srcDir = args.prepare;
     }
     else {
-        installDir = args.to;
-        isBuilding = false;
-        isInstalling = false;
-        isInstallingTo = true;
+        console.log(usage);
+        process.exit(0);
     }
-}
-else if (args.build) {
-    isBuilding = true;
-    isInstallingTo = false;
-    srcDir = args.build;
-}
-else if (args.prepare) {
-    isBuilding = false;
-    isInstallingTo = false;
-    srcDir = args.prepare;
-}
-else {
-    console.log(usage);
-    process.exit(1);
-}
 
-srcDir = path.resolve(srcDir);
+    srcDir = path.resolve(srcDir);
 
-if ( ! utils.exists(srcDir)) {
-    console.log("path '%s' does not exist\n".replace('%s', srcDir));
-    process.exit(1);
-}
+    if ( ! utils.exists(srcDir))
+        throw "path '%s' does not exist\n".replace('%s', srcDir);
 
-if (isInstallingTo) {
-    installDir = path.resolve(installDir);
-    if ( ! utils.exists(installDir)) {
-        console.log("path '%s' does not exist\n".replace('%s', installDir));
-        process.exit(1);
+    if (isInstallingTo) {
+        installDir = path.resolve(installDir);
+        if ( ! utils.exists(installDir))
+            throw "path '%s' does not exist\n".replace('%s', installDir);
     }
-}
 
-let defDir = path.join(srcDir, 'jamovi');
-let rDir = path.join(srcDir, 'R');
-let jsBuildDir = path.join(srcDir, 'build', 'js');
-let jsSrcDir = path.join(defDir, 'js');
-let packageInfoPath = path.join(defDir, '0000.yaml');
+    let defDir = path.join(srcDir, 'jamovi');
+    let rDir = path.join(srcDir, 'R');
+    let jsBuildDir = path.join(srcDir, 'build', 'js');
+    let jsSrcDir = path.join(defDir, 'js');
+    let packageInfoPath = path.join(defDir, '0000.yaml');
 
-let packageInfo;
+    let packageInfo;
 
-if (utils.exists(packageInfoPath)) {
-    let content = fs.readFileSync(packageInfoPath);
-    packageInfo = yaml.safeLoad(content);
-    if ('jms' in packageInfo) {
-        if (packageInfo.jms !== '1.0') {
-            console.log('this module requires a newer jmc');
-            process.exit(1);
+    if (utils.exists(packageInfoPath)) {
+        let content = fs.readFileSync(packageInfoPath);
+        packageInfo = yaml.safeLoad(content);
+        if ('jms' in packageInfo) {
+            if (packageInfo.jms !== '1.0')
+                throw 'this module requires a newer jmc';
+        }
+        else {
+            packageInfo.jms = '1.0';
         }
     }
     else {
-        packageInfo.jms = '1.0';
-    }
-}
-else {
-    try {
         packageInfo = parseR(srcDir);
     }
-    catch (e) {
-        console.log(e);
-        console.log();
-        process.exit(1);
+
+    if ( ! utils.exists(defDir))
+        fs.mkdirSync(defDir);
+
+    if ( ! utils.exists(rDir))
+        fs.mkdirSync(rDir);
+
+    if (utils.exists(jsSrcDir)) {
+        fs.removeSync(jsBuildDir);
+        fs.copySync(jsSrcDir, jsBuildDir);
     }
-}
+    else {
+        fs.emptyDirSync(jsBuildDir);
+    }
 
-if ( ! utils.exists(defDir))
-    fs.mkdirSync(defDir);
-
-if ( ! utils.exists(rDir))
-    fs.mkdirSync(rDir);
-
-if (utils.exists(jsSrcDir)) {
-    fs.removeSync(jsBuildDir);
-    fs.copySync(jsSrcDir, jsBuildDir);
-}
-else {
-    fs.emptyDirSync(jsBuildDir);
-}
-
-let files = fs.readdirSync(defDir);
+    let files = fs.readdirSync(defDir);
 
 
-let modDir;
-let uiOutDir;
-let yamlOutDir;
+    let modDir;
+    let uiOutDir;
+    let yamlOutDir;
 
-if (isBuilding) {
-    modDir = temp.mkdirSync(packageInfo.name);
-}
-else if (isInstallingTo) {
-    modDir = path.join(installDir, packageInfo.name);
-    fs.emptyDirSync(modDir);
-}
+    if (isBuilding) {
+        modDir = temp.mkdirSync(packageInfo.name);
+    }
+    else if (isInstallingTo) {
+        modDir = path.join(installDir, packageInfo.name);
+        fs.emptyDirSync(modDir);
+    }
 
-if (isBuilding || isInstallingTo) {
-    uiOutDir = path.join(modDir, 'ui');
-    if ( ! utils.exists(uiOutDir))
-        fs.mkdirSync(uiOutDir);
-    yamlOutDir = path.join(modDir, 'analyses');
-    if ( ! utils.exists(yamlOutDir))
-        fs.mkdirSync(yamlOutDir);
-}
+    if (isBuilding || isInstallingTo) {
+        uiOutDir = path.join(modDir, 'ui');
+        if ( ! utils.exists(uiOutDir))
+            fs.mkdirSync(uiOutDir);
+        yamlOutDir = path.join(modDir, 'analyses');
+        if ( ! utils.exists(yamlOutDir))
+            fs.mkdirSync(yamlOutDir);
+    }
 
-let pOutPath = path.join(rDir, 'jamovi.R');
-let pTemplPath = path.join(__dirname, 'package.template');
-fs.copySync(pTemplPath, pOutPath);
+    let pOutPath = path.join(rDir, 'jamovi.R');
+    let pTemplPath = path.join(__dirname, 'package.template');
+    fs.copySync(pTemplPath, pOutPath);
 
-let waits = [ ]
+    let waits = [ ]
 
-for (let file of files) {
+    for (let file of files) {
 
-    if (file.endsWith('.a.yaml')) {
-        let analysisPath = path.join(defDir, file);
-        let basename = path.basename(analysisPath, '.a.yaml');
-        let resultsPath = path.join(defDir, basename + '.r.yaml');
-        let uiPath = path.join(defDir, basename + '.u.yaml');
-        let hOutPath = path.join(rDir, basename + '.h.R');
-        let bOutPath = path.join(rDir, basename + '.b.R');
-        let sOutPath = path.join(jsBuildDir, basename + '.src.js');
+        if (file.endsWith('.a.yaml')) {
+            let analysisPath = path.join(defDir, file);
+            let basename = path.basename(analysisPath, '.a.yaml');
+            let resultsPath = path.join(defDir, basename + '.r.yaml');
+            let uiPath = path.join(defDir, basename + '.u.yaml');
+            let hOutPath = path.join(rDir, basename + '.h.R');
+            let bOutPath = path.join(rDir, basename + '.b.R');
+            let sOutPath = path.join(jsBuildDir, basename + '.src.js');
 
-        let hTemplPath = path.join(__dirname, 'header.template');
-        let bTemplPath = path.join(__dirname, 'body.template');
-        let sTemplPath = path.join(__dirname, 'src.template');
+            let hTemplPath = path.join(__dirname, 'header.template');
+            let bTemplPath = path.join(__dirname, 'body.template');
+            let sTemplPath = path.join(__dirname, 'src.template');
 
-        compiler(packageInfo.name, analysisPath, resultsPath, hTemplPath, hOutPath);
-        console.log('wrote: ' + path.basename(hOutPath));
+            compiler(packageInfo.name, analysisPath, resultsPath, hTemplPath, hOutPath);
+            console.log('wrote: ' + path.basename(hOutPath));
 
-        if ( ! utils.exists(bOutPath)) {
-            compiler(packageInfo.name, analysisPath, resultsPath, bTemplPath, bOutPath);
-            console.log('wrote: ' + path.basename(bOutPath));
+            if ( ! utils.exists(bOutPath)) {
+                compiler(packageInfo.name, analysisPath, resultsPath, bTemplPath, bOutPath);
+                console.log('wrote: ' + path.basename(bOutPath));
+            }
+
+            uicompiler(analysisPath, uiPath, sTemplPath, sOutPath);
+
+
+            if (isBuilding || isInstallingTo) {
+
+                let uOutPath = path.join(uiOutDir, basename + '.js');
+
+                waits.push(Promise.resolve().then(() => {
+                    let stream = fs.createWriteStream(uOutPath);
+                    return new Promise((resolve) => {
+                        browserify(sOutPath, { standalone: 'module' })
+                            .bundle().pipe(stream);
+                        stream.on('close', resolve);
+                    });
+                }));
+
+                let content = fs.readFileSync(analysisPath);
+                fs.writeFileSync(path.join(yamlOutDir, basename + '.a.yaml'), content);
+
+                if (utils.exists(resultsPath)) {
+                    content = fs.readFileSync(resultsPath);
+                    fs.writeFileSync(path.join(yamlOutDir, basename + '.r.yaml'), content);
+                }
+
+                console.log('wrote: ' + path.basename(uOutPath));
+            }
+
+            let content = fs.readFileSync(analysisPath, 'utf-8');
+            let analysis = yaml.safeLoad(content);
+            let title = ('title' in analysis ? analysis.title : analyis.name);
+            let aObj = {
+                title: title,
+                name: analysis.name,
+                ns: packageInfo.name,
+            };
+
+            if ('menuGroup' in analysis)
+                aObj.menuGroup = analysis.menuGroup;
+            else
+                aObj.menuGroup = packageInfo.name;
+
+            if ('menuSubgroup' in analysis)
+                aObj.menuSubgroup = analysis.menuSubgroup;
+
+            if ('menuTitle' in analysis)
+                aObj.menuTitle = analysis.menuTitle;
+            else
+                aObj.menuTitle = title;
+
+            if ('menuSubtitle' in analysis)
+                aObj.menuSubtitle = analysis.menuSubtitle;
+            if ('description' in analysis)
+                aObj.description = analysis.description;
+            if (analysis.hidden === true)
+                aObj.hidden = analysis.hidden;
+
+            let found = false;
+            for (let existing of packageInfo.analyses) {
+                if (existing.name === analysis.name) {
+                    Object.assign(existing, aObj);
+                    found = true;
+                    break;
+                }
+            }
+            if (found === false)
+                packageInfo.analyses.push(aObj);
         }
+    }
 
-        uicompiler(analysisPath, uiPath, sTemplPath, sOutPath);
+    Promise.all(waits).then(() => {  // wait for all the browserifies to finish
 
+        let indexPath = path.join(defDir, '0000.yaml');
+
+        if (packageInfo.date instanceof Date)
+            packageInfo.date = packageInfo.date.toISOString().slice(0,10)
+
+        let content = yaml.safeDump(packageInfo);
+        fs.writeFileSync(indexPath, content);
 
         if (isBuilding || isInstallingTo) {
 
-            let uOutPath = path.join(uiOutDir, basename + '.js');
+            fs.writeFileSync(path.join(modDir, 'jamovi.yaml'), content);
 
-            waits.push(Promise.resolve().then(() => {
-                let stream = fs.createWriteStream(uOutPath);
-                return new Promise((resolve) => {
-                    browserify(sOutPath, { standalone: 'module' })
-                        .bundle().pipe(stream);
-                    stream.on('close', resolve);
+            compileR(srcDir, modDir);
+
+            if (isBuilding) {
+
+                let zipPath = packageInfo.name + '.jmo';
+                let zip = new JSZip();
+                let paths = walkSync(modDir, { directories: false });
+
+                for (let relPath of paths) {
+                    let archivePath = path.join(packageInfo.name, relPath);
+                    let fullPath = path.join(modDir, relPath);
+                    let contents = fs.readFileSync(fullPath);
+                    zip.file(archivePath, contents);
+                }
+
+                return new Promise((resolve, reject) => {
+                    zip.generateAsync({ type: 'nodebuffer' }).then(content => {
+                        fs.writeFileSync(zipPath, content);
+                        console.log('wrote module: ' + path.basename(zipPath) + '\n');
+                        resolve(zipPath);
+                    }, err => fs.writeSync(2, err))
                 });
-            }));
-
-            let content = fs.readFileSync(analysisPath);
-            fs.writeFileSync(path.join(yamlOutDir, basename + '.a.yaml'), content);
-
-            if (utils.exists(resultsPath)) {
-                content = fs.readFileSync(resultsPath);
-                fs.writeFileSync(path.join(yamlOutDir, basename + '.r.yaml'), content);
-            }
-
-            console.log('wrote: ' + path.basename(uOutPath));
-        }
-
-        let content = fs.readFileSync(analysisPath, 'utf-8');
-        let analysis = yaml.safeLoad(content);
-        let title = ('title' in analysis ? analysis.title : analyis.name);
-        let aObj = {
-            title: title,
-            name: analysis.name,
-            ns: packageInfo.name,
-        };
-
-        if ('menuGroup' in analysis)
-            aObj.menuGroup = analysis.menuGroup;
-        else
-            aObj.menuGroup = packageInfo.name;
-
-        if ('menuSubgroup' in analysis)
-            aObj.menuSubgroup = analysis.menuSubgroup;
-
-        if ('menuTitle' in analysis)
-            aObj.menuTitle = analysis.menuTitle;
-        else
-            aObj.menuTitle = title;
-
-        if ('menuSubtitle' in analysis)
-            aObj.menuSubtitle = analysis.menuSubtitle;
-        if ('description' in analysis)
-            aObj.description = analysis.description;
-        if (analysis.hidden === true)
-            aObj.hidden = analysis.hidden;
-
-        let found = false;
-        for (let existing of packageInfo.analyses) {
-            if (existing.name === analysis.name) {
-                Object.assign(existing, aObj);
-                found = true;
-                break;
             }
         }
-        if (found === false)
-            packageInfo.analyses.push(aObj);
-    }
+
+    }).then(path => {
+
+        if (isInstalling)
+            installer.install(path, args.home);
+
+    }).catch(e => {
+        fs.writeSync(2, '\n');
+        fs.writeSync(2, e);
+        fs.writeSync(2, '\n\n');
+        process.exit(1);
+    });
+
 }
-
-Promise.all(waits).then(() => {  // wait for all the browserifies to finish
-
-    let indexPath = path.join(defDir, '0000.yaml');
-
-    if (packageInfo.date instanceof Date)
-        packageInfo.date = packageInfo.date.toISOString().slice(0,10)
-
-    let content = yaml.safeDump(packageInfo);
-    fs.writeFileSync(indexPath, content);
-
-    if (isBuilding || isInstallingTo) {
-
-        fs.writeFileSync(path.join(modDir, 'jamovi.yaml'), content);
-
-        compileR(srcDir, modDir);
-
-        if (isBuilding) {
-
-            let zipPath = packageInfo.name + '.jmo';
-            let zip = new JSZip();
-            let paths = walkSync(modDir, { directories: false });
-
-            for (let relPath of paths) {
-                let archivePath = path.join(packageInfo.name, relPath);
-                let fullPath = path.join(modDir, relPath);
-                let contents = fs.readFileSync(fullPath);
-                zip.file(archivePath, contents);
-            }
-
-            return new Promise((resolve, reject) => {
-                zip.generateAsync({ type: 'nodebuffer' }).then(content => {
-                    fs.writeFileSync(zipPath, content);
-                    console.log('wrote module: ' + path.basename(zipPath) + '\n');
-                    resolve(zipPath);
-                }, err => console.log(err))
-            });
-        }
-    }
-
-}).then(path => {
-
-    if (isInstalling)
-        installer.install(path, args.home);
-
-}).catch(e => console.log(e));
+catch (e) {
+    fs.writeSync(2, '\n');
+    if (typeof(e) === 'string')
+        fs.writeSync(2, e);
+    else if ('message' in e)
+        fs.writeSync(2, e.message);
+    else
+        fs.writeSync(2, e);
+    fs.writeSync(2, '\n\n');
+    process.exit(1);
+}

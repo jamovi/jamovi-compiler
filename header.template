@@ -60,7 +60,8 @@
                 data = data,
                 datasetId = datasetId,
                 analysisId = analysisId,
-                revision = revision)
+                revision = revision,
+                pause = <%= imports.sourcifyResults(analysis.pause ? analysis.pause : null, '            ') %>)
         }))
 
 #' <%= analysis.title %>
