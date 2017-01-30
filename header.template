@@ -86,6 +86,7 @@
         desc = '.';
     desc = '@param ' + option.name + ' ' + desc;
     desc = desc.replace(/\s/g, ' ');
+    desc = desc.replace(/`(.*?)`/g, '\\code{$1}');
     desc = imports.wrap(desc, { indent: "#'   ", width: 75 });
     desc = desc.replace('  @param', '@param');
     return desc;
