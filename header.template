@@ -66,9 +66,16 @@
 
 #' <%= analysis.title %>
 #'
-<%= (analysis.description || '').split('\n').map(line => {
+<%= (analysis.description.main || '').replace(/`(.*?)`/g, '\\code{$1}').split('\n').map(line => {
         return imports.wrap(line, { indent: "#' ", width: 75 })
     }).join("\n#'\n")
+%><%
+    if (analysis.description && analysis.description.R && analysis.description.R.usage) {
+        var usage = analysis.description.R.usage;
+        usage = usage.split('\n').join("\n#' ");
+        print("\n#'\n#' @examples\n#' ");
+        print(usage);
+    }
 %>
 <%= analysis.options.map(option => {
     var desc;

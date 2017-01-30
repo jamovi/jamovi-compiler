@@ -114,6 +114,9 @@ const compile = function(packageName, analysisPath, resultsPath, templPath, outP
     for (let i = 0; i < results.items.length; i++)
         checkResultsElement(results.items[i], 'results.items[' + i + ']', resultsPath);
 
+    if ( ! ('description' in analysis))
+        analysis.description = { };
+
     let template = fs.readFileSync(templPath, 'utf-8');
     let compiler = _.template(template);
 
