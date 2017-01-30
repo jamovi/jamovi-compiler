@@ -260,7 +260,7 @@ try {
         if (packageInfo.date instanceof Date)
             packageInfo.date = packageInfo.date.toISOString().slice(0,10)
 
-        let content = yaml.safeDump(packageInfo);
+        let content = '---\n' + yaml.safeDump(packageInfo) + '\n...\n';
         fs.writeFileSync(indexPath, content);
 
         if (isBuilding || isInstallingTo) {
