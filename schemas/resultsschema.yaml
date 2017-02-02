@@ -37,8 +37,8 @@ properties:
             required:
                 - name
                 - type
-    required:
-        - name
-        - title
-        - jrs
-        - items
+required:
+    - name
+    - title
+    - jrs
+    - items
