@@ -93,11 +93,21 @@ const compile = function(packageName, analysisPath, resultsPath, templPath, outP
 
     let results;
     try {
-        content = fs.readFileSync(resultsPath, 'utf-8');
+        let content = fs.readFileSync(resultsPath, 'utf-8');
         results = yaml.safeLoad(content);
     }
     catch (e) {
-        reject(resultsPath, e.message);
+        if (e.code === 'ENOENT') {
+            results = {
+                name: analysis.name,
+                title: analysis.title,
+                jrs: '1.0',
+                items: [],
+            };
+        }
+        else {
+            reject(resultsPath, e.message);
+        }
     }
 
     if (results === null || typeof results.jrs !== 'string')
