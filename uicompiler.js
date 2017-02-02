@@ -474,7 +474,7 @@ const constructors = {
             let checkbox = { };
             checkbox.name = item.name + "_" + option.name;
             checkbox.type = "CheckBox";
-            checkbox.label = item.title;
+            checkbox.label = option.title;
             checkbox.checkedValue = option.name;
             checkbox.optionId = item.name;
             ctrl.children.push(checkbox);
