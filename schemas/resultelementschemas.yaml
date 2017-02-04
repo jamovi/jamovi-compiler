@@ -152,3 +152,47 @@ Array:
               - null
             items:
                 type: string
+
+Preformatted:
+    "$schema": http://json-schema.org/draft-04/schema#
+    additionalProperties: false
+    properties:
+        name:
+            type: string
+        type:
+            type: string
+        title:
+            type: string
+        content:
+            type: string
+        visible:
+            type:
+              - bool
+              - string
+        clearWith:
+            type:
+              - array
+              - null
+            items:
+                type: string
+
+Html:
+    "$schema": http://json-schema.org/draft-04/schema#
+    additionalProperties: false
+    properties:
+        name:
+            type: string
+        type:
+            type: string
+        title:
+            type: string
+        visible:
+            type:
+              - bool
+              - string
+        clearWith:
+            type:
+              - array
+              - null
+            items:
+                type: string

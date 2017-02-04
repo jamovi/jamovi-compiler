@@ -28,6 +28,8 @@ properties:
                         - Group
                         - Array
                         - Image
+                        - Preformatted
+                        - Html
                 clearWith:
                     type:
                       - array
