@@ -15,7 +15,13 @@ const find = function(jamovi_home) {
         exe = path.join(jamovi_home, 'jamovi');
         if (fs.existsSync(exe))
             return exe;
+        exe = path.join(jamovi_home, 'jamovi.exe');
+        if (fs.existsSync(exe))
+            return exe;
         exe = path.join(jamovi_home, 'bin', 'jamovi');
+        if (fs.existsSync(exe))
+            return exe;
+        exe = path.join(jamovi_home, 'bin', 'jamovi.exe');
         if (fs.existsSync(exe))
             return exe;
         exe = path.join(jamovi_home, 'Contents', 'MacOS', 'jamovi')
@@ -58,7 +64,10 @@ const check = function(jamovi_home) {
             stdio: [ 'ignore', 'pipe', 'inherit' ],
             encoding: 'utf-8'
         });
-    if (response.stdout !== null && response.stdout.match('^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\n')) {
+    if (response.stdout === null) {
+        throw 'jamovi did not respond';
+    }
+    else if (response.stdout.match('^\r?\n?[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\r?\n')) {
         if (process.platform === 'darwin') {
             let m = exe.match(/^(.+)\/Contents\/MacOS\/jamovi$/);
             if (m)
@@ -71,6 +80,7 @@ const check = function(jamovi_home) {
         }
     }
     else {
+        console.log(response.stdout + '\n')
         throw 'jamovi could not be accessed';
     }
 };
