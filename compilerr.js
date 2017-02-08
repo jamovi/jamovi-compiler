@@ -49,10 +49,13 @@ const included = [
     'R6',
 ];
 
-const compile = function(srcDir, moduleDir) {
+const compile = function(srcDir, moduleDir, rpath) {
 
     let rDir = path.join(moduleDir, 'R');
     let buildDir = path.join(srcDir, 'build', 'R');
+    let rExe = path.join(rpath, 'R');
+    if (process.platform === 'win32')
+        rExe = rExe + '.exe';
 
     try {
         fs.statSync(buildDir);
@@ -105,11 +108,11 @@ const compile = function(srcDir, moduleDir) {
 
             depends = depends.join("','");
 
-            cmd = util.format('R --slave -e "utils::install.packages(c(\'%s\'), lib=\'%s\', repos=c(\'https://repo.jamovi.org\', \'https://cran.r-project.org\'), INSTALL_opts=c(\'--no-data\', \'--no-help\', \'--no-demo\'))"', depends, buildDir);
+            cmd = util.format('"%s" --slave -e "utils::install.packages(c(\'%s\'), lib=\'%s\', repos=c(\'https://repo.jamovi.org\', \'https://cran.r-project.org\'), INSTALL_opts=c(\'--no-data\', \'--no-help\', \'--no-demo\'))"', rExe, depends, buildDir);
             sh(cmd, { stdio: [0, 1, 1], encoding: 'utf-8', env: env } );
         }
 
-        cmd = util.format('R CMD INSTALL "--library=%s" "%s"', buildDir, srcDir);
+        cmd = util.format('"%s" CMD INSTALL "--library=%s" "%s"', rExe, buildDir, srcDir);
         sh(cmd, { stdio: [0, 1, 1], encoding: 'utf-8', env: env } );
     }
     catch (e) {

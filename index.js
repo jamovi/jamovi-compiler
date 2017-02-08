@@ -17,8 +17,9 @@ const ARGS = [
     { name: 'prepare', alias: 'p', type: String },
     { name: 'install', alias: 'i', type: String },
     { name: 'check',   alias: 'c', type: Boolean },
-    { name: 'home', type: String },
-    { name: 'to',   type: String },
+    { name: 'home',  type: String },
+    { name: 'to',    type: String },
+    { name: 'rpath', type: String },
 ];
 
 const temp = require('temp');
@@ -82,6 +83,10 @@ try {
         console.log(usage);
         process.exit(0);
     }
+
+    let rpath = '';
+    if (args.rpath)
+        rpath = args.rpath;
 
     srcDir = path.resolve(srcDir);
 
@@ -267,7 +272,7 @@ try {
 
             fs.writeFileSync(path.join(modDir, 'jamovi.yaml'), content);
 
-            compileR(srcDir, modDir);
+            compileR(srcDir, modDir, rpath);
 
             if (isBuilding) {
 
