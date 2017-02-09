@@ -18,13 +18,27 @@ const uicompile = function(analysisPath, uiPath, sTemplPath, outPath) {
     let content = fs.readFileSync(analysisPath, 'utf-8');
     let analysis = yaml.safeLoad(content);
 
-    let uiData = { title: analysis.title, name: analysis.name, version: "1.0", stage: 0, children: [] };
+    let uiData = { title: analysis.title, name: analysis.name, jus: "1.0", stage: 0, children: [] };
 
     if (fs.existsSync(uiPath)) {
-        uiData = yaml.safeLoad(fs.readFileSync(uiPath, 'utf-8'));
+        try {
+            uiData = yaml.safeLoad(fs.readFileSync(uiPath, 'utf-8'));
+        }
+        catch (e) {
+            reject(uiPath, e.message);
+        }
         if (uiData.children === undefined)
             uiData.children = [];
     }
+
+
+    if (uiData === null || typeof uiData.jus !== 'string')
+        reject(uiPath, "no 'jus' present");
+
+    let jus = uiData.jus.match(/^([0-9]+)\.([0-9]+)$/)
+    if (jus[1] !== '1' || jus[2] !== '0')
+        reject(uiPath, 'requires a newer jamovi-compiler');
+
 
     let removed = removeMissingOptions(analysis.options, uiData);
     if (removed.length > 0) {
@@ -486,7 +500,7 @@ const groupConstructors = {
 
     open_LayoutBox: function(margin) {
         var ctrl = {};
-        ctrl.type = "LayoutBox";
+        ctrl.type = 'LayoutBox';
         ctrl.margin = margin !== undefined ? margin : "large";
         ctrl.children = [ ];
         return ctrl;
@@ -494,7 +508,7 @@ const groupConstructors = {
 
     open_Label: function(label) {
         var ctrl = {};
-        ctrl.type = "Label";
+        ctrl.type = 'Label';
         ctrl.label = label;
         ctrl.children = [ ];
         return ctrl;
@@ -502,7 +516,7 @@ const groupConstructors = {
 
     open_VariableSupplier: function() {
         var ctrl = { };
-        ctrl.type = "VariableSupplier"
+        ctrl.type = 'VariableSupplier'
         ctrl.persistentItems = false;
         ctrl.stretchFactor = 1;
         ctrl.children = [ ];
@@ -511,7 +525,7 @@ const groupConstructors = {
 
     open_Supplier: function() {
         var ctrl = { };
-        ctrl.type = "Supplier"
+        ctrl.type = 'Supplier'
         ctrl.persistentItems = false;
         ctrl.stretchFactor = 1;
         ctrl.children = [ ];
@@ -524,7 +538,7 @@ const constructors = {
     Integer: function(item) {
         let ctrl = { };
         ctrl.name = item.name;
-        ctrl.type = "TextBox";
+        ctrl.type = 'TextBox';
         ctrl.label = item.title !== undefined ? item.title : item.name;
         ctrl.format = "number";
         ctrl.inputPattern = "[0-9]+";
@@ -534,7 +548,7 @@ const constructors = {
     Number: function(item) {
         let ctrl = { };
         ctrl.name = item.name;
-        ctrl.type = "TextBox";
+        ctrl.type = 'TextBox';
         ctrl.label = item.title !== undefined ? item.title : item.name;
         ctrl.format = "number";
         ctrl.inputPattern = "[0-9]+";
@@ -544,7 +558,7 @@ const constructors = {
     Bool: function(item) {
         let ctrl = { };
         ctrl.name = item.name;
-        ctrl.type = "CheckBox";
+        ctrl.type = 'CheckBox';
         ctrl.label = item.title !== undefined ? item.title : item.name;
         return ctrl
     },
@@ -555,7 +569,7 @@ const constructors = {
             let option = item.options[i];
             let checkbox = { };
             checkbox.name = item.name + "_" + option.name;
-            checkbox.type = "CheckBox";
+            checkbox.type = 'CheckBox';
             checkbox.label = option.title;
             checkbox.checkedValue = option.name;
             checkbox.optionId = item.name;
@@ -567,7 +581,7 @@ const constructors = {
     List: function(item) {
         var ctrl = { };
         ctrl.name = item.name;
-        ctrl.type ="ComboBox";
+        ctrl.type = 'ComboBox';
         ctrl.label = item.title !== undefined ? item.title : item.name;
         if (item.options.length > 0) {
             ctrl.options = [];
@@ -580,7 +594,7 @@ const constructors = {
     Terms: function(item) {
         var ctrl = { };
 
-        ctrl.type = "TargetListBox";
+        ctrl.type = 'TargetListBox';
         ctrl.name = item.name;
         ctrl.label = item.title !== undefined ? item.title : item.name;;
         ctrl.showColumnHeaders = false;

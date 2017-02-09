@@ -1,6 +1,6 @@
 ---
 
-controlbase:
+ControlBase:
     type: object
     properties:
         type:
@@ -64,7 +64,7 @@ controlbase:
     required:
         - type
 
-controlcontainer:
+ControlContainer:
     type: object
     properties:
         style:
@@ -73,7 +73,7 @@ controlcontainer:
                 - list
                 - inline
 
-optioncontrol:
+OptionControl:
     type: object
     properties:
         name:
@@ -100,7 +100,7 @@ optioncontrol:
     required:
         - name
 
-optionlistcontrol:
+OptionListControl:
     type: object
     properties:
         showColumnHeaders:
@@ -142,13 +142,13 @@ optionlistcontrol:
     required:
         - columns
 
-checkbox:
+CheckBox:
     type: object
     properties:
         checkedValue:
             type: string
 
-combobox:
+ComboBox:
     type: object
     properties:
         options:
@@ -165,7 +165,7 @@ combobox:
     required:
         - options
 
-radiobutton:
+RadioButton:
     type: object
     properties:
         optionId:
@@ -176,7 +176,7 @@ radiobutton:
         - optionId
         - checkedValue
 
-textbox:
+TextBox:
     type: object
     properties:
         format:
@@ -188,7 +188,7 @@ textbox:
     required:
         - format
 
-targetlist:
+TargetList:
     type: object
     properties:
         maxItemCount:
@@ -217,7 +217,7 @@ targetlist:
                 preprocess:
                     type: string
 
-variabletargetlist:
+VariableTargetList:
     type: object
     properties:
         suggested:
@@ -241,7 +241,7 @@ variabletargetlist:
             minItems: 1
             uniqueItems: true
 
-collapsebox:
+CollapseBox:
     type: object
     properties:
         collapsed:
@@ -249,7 +249,7 @@ collapsebox:
         label:
             type: string
 
-label:
+Label:
     type: object
     properties:
         label:
@@ -262,7 +262,7 @@ label:
                 - list-inline
                 - inline-list
 
-supplier:
+Supplier:
     type: object
     properties:
         persistentItems:
@@ -276,7 +276,7 @@ supplier:
                 change:
                     type: string
 
-variablesupplier:
+VariableSupplier:
     type: object
     properties:
         suggested:
@@ -300,7 +300,7 @@ variablesupplier:
             minItems: 1
             uniqueItems: true
 
-listitem:
+ListItem:
     type: object
     properties:
         type:
@@ -330,7 +330,7 @@ listitem:
     required:
         - type
 
-listitemcombobox:
+ListItemComboBox:
     type: object
     properties:
         options:
@@ -340,7 +340,7 @@ listitemcombobox:
     required:
         - options
 
-listitemtextbox:
+ListItemTextBox:
     type: object
     properties:
         format:
@@ -353,67 +353,67 @@ listitemtextbox:
 
 ControlInheritance:
     RMAnovaFactorsBox:
-        - "controlbase"
-        - "optioncontrol"
+        - ControlBase
+        - OptionControl
     CheckBox:
-        - "controlbase"
-        - "optioncontrol"
-        - "checkbox"
+        - ControlBase
+        - OptionControl
+        - CheckBox
     RadioButton:
-        - "controlbase"
-        - "optioncontrol"
-        - "radiobutton"
+        - ControlBase
+        - OptionControl
+        - RadioButton
     ComboBox:
-        - "controlbase"
-        - "optioncontrol"
-        - "combobox"
+        - ControlBase
+        - OptionControl
+        - ComboBox
     TextBox:
-        - "controlbase"
-        - "optioncontrol"
-        - "textbox"
+        - ControlBase
+        - OptionControl
+        - TextBox
     ListBox:
-        - "controlbase"
-        - "optioncontrol"
-        - "optionlistcontrol"
+        - ControlBase
+        - OptionControl
+        - OptionListControl
     TargetListBox:
-        - "controlbase"
-        - "optioncontrol"
-        - "optionlistcontrol"
-        - "targetlist"
+        - ControlBase
+        - OptionControl
+        - OptionListControl
+        - TargetList
     VariableTargetListBox:
-        - "controlbase"
-        - "optioncontrol"
-        - "optionlistcontrol"
-        - "targetlist"
-        - "variabletargetlist"
+        - ControlBase
+        - OptionControl
+        - OptionListControl
+        - TargetList
+        - VariableTargetList
     Supplier:
-        - "controlbase"
-        - "controlcontainer"
-        - "supplier"
+        - ControlBase
+        - ControlContainer
+        - Supplier
     VariableSupplier:
-        - "controlbase"
-        - "controlcontainer"
-        - "supplier"
-        - "variablesupplier"
+        - ControlBase
+        - ControlContainer
+        - Supplier
+        - VariableSupplier
     CollapseBox:
-        - "controlbase"
-        - "collapsebox"
+        - ControlBase
+        - CollapseBox
     Label:
-        - "controlbase"
-        - "label"
+        - ControlBase
+        - Label
     LayoutBox:
-        - "controlbase"
-        - "controlcontainer"
+        - ControlBase
+        - ControlContainer
     ListItem.VariableLabel:
-        - "listitem"
+        - ListItem
     ListItem.ComboBox:
         allOf:
-        - "listitem"
-        - "listitemcombobox"
+        - ListItem
+        - ListItemComboBox
     ListItem.Label:
-        - "listitem"
+        - ListItem
     ListItem.TermLabel:
-        - "listitem"
+        - ListItem
     ListItem.TextBox:
-        - "listitem"
-        - "listitemtextbox"
+        - ListItem
+        - ListItemTextBox
