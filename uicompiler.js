@@ -5,19 +5,40 @@ const path = require('path');
 const fs = require('fs');
 const yaml = require('js-yaml');
 const _ = require('underscore');
+const validate = require('jsonschema').validate;
+const util = require('util')
+
+let uiSchemaPath = path.join(__dirname, 'schemas', 'uischema.yaml');
+let uiSchema = yaml.safeLoad(fs.readFileSync(uiSchemaPath));
+let uiCtrlSchemasPath = path.join(__dirname, 'schemas', 'uictrlschemas.yaml');
+let uiCtrlSchemas = yaml.safeLoad(fs.readFileSync(uiCtrlSchemasPath));
 
 const uicompile = function(analysisPath, uiPath, sTemplPath, outPath) {
 
     let content = fs.readFileSync(analysisPath, 'utf-8');
     let analysis = yaml.safeLoad(content);
 
-    let uiData = { title: analysis.title, name: analysis.name, version: "1.0", stage: 0, children: [] };
+    let uiData = { title: analysis.title, name: analysis.name, jus: "1.0", stage: 0, children: [] };
 
     if (fs.existsSync(uiPath)) {
-        uiData = yaml.safeLoad(fs.readFileSync(uiPath, 'utf-8'));
+        try {
+            uiData = yaml.safeLoad(fs.readFileSync(uiPath, 'utf-8'));
+        }
+        catch (e) {
+            reject(uiPath, e.message);
+        }
         if (uiData.children === undefined)
             uiData.children = [];
     }
+
+
+    if (uiData === null || typeof uiData.jus !== 'string')
+        reject(uiPath, "no 'jus' present");
+
+    let jus = uiData.jus.match(/^([0-9]+)\.([0-9]+)$/)
+    if (jus[1] !== '1' || jus[2] !== '0')
+        reject(uiPath, 'requires a newer jamovi-compiler');
+
 
     let removed = removeMissingOptions(analysis.options, uiData);
     if (removed.length > 0) {
@@ -33,6 +54,12 @@ const uicompile = function(analysisPath, uiPath, sTemplPath, outPath) {
         for (let i = 0; i < added.length; i++)
             console.log("  - added ctrl: " + added[i].name);
     }
+
+    let report = validate(uiData, uiSchema);
+    if ( ! report.valid)
+        throwVError(report, analysis.title, uiPath);
+
+    checkControls(uiData.children, uiPath);
 
     if (added.length > 0 || removed.length > 0) {
         fs.writeFileSync(uiPath,  yaml.safeDump(uiData));
@@ -50,6 +77,63 @@ const uicompile = function(analysisPath, uiPath, sTemplPath, outPath) {
 
     console.log('wrote: ' + path.basename(outPath));
 };
+
+
+
+const reject = function(filePath, message) {
+    throw "Unable to compile '" + path.basename(filePath) + "':\n\t" + message;
+}
+
+const throwVError = function(report, name, filename) {
+    let errors = report.errors.map(e => {
+        return e.stack.replace(/instance/g, name);
+    }).join('\n\t');
+    reject(filename, errors)
+}
+
+const extendSchemas = function(source, destination) {
+
+    for (let name in source) {
+        if (name === "properties") {
+            for (let prop in source.properties)
+                destination.properties[prop] = source.properties[prop];
+        }
+        else if (name === "required" && destination.required)
+            destination.required = destination.required.concat(source.required)
+        else
+            destination[name] = source[name];
+    }
+}
+
+const createSchema = function(ctrl) {
+    let schema = { };
+    schema["$schema"] = 'http://json-schema.org/draft-04/schema#';
+    schema.type = "object";
+    schema.additionalProperties = false;
+    schema.properties = { };
+    if (ctrl.children)
+        schema.properties.children = { type: "array" };
+    let list = uiCtrlSchemas.ControlInheritance[ctrl.type];
+    for (let i = 0; i < list.length; i++) {
+        let partSchema = uiCtrlSchemas[list[i]];
+        extendSchemas(partSchema, schema);
+    }
+    return schema;
+}
+
+const checkControls = function(ctrls, uifilename) {
+    for (let i = 0; i < ctrls.length; i++) {
+        let ctrl = ctrls[i];
+        let schema = createSchema(ctrl);
+        if (schema) {
+            let report = validate(ctrl, schema);
+            if ( ! report.valid)
+                throwVError(report, ctrl.name, uifilename);
+        }
+        if (ctrls[i].children)
+            checkControls(ctrls[i].children, uifilename);
+    }
+}
 
 const removeMissingOptions = function(options, parent) {
     let list = [];
@@ -104,6 +188,8 @@ const insertMissingControls = function(options, uiData) {
     var updated = [];
     for (var i = 0; i < options.length; i++) {
         var option = options[i];
+        if (option.hidden)
+            continue;
         let posData = findOptionControl(option, baseObj);
         if (posData === null) {
             posData = addOptionAsControl(option, lastPosData);
@@ -414,7 +500,7 @@ const groupConstructors = {
 
     open_LayoutBox: function(margin) {
         var ctrl = {};
-        ctrl.type = "LayoutBox";
+        ctrl.type = 'LayoutBox';
         ctrl.margin = margin !== undefined ? margin : "large";
         ctrl.children = [ ];
         return ctrl;
@@ -422,7 +508,7 @@ const groupConstructors = {
 
     open_Label: function(label) {
         var ctrl = {};
-        ctrl.type = "Label";
+        ctrl.type = 'Label';
         ctrl.label = label;
         ctrl.children = [ ];
         return ctrl;
@@ -430,7 +516,7 @@ const groupConstructors = {
 
     open_VariableSupplier: function() {
         var ctrl = { };
-        ctrl.type = "VariableSupplier"
+        ctrl.type = 'VariableSupplier'
         ctrl.persistentItems = false;
         ctrl.stretchFactor = 1;
         ctrl.children = [ ];
@@ -439,7 +525,7 @@ const groupConstructors = {
 
     open_Supplier: function() {
         var ctrl = { };
-        ctrl.type = "Supplier"
+        ctrl.type = 'Supplier'
         ctrl.persistentItems = false;
         ctrl.stretchFactor = 1;
         ctrl.children = [ ];
@@ -449,11 +535,21 @@ const groupConstructors = {
 
 const constructors = {
 
+    Integer: function(item) {
+        let ctrl = { };
+        ctrl.name = item.name;
+        ctrl.type = 'TextBox';
+        ctrl.label = item.title !== undefined ? item.title : item.name;
+        ctrl.format = "number";
+        ctrl.inputPattern = "[0-9]+";
+        return ctrl
+    },
+
     Number: function(item) {
         let ctrl = { };
         ctrl.name = item.name;
-        ctrl.type = "TextBox";
-        ctrl.label = item.title;
+        ctrl.type = 'TextBox';
+        ctrl.label = item.title !== undefined ? item.title : item.name;
         ctrl.format = "number";
         ctrl.inputPattern = "[0-9]+";
         return ctrl
@@ -462,8 +558,8 @@ const constructors = {
     Bool: function(item) {
         let ctrl = { };
         ctrl.name = item.name;
-        ctrl.type = "CheckBox";
-        ctrl.label = item.title;
+        ctrl.type = 'CheckBox';
+        ctrl.label = item.title !== undefined ? item.title : item.name;
         return ctrl
     },
 
@@ -473,7 +569,7 @@ const constructors = {
             let option = item.options[i];
             let checkbox = { };
             checkbox.name = item.name + "_" + option.name;
-            checkbox.type = "CheckBox";
+            checkbox.type = 'CheckBox';
             checkbox.label = option.title;
             checkbox.checkedValue = option.name;
             checkbox.optionId = item.name;
@@ -485,8 +581,8 @@ const constructors = {
     List: function(item) {
         var ctrl = { };
         ctrl.name = item.name;
-        ctrl.type ="ComboBox";
-        ctrl.label = item.title;
+        ctrl.type = 'ComboBox';
+        ctrl.label = item.title !== undefined ? item.title : item.name;
         if (item.options.length > 0) {
             ctrl.options = [];
             for (let j = 0; j < item.options.length; j++)
@@ -498,9 +594,9 @@ const constructors = {
     Terms: function(item) {
         var ctrl = { };
 
-        ctrl.type = "TargetListBox";
+        ctrl.type = 'TargetListBox';
         ctrl.name = item.name;
-        ctrl.label = (item.title ? item.title : "");
+        ctrl.label = item.title !== undefined ? item.title : item.name;;
         ctrl.showColumnHeaders = false;
         ctrl.fullRowSelect = true;
         ctrl.columns = [];
@@ -520,7 +616,7 @@ const constructors = {
 
         ctrl.type = "VariableTargetListBox";
         ctrl.name = item.name;
-        ctrl.label = (item.title ? item.title : '');
+        ctrl.label = item.title !== undefined ? item.title : item.name;;
         ctrl.showColumnHeaders = false;
         ctrl.fullRowSelect = true;
         ctrl.columns = [];
@@ -538,7 +634,7 @@ const constructors = {
 
         ctrl.type = "VariableTargetListBox";
         ctrl.name = item.name;
-        ctrl.label = (item.title ? item.title : '');
+        ctrl.label = item.title !== undefined ? item.title : item.name;;
         ctrl.maxItemCount = 1;
         ctrl.showColumnHeaders = false;
         ctrl.fullRowSelect = true;
@@ -558,7 +654,7 @@ const constructors = {
 
         ctrl.type = "ListBox";
         ctrl.name = item.name;
-        ctrl.label = (item.title ? item.title : '');
+        ctrl.label = item.title !== undefined ? item.title : item.name;;
         ctrl.showColumnHeaders = false;
         ctrl.fullRowSelect = true;
         ctrl.stretchFactor = 1;
@@ -566,8 +662,8 @@ const constructors = {
 
         if (item.template.type === 'Group') {
             for (let i = 0; i < item.template.elements.length; i++) {
-                var column = item.template.elements[i];
-                var columnData = {
+                let column = item.template.elements[i];
+                let columnData = {
                     type: "ListItem.Label",
                     name: column.name,
                     label: "",
@@ -582,8 +678,17 @@ const constructors = {
                         columnData.options = column.options;
                 }
 
-                ctrl.columns.push(column);
+                ctrl.columns.push(columnData);
             }
+        }
+        else {
+            let columnData = {
+                type: "ListItem.Label",
+                name: "column1",
+                label: "",
+                stretchFactor: 1
+            }
+            ctrl.columns.push(columnData);
         }
 
         return ctrl;

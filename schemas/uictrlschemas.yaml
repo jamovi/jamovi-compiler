@@ -1,0 +1,419 @@
+---
+
+ControlBase:
+    type: object
+    properties:
+        type:
+            oneOf:
+              - type: string
+                pattern: "^\\.\\/"
+              - enum:
+                  - CheckBox
+                  - RadioButton
+                  - ComboBox
+                  - TextBox
+                  - ListBox
+                  - TargetListBox
+                  - VariableTargetListBox
+                  - Supplier
+                  - VariableSupplier
+                  - CollapseBox
+                  - Label
+                  - LayoutBox
+                  - ListItem.VariableLabel
+                  - ListItem.ComboBox
+                  - ListItem.Label
+                  - ListItem.TermLabel
+                  - ListItem.TextBox
+                  - RMAnovaFactorsBox
+        name:
+            type: string
+        stage:
+            type: integer
+        cell:
+            type: object
+            additionalProperties: false
+            properties:
+                row:
+                    type: integer
+                column:
+                    type: integer
+        margin:
+            type: string
+            enum:
+                - small
+                - normal
+                - large
+                - none
+        fitToGrid:
+            type: bool
+        stretchFactor:
+            type: integer
+        horizontalAlignment:
+            type: string
+            enum:
+                - left
+                - center
+                - right
+        verticalAlignment:
+            type: string
+            enum:
+                - top
+                - center
+                - bottom
+    required:
+        - type
+
+ControlContainer:
+    type: object
+    properties:
+        style:
+            type: string
+            enum:
+                - list
+                - inline
+
+OptionControl:
+    type: object
+    properties:
+        name:
+            type: string
+        optionId:
+            type: string
+        label:
+            type:
+                - string
+                - null
+        style:
+            type: string
+            enum:
+                - list
+                - inline
+                - list-inline
+                - inline-list
+        events:
+            type: object
+            additionalProperties: false
+            properties:
+                change:
+                    type: string
+    required:
+        - name
+
+OptionListControl:
+    type: object
+    properties:
+        showColumnHeaders:
+            type: bool
+        stripedRows:
+            type: bool
+        fullRowSelect:
+            type: bool
+        maxItemCount:
+            type: integer
+        removeAction:
+            type: string
+            enum:
+                - deleterow
+                - clearcell
+        height:
+            type: string
+            enum:
+                - smallest
+                - small
+                - normal
+                - large
+                - largest
+        columns:
+            type: array
+            items:
+                properties:
+                    name:
+                        type: string
+                    selectable:
+                        type: bool
+                    stretchfactor:
+                        type: integer
+                    label:
+                        type:
+                            - string
+                            - null
+            minItems: 1
+    required:
+        - columns
+
+CheckBox:
+    type: object
+    properties:
+        checkedValue:
+            type: string
+
+ComboBox:
+    type: object
+    properties:
+        options:
+            type: array
+            items:
+                type: object
+                additionalProperties: false
+                properties:
+                    label:
+                        type: string
+                    value:
+                        type: string
+            minItems: 1
+    required:
+        - options
+
+RadioButton:
+    type: object
+    properties:
+        optionId:
+            type: string
+        checkedValue:
+            type: string
+    required:
+        - optionId
+        - checkedValue
+
+TextBox:
+    type: object
+    properties:
+        format:
+            type: string
+        suffix:
+            type: string
+        inputPattern:
+            type: string
+    required:
+        - format
+
+TargetList:
+    type: object
+    properties:
+        maxItemCount:
+            type: integer
+        valueFilter:
+            type: string
+            enum:
+                - none
+                - unique
+                - uniquePerRow
+                - uniquePerColumn
+        itemDropBehaviour:
+            type: string
+            enum:
+                - overwrite
+                - insert
+                - emptyspace
+        events:
+            type: object
+            additionalProperties: false
+            properties:
+                change:
+                    type: string
+                changing:
+                    type: string
+                preprocess:
+                    type: string
+
+VariableTargetList:
+    type: object
+    properties:
+        suggested:
+            type: array
+            items:
+                enum:
+                    - continuous
+                    - ordinal
+                    - nominal
+                    - nominaltext
+            minItems: 1
+            uniqueItems: true
+        permitted:
+            type: array
+            items:
+                enum:
+                    - continuous
+                    - ordinal
+                    - nominal
+                    - nominaltext
+            minItems: 1
+            uniqueItems: true
+
+CollapseBox:
+    type: object
+    properties:
+        collapsed:
+            type: bool
+        label:
+            type: string
+
+Label:
+    type: object
+    properties:
+        label:
+            type: string
+        style:
+            type: string
+            enum:
+                - list
+                - inline
+                - list-inline
+                - inline-list
+
+Supplier:
+    type: object
+    properties:
+        persistentItems:
+            type: bool
+        label:
+            type: string
+        events:
+            type: object
+            additionalProperties: false
+            properties:
+                change:
+                    type: string
+
+VariableSupplier:
+    type: object
+    properties:
+        suggested:
+            type: array
+            items:
+                enum:
+                    - continuous
+                    - ordinal
+                    - nominal
+                    - nominaltext
+            minItems: 1
+            uniqueItems: true
+        permitted:
+            type: array
+            items:
+                enum:
+                    - continuous
+                    - ordinal
+                    - nominal
+                    - nominaltext
+            minItems: 1
+            uniqueItems: true
+
+ListItem:
+    type: object
+    properties:
+        type:
+            type: string
+        name:
+            type: string
+        horizontalAlignment:
+            type: string
+            enum:
+                - left
+                - center
+                - right
+        verticalAlignment:
+            type: string
+            enum:
+                - top
+                - center
+                - bottom
+        minWidth:
+            type: integer
+        minHeight:
+            type: integer
+        maxWidth:
+            type: integer
+        maxHeight:
+            type: integer
+    required:
+        - type
+
+ListItemComboBox:
+    type: object
+    properties:
+        options:
+            type: Array
+            items:
+                type: string
+    required:
+        - options
+
+ListItemTextBox:
+    type: object
+    properties:
+        format:
+            type: string
+        inputPattern:
+            type: string
+    required:
+        - format
+
+
+ControlInheritance:
+    RMAnovaFactorsBox:
+        - ControlBase
+        - OptionControl
+    CheckBox:
+        - ControlBase
+        - OptionControl
+        - CheckBox
+    RadioButton:
+        - ControlBase
+        - OptionControl
+        - RadioButton
+    ComboBox:
+        - ControlBase
+        - OptionControl
+        - ComboBox
+    TextBox:
+        - ControlBase
+        - OptionControl
+        - TextBox
+    ListBox:
+        - ControlBase
+        - OptionControl
+        - OptionListControl
+    TargetListBox:
+        - ControlBase
+        - OptionControl
+        - OptionListControl
+        - TargetList
+    VariableTargetListBox:
+        - ControlBase
+        - OptionControl
+        - OptionListControl
+        - TargetList
+        - VariableTargetList
+    Supplier:
+        - ControlBase
+        - ControlContainer
+        - Supplier
+    VariableSupplier:
+        - ControlBase
+        - ControlContainer
+        - Supplier
+        - VariableSupplier
+    CollapseBox:
+        - ControlBase
+        - CollapseBox
+    Label:
+        - ControlBase
+        - Label
+    LayoutBox:
+        - ControlBase
+        - ControlContainer
+    ListItem.VariableLabel:
+        - ListItem
+    ListItem.ComboBox:
+        allOf:
+        - ListItem
+        - ListItemComboBox
+    ListItem.Label:
+        - ListItem
+    ListItem.TermLabel:
+        - ListItem
+    ListItem.TextBox:
+        - ListItem
+        - ListItemTextBox
