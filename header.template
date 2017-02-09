@@ -74,7 +74,9 @@
         var usage = analysis.description.R.usage;
         usage = usage.split('\n').join("\n#' ");
         print("\n#'\n#' @examples\n#' ");
+        print("\\dontrun{\n#' ");
         print(usage);
+        print("}");
     }
 %>
 <%= analysis.options.map(option => {
