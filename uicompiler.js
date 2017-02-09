@@ -5,6 +5,13 @@ const path = require('path');
 const fs = require('fs');
 const yaml = require('js-yaml');
 const _ = require('underscore');
+const validate = require('jsonschema').validate;
+const util = require('util')
+
+let uiSchemaPath = path.join(__dirname, 'schemas', 'uischema.yaml');
+let uiSchema = yaml.safeLoad(fs.readFileSync(uiSchemaPath));
+let uiCtrlSchemasPath = path.join(__dirname, 'schemas', 'uictrlschemas.yaml');
+let uiCtrlSchemas = yaml.safeLoad(fs.readFileSync(uiCtrlSchemasPath));
 
 const uicompile = function(analysisPath, uiPath, sTemplPath, outPath) {
 
@@ -34,6 +41,12 @@ const uicompile = function(analysisPath, uiPath, sTemplPath, outPath) {
             console.log("  - added ctrl: " + added[i].name);
     }
 
+    let report = validate(uiData, uiSchema);
+    if ( ! report.valid)
+        throwVError(report, analysis.title, uiPath);
+
+    checkControls(uiData.children, uiPath);
+
     if (added.length > 0 || removed.length > 0) {
         fs.writeFileSync(uiPath,  yaml.safeDump(uiData));
         console.log('wrote: ' + path.basename(uiPath));
@@ -50,6 +63,63 @@ const uicompile = function(analysisPath, uiPath, sTemplPath, outPath) {
 
     console.log('wrote: ' + path.basename(outPath));
 };
+
+
+
+const reject = function(filePath, message) {
+    throw "Unable to compile '" + path.basename(filePath) + "':\n\t" + message;
+}
+
+const throwVError = function(report, name, filename) {
+    let errors = report.errors.map(e => {
+        return e.stack.replace(/instance/g, name);
+    }).join('\n\t');
+    reject(filename, errors)
+}
+
+const extendSchemas = function(source, destination) {
+
+    for (let name in source) {
+        if (name === "properties") {
+            for (let prop in source.properties)
+                destination.properties[prop] = source.properties[prop];
+        }
+        else if (name === "required" && destination.required)
+            destination.required = destination.required.concat(source.required)
+        else
+            destination[name] = source[name];
+    }
+}
+
+const createSchema = function(ctrl) {
+    let schema = { };
+    schema["$schema"] = 'http://json-schema.org/draft-04/schema#';
+    schema.type = "object";
+    schema.additionalProperties = false;
+    schema.properties = { };
+    if (ctrl.children)
+        schema.properties.children = { type: "array" };
+    let list = uiCtrlSchemas.ControlInheritance[ctrl.type];
+    for (let i = 0; i < list.length; i++) {
+        let partSchema = uiCtrlSchemas[list[i]];
+        extendSchemas(partSchema, schema);
+    }
+    return schema;
+}
+
+const checkControls = function(ctrls, uifilename) {
+    for (let i = 0; i < ctrls.length; i++) {
+        let ctrl = ctrls[i];
+        let schema = createSchema(ctrl);
+        if (schema) {
+            let report = validate(ctrl, schema);
+            if ( ! report.valid)
+                throwVError(report, ctrl.name, uifilename);
+        }
+        if (ctrls[i].children)
+            checkControls(ctrls[i].children, uifilename);
+    }
+}
 
 const removeMissingOptions = function(options, parent) {
     let list = [];
@@ -104,6 +174,8 @@ const insertMissingControls = function(options, uiData) {
     var updated = [];
     for (var i = 0; i < options.length; i++) {
         var option = options[i];
+        if (option.hidden)
+            continue;
         let posData = findOptionControl(option, baseObj);
         if (posData === null) {
             posData = addOptionAsControl(option, lastPosData);
@@ -449,11 +521,21 @@ const groupConstructors = {
 
 const constructors = {
 
+    Integer: function(item) {
+        let ctrl = { };
+        ctrl.name = item.name;
+        ctrl.type = "TextBox";
+        ctrl.label = item.title !== undefined ? item.title : item.name;
+        ctrl.format = "number";
+        ctrl.inputPattern = "[0-9]+";
+        return ctrl
+    },
+
     Number: function(item) {
         let ctrl = { };
         ctrl.name = item.name;
         ctrl.type = "TextBox";
-        ctrl.label = item.title;
+        ctrl.label = item.title !== undefined ? item.title : item.name;
         ctrl.format = "number";
         ctrl.inputPattern = "[0-9]+";
         return ctrl
@@ -463,7 +545,7 @@ const constructors = {
         let ctrl = { };
         ctrl.name = item.name;
         ctrl.type = "CheckBox";
-        ctrl.label = item.title;
+        ctrl.label = item.title !== undefined ? item.title : item.name;
         return ctrl
     },
 
@@ -486,7 +568,7 @@ const constructors = {
         var ctrl = { };
         ctrl.name = item.name;
         ctrl.type ="ComboBox";
-        ctrl.label = item.title;
+        ctrl.label = item.title !== undefined ? item.title : item.name;
         if (item.options.length > 0) {
             ctrl.options = [];
             for (let j = 0; j < item.options.length; j++)
@@ -500,7 +582,7 @@ const constructors = {
 
         ctrl.type = "TargetListBox";
         ctrl.name = item.name;
-        ctrl.label = (item.title ? item.title : "");
+        ctrl.label = item.title !== undefined ? item.title : item.name;;
         ctrl.showColumnHeaders = false;
         ctrl.fullRowSelect = true;
         ctrl.columns = [];
@@ -520,7 +602,7 @@ const constructors = {
 
         ctrl.type = "VariableTargetListBox";
         ctrl.name = item.name;
-        ctrl.label = (item.title ? item.title : '');
+        ctrl.label = item.title !== undefined ? item.title : item.name;;
         ctrl.showColumnHeaders = false;
         ctrl.fullRowSelect = true;
         ctrl.columns = [];
@@ -538,7 +620,7 @@ const constructors = {
 
         ctrl.type = "VariableTargetListBox";
         ctrl.name = item.name;
-        ctrl.label = (item.title ? item.title : '');
+        ctrl.label = item.title !== undefined ? item.title : item.name;;
         ctrl.maxItemCount = 1;
         ctrl.showColumnHeaders = false;
         ctrl.fullRowSelect = true;
@@ -558,7 +640,7 @@ const constructors = {
 
         ctrl.type = "ListBox";
         ctrl.name = item.name;
-        ctrl.label = (item.title ? item.title : '');
+        ctrl.label = item.title !== undefined ? item.title : item.name;;
         ctrl.showColumnHeaders = false;
         ctrl.fullRowSelect = true;
         ctrl.stretchFactor = 1;
@@ -566,8 +648,8 @@ const constructors = {
 
         if (item.template.type === 'Group') {
             for (let i = 0; i < item.template.elements.length; i++) {
-                var column = item.template.elements[i];
-                var columnData = {
+                let column = item.template.elements[i];
+                let columnData = {
                     type: "ListItem.Label",
                     name: column.name,
                     label: "",
@@ -582,8 +664,17 @@ const constructors = {
                         columnData.options = column.options;
                 }
 
-                ctrl.columns.push(column);
+                ctrl.columns.push(columnData);
             }
+        }
+        else {
+            let columnData = {
+                type: "ListItem.Label",
+                name: "column1",
+                label: "",
+                stretchFactor: 1
+            }
+            ctrl.columns.push(columnData);
         }
 
         return ctrl;
