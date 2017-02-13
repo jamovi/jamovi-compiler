@@ -6,6 +6,9 @@ const fs = require('fs-extra');
 const util = require('util');
 const sh = require('child_process').execSync;
 
+const temp = require('temp');
+temp.track();
+
 const included = [
 
     // base
@@ -49,7 +52,7 @@ const included = [
     'R6',
 ];
 
-const compile = function(srcDir, moduleDir, rpath) {
+const compile = function(srcDir, moduleDir, rpath, packageInfo) {
 
     let rDir = path.join(moduleDir, 'R');
     let buildDir = path.join(srcDir, 'build', 'R');
@@ -112,7 +115,21 @@ const compile = function(srcDir, moduleDir, rpath) {
             sh(cmd, { stdio: [0, 1, 1], encoding: 'utf-8', env: env } );
         }
 
-        cmd = util.format('"%s" CMD INSTALL "--library=%s" "%s"', rExe, buildDir, srcDir);
+        let tempPath = temp.mkdirSync();
+        fs.copySync(srcDir, tempPath);
+
+        let tempNAMESPACE = path.join(tempPath, 'NAMESPACE');
+        let sid = fs.openSync(tempNAMESPACE, 'a');
+
+        for (let analysis of packageInfo.analyses) {
+            fs.appendFileSync(sid, util.format('export(%s)\n', analysis.name));
+            fs.appendFileSync(sid, util.format('export(%sClass)\n', analysis.name));
+            fs.appendFileSync(sid, util.format('export(%sOptions)\n', analysis.name));
+        }
+
+        fs.closeSync(sid);
+
+        cmd = util.format('"%s" CMD INSTALL "--library=%s" "%s"', rExe, buildDir, tempPath);
         sh(cmd, { stdio: [0, 1, 1], encoding: 'utf-8', env: env } );
     }
     catch (e) {

@@ -1,8 +1,6 @@
 
 # This file is a generated template, your changes will not be overwritten
 
-#' @rdname jamovi
-#' @export
 <%= analysis.name %>Class <- R6::R6Class(
     "<%= analysis.name %>Class",
     inherit = <%= analysis.name %>Base,

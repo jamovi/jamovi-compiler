@@ -169,10 +169,6 @@ try {
             fs.mkdirSync(yamlOutDir);
     }
 
-    let pOutPath = path.join(rDir, 'jamovi.R');
-    let pTemplPath = path.join(__dirname, 'package.template');
-    fs.copySync(pTemplPath, pOutPath);
-
     let waits = [ ]
 
     for (let file of files) {
@@ -281,7 +277,7 @@ try {
 
             fs.writeFileSync(path.join(modDir, 'jamovi.yaml'), content);
 
-            compileR(srcDir, modDir, rpath);
+            compileR(srcDir, modDir, rpath, packageInfo);
 
             if (isBuilding) {
 
