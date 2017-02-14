@@ -217,7 +217,9 @@ NMXList:
                         title:
                             type: string
         default:
-            type: array
+            type:
+              - null
+              - array
             items:
                 type: string
         description: *Description
