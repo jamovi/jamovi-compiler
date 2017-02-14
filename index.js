@@ -245,8 +245,11 @@ try {
 
             if ('menuSubtitle' in analysis)
                 aObj.menuSubtitle = analysis.menuSubtitle;
-            if ('description' in analysis)
+            if (analysis.description) {
                 aObj.description = analysis.description;
+                if (typeof aObj.description === 'object' && aObj.description.R)
+                    delete aObj.description.R;
+            }
             if (analysis.hidden === true)
                 aObj.hidden = analysis.hidden;
 
