@@ -65,11 +65,13 @@ properties:
     options:
         type: array
         items:
+            type: object
             properties:
                 name:
                     type: string
                 type:
-                    type: enum
+                    enum:
+                        - Data
                         - Variable
                         - Variables
                         - Terms
