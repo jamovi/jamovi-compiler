@@ -91,6 +91,10 @@ OptionControl:
                 - inline
                 - list-inline
                 - inline-list
+        enableOn:
+            type:
+                - string
+                - bool
         events:
             type: object
             additionalProperties: false
