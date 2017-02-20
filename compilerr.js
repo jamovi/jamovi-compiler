@@ -71,11 +71,11 @@ const compile = function(srcDir, moduleDir, rpath, packageInfo) {
 
     let descPath = path.join(srcDir, 'DESCRIPTION');
     let desc = fs.readFileSync(descPath, 'utf-8');
-    desc = desc.replace(/\n /g, ' ')
+    desc = desc.replace(/\r?\n /g, ' ')
 
-    let depends = desc.match(/\nDepends\s*:(.*)\n/);
-    let imports = desc.match(/\nImports\s*:(.*)\n/);
-
+    let depends = desc.match(/\nDepends\s*:\s*(.*)\r?\n/);
+    let imports = desc.match(/\nImports\s*:\s*(.*)\r?\n/);
+    
     if (depends !== null) {
         depends = depends[1];
         depends = depends.match(/([A-Za-z][A-Za-z0-9_]*)/g);
@@ -112,6 +112,7 @@ const compile = function(srcDir, moduleDir, rpath, packageInfo) {
             depends = depends.join("','");
 
             cmd = util.format('"%s" --slave -e "utils::install.packages(c(\'%s\'), lib=\'%s\', repos=c(\'https://repo.jamovi.org\', \'https://cran.r-project.org\'), INSTALL_opts=c(\'--no-data\', \'--no-help\', \'--no-demo\'))"', rExe, depends, buildDir);
+            cmd = cmd.replace(/\\/g, '/')
             sh(cmd, { stdio: [0, 1, 1], encoding: 'utf-8', env: env } );
         }
 
