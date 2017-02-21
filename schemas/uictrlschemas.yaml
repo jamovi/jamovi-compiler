@@ -91,7 +91,7 @@ OptionControl:
                 - inline
                 - list-inline
                 - inline-list
-        enableOn:
+        enable:
             type: string
             pattern: "^\\([a-zA-Z0-9_\\:?\\=\\<\\>]+\\)"
         events:
