@@ -11,6 +11,12 @@ Table:
             type: string
         title:
             type: string
+        rowSelect:
+            type: string
+            pattern: "^\\([A-Za-z][A-Za-z0-9_]*\\)$"
+        sortSelect:
+            type: string
+            pattern: "^\\([A-Za-z][A-Za-z0-9_]*\\)$"
         columns:
             type: array
             items:
@@ -28,11 +34,16 @@ Table:
                           - text
                           - number
                           - integer
+                          - Text
+                          - Number
+                          - Integer
                     format:
                         type: string
                     content:
                         type: string
                     combineBelow:
+                        type: bool
+                    sortable:
                         type: bool
                     visible:
                         type:

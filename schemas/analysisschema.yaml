@@ -83,6 +83,7 @@ properties:
                         - NMXList
                         - Array
                         - Pairs
+                        - Sort
                 required:
                     - name
                     - type

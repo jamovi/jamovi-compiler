@@ -324,3 +324,17 @@ Group:
               - null
               - array
         description: *Description
+
+Sort:
+    "$schema": http://json-schema.org/draft-04/schema#
+    properties:
+        name:
+            type: string
+        type:
+            type: string
+        hidden:
+            type: bool
+        sortBy:
+            type: string
+        sortDesc:
+            type: bool

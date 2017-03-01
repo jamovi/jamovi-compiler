@@ -30,6 +30,7 @@ properties:
                         - Image
                         - Preformatted
                         - Html
+                        - State
                 clearWith:
                     type:
                       - array

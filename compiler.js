@@ -114,7 +114,7 @@ const compile = function(packageName, analysisPath, resultsPath, templPath, outP
         reject(resultsPath, "no 'jrs' present");
 
     let jrs = results.jrs.match(/^([0-9]+)\.([0-9]+)$/)
-    if (jrs[1] !== '1' || jrs[2] !== '0')
+    if (parseInt(jrs[1]) !== 1 || parseInt(jrs[2]) > 1)
         reject(resultsPath, 'requires a newer jamovi-compiler');
 
     report = validate(results, resultsSchema);
@@ -130,11 +130,19 @@ const compile = function(packageName, analysisPath, resultsPath, templPath, outP
     let template = fs.readFileSync(templPath, 'utf-8');
     let compiler = _.template(template);
 
-    let imports = { sourcifyOption, optionify, sourcifyResults, resultsify, wrap };
+    let imports = { sourcifyOption, optionify, sourcifyResults, resultsify, wrap, asciify };
     let object = { packageName, analysis, results, imports };
     content = compiler(object);
 
     fs.writeFileSync(outPath, content);
+};
+
+const asciify = function(text) {
+    return text
+        .replace(/ω/g, 'omega')
+        .replace(/α/g, 'alpha')
+        .replace(/η/g, 'eta')
+        .replace(/χ/g, 'chi');
 };
 
 const sourcifyOption = function(object, optionName, optionValue, indent) {
@@ -236,7 +244,14 @@ const sourcifyResults = function(object, indent) {
         str += ')';
     }
     else if (_.isObject(object)) {
-        if (object.type && (object.type === 'Table' || object.type === 'Image' || object.type === 'Array' || object.type === 'Group' || object.type === 'Preformatted' || object.type === 'Html')) {
+        if (object.type && (
+                object.type === 'Table' ||
+                object.type === 'Image' ||
+                object.type === 'Array' ||
+                object.type === 'Group' ||
+                object.type === 'Preformatted' ||
+                object.type === 'Html' ||
+                object.type === 'State')) {
             str = resultsify(object, indent + '    ')
         }
         else {

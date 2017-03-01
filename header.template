@@ -65,6 +65,7 @@
 #' <%= analysis.title %>
 #'
 <%= (analysis.description.main || '').replace(/`(.*?)`/g, '\\code{$1}').split('\n').map(line => {
+        line = imports.asciify(line);
         return imports.wrap(line, { indent: "#' ", width: 75 })
     }).join("\n#'\n")
 %><%
@@ -87,10 +88,7 @@
     desc = '@param ' + option.name + ' ' + desc;
     desc = desc.replace(/\s/g, ' ');
     desc = desc.replace(/`(.*?)`/g, '\\code{$1}');
-    desc = desc.replace(/ω/g, 'omega');
-    desc = desc.replace(/α/g, 'alpha');
-    desc = desc.replace(/η/g, 'eta');
-    desc = desc.replace(/χ/g, 'chi');
+    desc = imports.asciify(desc);
     desc = imports.wrap(desc, { indent: "#'   ", width: 75 });
     desc = desc.replace('  @param', '@param');
     return desc;
