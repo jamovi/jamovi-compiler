@@ -42,12 +42,12 @@ Table:
                     content:
                         type: string
                     combineBelow:
-                        type: bool
+                        type: boolean
                     sortable:
-                        type: bool
+                        type: boolean
                     visible:
                         type:
-                          - bool
+                          - boolean
                           - string
                 required:
                     - name
@@ -57,7 +57,7 @@ Table:
               - integer
         visible:
             type:
-              - bool
+              - boolean
               - string
         clearWith:
             type:
@@ -66,7 +66,7 @@ Table:
             items:
                 type: string
         swapRowsColumns:
-            type: bool
+            type: boolean
         notes:
             type: object
 
@@ -89,10 +89,10 @@ Image:
         renderFun:
             type: string
         requiresData:
-            type: bool
+            type: boolean
         visible:
             type:
-              - bool
+              - boolean
               - string
         clearWith:
             type:
@@ -124,7 +124,7 @@ Group:
                   - name
         visible:
             type:
-              - bool
+              - boolean
               - string
         clearWith:
             type:
@@ -155,7 +155,7 @@ Array:
                     type: string
         visible:
             type:
-              - bool
+              - boolean
               - string
         clearWith:
             type:
@@ -178,7 +178,7 @@ Preformatted:
             type: string
         visible:
             type:
-              - bool
+              - boolean
               - string
         clearWith:
             type:
@@ -199,7 +199,7 @@ Html:
             type: string
         visible:
             type:
-              - bool
+              - boolean
               - string
         clearWith:
             type:

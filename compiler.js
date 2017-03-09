@@ -80,7 +80,7 @@ const compile = function(packageName, analysisPath, resultsPath, templPath, outP
         reject(analysisPath, "no 'jas' present");
 
     let jas = analysis.jas.match(/^([0-9]+)\.([0-9]+)$/)
-    if (jas[1] !== '1' || jas[2] !== '0')
+    if (parseInt(jas[1]) !== 1 || parseInt(jas[2]) > 1)
         reject(analysisPath, 'requires a newer jamovi-compiler');
 
     let report;

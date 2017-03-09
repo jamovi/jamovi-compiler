@@ -10,7 +10,7 @@ Data:
         title:
             type: string
         hidden:
-            type: bool
+            type: boolean
         description: &Description
             oneOf:
               - type: string
@@ -32,7 +32,7 @@ Variables:
         title:
             type: string
         hidden:
-            type: bool
+            type: boolean
         default:
             type:
               - null
@@ -58,7 +58,7 @@ Variables:
             minItems: 1
             uniqueItems: true
         rejectInf:
-            type: bool
+            type: boolean
         description: *Description
 
 Variable:
@@ -72,7 +72,7 @@ Variable:
         title:
             type: string
         hidden:
-            type: bool
+            type: boolean
         default:
             type: null
         suggested:
@@ -96,7 +96,7 @@ Variable:
             minItems: 1
             uniqueItems: true
         rejectInf:
-            type: bool
+            type: boolean
         content:
             type: string
         description: *Description
@@ -112,9 +112,9 @@ Bool:
         title:
             type: string
         hidden:
-            type: bool
+            type: boolean
         default:
-            type: bool
+            type: boolean
         description: *Description
 
 Integer:
@@ -128,7 +128,7 @@ Integer:
         title:
             type: string
         hidden:
-            type: bool
+            type: boolean
         default:
             type: integer
         min:
@@ -148,7 +148,7 @@ Number:
         title:
             type: string
         hidden:
-            type: bool
+            type: boolean
         default:
             type: number
         min:
@@ -170,7 +170,7 @@ String:
         title:
             type: string
         hidden:
-            type: bool
+            type: boolean
         description: *Description
 
 List:
@@ -184,7 +184,7 @@ List:
         title:
             type: string
         hidden:
-            type: bool
+            type: boolean
         options:
             type: array
             items:
@@ -204,7 +204,7 @@ NMXList:
         title:
             type: string
         hidden:
-            type: bool
+            type: boolean
         options:
             type: array
             items:
@@ -235,7 +235,7 @@ Array:
         title:
             type: string
         hidden:
-            type: bool
+            type: boolean
         items:
             type: string
         default:
@@ -257,7 +257,7 @@ Pairs:
         title:
             type: string
         hidden:
-            type: bool
+            type: boolean
         suggested:
             type: array
             items:
@@ -291,7 +291,7 @@ Terms:
         title:
             type: string
         hidden:
-            type: bool
+            type: boolean
         default:
             type:
               - null
@@ -306,7 +306,7 @@ Group:
         type:
             type: string
         hidden:
-            type: bool
+            type: boolean
         elements:
             type: array
             items:
@@ -333,8 +333,8 @@ Sort:
         type:
             type: string
         hidden:
-            type: bool
+            type: boolean
         sortBy:
             type: string
         sortDesc:
-            type: bool
+            type: boolean

@@ -1,17 +1,6 @@
 ---
 "$schema": http://json-schema.org/draft-04/schema#
 
-definitions:
-    description:
-        oneOf:
-          - type: string
-          - type: object
-            properties:
-                - name: R
-                  type: string
-            required:
-                - R
-
 title: Analysis Definition Schema
 type: object
 additionalProperties: false
@@ -48,6 +37,12 @@ properties:
                 properties:
                     usage:
                         type: string
+                    dontrun:
+                        type: boolean
+            references:
+                type: array
+                items:
+                    type: string
     pause:
         type: array
         minItems: 1

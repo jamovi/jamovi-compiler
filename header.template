@@ -73,9 +73,20 @@
         var usage = analysis.description.R.usage;
         usage = usage.split('\n').join("\n#' ");
         print("\n#'\n#' @examples\n#' ");
-        print("\\dontrun{\n#' ");
+        if (analysis.description.R.dontrun !== false)
+            print("\\dontrun{\n#' ");
         print(usage);
-        print("}");
+        if (analysis.description.R.dontrun !== false)
+            print("}");
+    }
+%><%
+    if (analysis.description && analysis.description.references) {
+        print("\n#' @section References:")
+        var refs = analysis.description.references;
+        for (var i = 0; i < refs.length; i++) {
+            var desc = refs[i];
+            print("\n#' " + desc + "\n#'");
+        }
     }
 %>
 <%= analysis.options.map(option => {
@@ -116,5 +127,5 @@
     analysis$run()
     analysis$render()
 
-    analysis
+    analysis$results
 }

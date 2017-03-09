@@ -46,7 +46,7 @@ ControlBase:
                 - large
                 - none
         fitToGrid:
-            type: bool
+            type: boolean
         stretchFactor:
             type: integer
         horizontalAlignment:
@@ -107,11 +107,11 @@ OptionListControl:
     type: object
     properties:
         showColumnHeaders:
-            type: bool
+            type: boolean
         stripedRows:
-            type: bool
+            type: boolean
         fullRowSelect:
-            type: bool
+            type: boolean
         maxItemCount:
             type: integer
         removeAction:
@@ -134,7 +134,7 @@ OptionListControl:
                     name:
                         type: string
                     selectable:
-                        type: bool
+                        type: boolean
                     stretchfactor:
                         type: integer
                     label:
@@ -248,7 +248,7 @@ CollapseBox:
     type: object
     properties:
         collapsed:
-            type: bool
+            type: boolean
         label:
             type: string
 
@@ -269,7 +269,7 @@ Supplier:
     type: object
     properties:
         persistentItems:
-            type: bool
+            type: boolean
         label:
             type: string
         events:
