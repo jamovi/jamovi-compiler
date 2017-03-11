@@ -25,6 +25,8 @@ properties:
     jas:
         type: string
         pattern: "^[0-9]+\\.[0-9]+$"
+    completeWhenFilled:
+        type: boolean
     description:
         type: object
         additionalProperties: false

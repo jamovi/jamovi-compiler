@@ -59,7 +59,8 @@
                 datasetId = datasetId,
                 analysisId = analysisId,
                 revision = revision,
-                pause = <%= imports.sourcifyResults(analysis.pause ? analysis.pause : null, '            ') %>)
+                pause = <%= imports.sourcifyResults(analysis.pause ? analysis.pause : null, '            ')%>,
+                completeWhenFilled = <%= analysis.completeWhenFilled ? 'TRUE' : 'FALSE' %>)
         }))
 
 #' <%= analysis.title %>
