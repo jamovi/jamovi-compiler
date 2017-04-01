@@ -27,6 +27,7 @@ const included = [
     'stats4',
     'tcltk',
     'utils',
+    'tools',
 
     // recommended
 

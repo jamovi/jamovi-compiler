@@ -94,8 +94,14 @@ try {
     }
 
     let rpath = '';
-    if (args.rpath)
+    if (args.rpath) {
         rpath = args.rpath;
+    }
+    else if (process.platform === 'win32') {
+        let exe = installer.find(args.home);
+        let bin = path.dirname(exe);
+        rpath = path.join(bin, '..', 'Frameworks', 'R', 'bin', 'x64')
+    }
 
     srcDir = path.resolve(srcDir);
 
