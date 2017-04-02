@@ -72,6 +72,7 @@
 %><%
     if (analysis.description && analysis.description.R && analysis.description.R.usage) {
         var usage = analysis.description.R.usage;
+        usage = imports.asciify(usage);
         usage = usage.split('\n').join("\n#' ");
         print("\n#'\n#' @examples\n#' ");
         if (analysis.description.R.dontrun !== false)
