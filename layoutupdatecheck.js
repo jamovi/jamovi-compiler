@@ -60,7 +60,7 @@ const layoutUpgrade_2_0 = function(ctrl, parent) {
                         delete column.verticalAlignment;
                     }
 
-                    if (template.type === DefaultControls.TextBox) {
+                    if (template.type === "TextBox") {
                         if (column.inputPattern !== undefined) {
                             template.inputPattern = column.inputPattern;
                             delete column.inputPattern;
