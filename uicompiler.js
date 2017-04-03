@@ -7,6 +7,7 @@ const yaml = require('js-yaml');
 const _ = require('underscore');
 const validate = require('jsonschema').validate;
 const util = require('util')
+const uiUpdateCheck = require('./layoutupdatecheck');
 
 let uiSchemaPath = path.join(__dirname, 'schemas', 'uischema.yaml');
 let uiSchema = yaml.safeLoad(fs.readFileSync(uiSchemaPath));
@@ -18,7 +19,7 @@ const uicompile = function(analysisPath, uiPath, sTemplPath, outPath) {
     let content = fs.readFileSync(analysisPath, 'utf-8');
     let analysis = yaml.safeLoad(content);
 
-    let uiData = { title: analysis.title, name: analysis.name, jus: "1.0", stage: 0, children: [] };
+    let uiData = { title: analysis.title, name: analysis.name, jus: "2.0", stage: 0, children: [] };
 
     if (fs.existsSync(uiPath)) {
         try {
@@ -31,12 +32,15 @@ const uicompile = function(analysisPath, uiPath, sTemplPath, outPath) {
             uiData.children = [];
     }
 
+    let upgradeInfo = uiUpdateCheck(uiData);
+    if (upgradeInfo.upgraded)
+        console.log("upgraded: " + path.basename(uiPath) + " : " + upgradeInfo.message);
 
     if (uiData === null || typeof uiData.jus !== 'string')
         reject(uiPath, "no 'jus' present");
 
     let jus = uiData.jus.match(/^([0-9]+)\.([0-9]+)$/)
-    if (jus[1] !== '1' || jus[2] !== '0')
+    if ((jus[1] !== '1' && jus[1] !== '2') || jus[2] !== '0')
         reject(uiPath, 'requires a newer jamovi-compiler');
 
 
@@ -59,9 +63,10 @@ const uicompile = function(analysisPath, uiPath, sTemplPath, outPath) {
     if ( ! report.valid)
         throwVError(report, analysis.title, uiPath);
 
+
     checkControls(uiData.children, uiPath);
 
-    if (added.length > 0 || removed.length > 0) {
+    if (upgradeInfo.upgraded || added.length > 0 || removed.length > 0) {
         fs.writeFileSync(uiPath,  yaml.safeDump(uiData));
         console.log('wrote: ' + path.basename(uiPath));
     }
@@ -95,8 +100,20 @@ const extendSchemas = function(source, destination) {
 
     for (let name in source) {
         if (name === "properties") {
-            for (let prop in source.properties)
-                destination.properties[prop] = source.properties[prop];
+            for (let prop in source.properties) {
+                if (prop === "events") {
+                    if (destination.properties[prop] === undefined) {
+                        destination.properties[prop] = {
+                            type: "object",
+                            additionalProperties: false,
+                            properties: []
+                        }
+                    }
+                    extendSchemas(source.properties[prop], destination.properties[prop]);
+                }
+                else
+                    destination.properties[prop] = source.properties[prop];
+            }
         }
         else if (name === "required" && destination.required)
             destination.required = destination.required.concat(source.required)
@@ -121,15 +138,22 @@ const createSchema = function(ctrl) {
     return schema;
 }
 
+const checkControl = function(ctrl, uifilename) {
+    let schema = createSchema(ctrl);
+    if (schema) {
+        let report = validate(ctrl, schema);
+        if ( ! report.valid)
+            throwVError(report, ctrl.name, uifilename);
+    }
+};
+
 const checkControls = function(ctrls, uifilename) {
     for (let i = 0; i < ctrls.length; i++) {
-        let ctrl = ctrls[i];
-        let schema = createSchema(ctrl);
-        if (schema) {
-            let report = validate(ctrl, schema);
-            if ( ! report.valid)
-                throwVError(report, ctrl.name, uifilename);
-        }
+        checkControl(ctrls[i]);
+
+        if (ctrls[i].template)
+            checkControl(ctrls[i].template, uifilename);
+
         if (ctrls[i].children)
             checkControls(ctrls[i].children, uifilename);
     }
@@ -227,7 +251,7 @@ const addOptionAsControl = function(option, sibblingData) {
     if (create === undefined)
         return null;
 
-    let newCtrl =  constructors[option.type](option);
+    let newCtrl =  create(option);
     var index;
 
     var neededGroup = groupConstructors.getAppropriateSupplier(option);
@@ -248,7 +272,8 @@ const addOptionAsControl = function(option, sibblingData) {
 
     if ((parentData.parentData === null || isPureContainerControl(sibblingData.ctrl)) && neededGroup !== null) {
         var parentControl = groupConstructors["open_" + neededGroup]();
-        parentControl.children.push(newCtrl);
+        //parentControl.children.push(newCtrl);
+        addChild(newCtrl, parentControl, 0);
         var ii = addChild(parentControl, parentCtrl, sibblingData.index + 1);
         parentData = { ctrl: parentControl, index: ii, parentData: parentData };
         parentCtrl = parentControl;
@@ -261,6 +286,21 @@ const addOptionAsControl = function(option, sibblingData) {
 };
 
 const addChild = function(newCtrl, parentCtrl, index) {
+    if (parentCtrl.type === "Supplier" || parentCtrl.type === "VariableSupplier") {
+        let label = newCtrl.name;;
+        if (newCtrl._target_label !== undefined) {
+            label = newCtrl._target_label;
+            delete newCtrl._target_label;
+        }
+
+        let cc = groupConstructors.open_TargetLayoutBox(label);
+        cc.children.push(newCtrl);
+        newCtrl = cc;
+    }
+
+    if (newCtrl._target_label !== undefined)
+        delete newCtrl._target_label;
+
     index = index + 1;
     if (index >= parentCtrl.children.length) {
         parentCtrl.children.push(newCtrl);
@@ -272,7 +312,7 @@ const addChild = function(newCtrl, parentCtrl, index) {
     return index;
 };
 
-const createUIElements = function(options) {
+/*const createUIElements = function(options) {
 
     var currentGroup = null;
     var lastCtrlType = null;
@@ -308,7 +348,7 @@ const createUIElements = function(options) {
     }
 
     return { controls: yaml.safeDump(parentControls[parentControls.length - 1]) };
-};
+};*/
 
 const replaceAt = function(value, index, character) {
     return value.substr(0, index) + character + value.substr(index+character.length);
@@ -326,7 +366,7 @@ const createUIElementsFromYaml = function(uiData) {
     for (let eventName in mainEvents)
         events = events + ",\n\n\t" + eventName + ": " + functionify(mainEvents[eventName]);
 
-    return { events: events, controls: "[\n" + data.ctrls + "\n\t]", title: uiData.title, name: uiData.name, stage: uiData.stage };
+    return { events: events, controls: "[\n" + data.ctrls + "\n\t]", title: uiData.title, name: uiData.name, stage: uiData.stage, jus: uiData.jus };
 };
 
 const createChildTree = function(list, indent) {
@@ -368,6 +408,10 @@ const createChildTree = function(list, indent) {
             else if (name === "columns") {
                 var data = createChildTree(child.columns, indent + "\t\t");
                 copy += indent + "\t" + "columns: [\n" + data.ctrls + "\n\t" + indent + "]";
+            }
+            else if (name === "template") {
+                var data = createChildTree([child.template], indent + "\t");
+                copy += indent + "\t" + "template:\n" + data.ctrls + "\t" + indent;
             }
             else
                 copy += indent + "\t" + name + ": " + JSON.stringify(child[name]);
@@ -437,12 +481,12 @@ const functionify = function(value, indent, args) {
 };
 
 const isPureContainerControl = function(ctrl) {
-    return ctrl.type === "LayoutBox" || ctrl.type === "CollapseBox" || ctrl.type === "Supplier" || ctrl.type === "VariableSupplier" || ctrl.type === "Label";
+    return ctrl.type === "LayoutBox" || ctrl.type === "TargetLayoutBox" || ctrl.type === "CollapseBox" || ctrl.type === "Supplier" || ctrl.type === "VariableSupplier" || ctrl.type === "Label";
 };
 
 const isOptionControl = function(ctrl, optionName) {
     let isOptionCtrl = ctrl.optionId !== undefined ||
-            (ctrl.type === "Supplier" || ctrl.type === "VariableSupplier" || ctrl.type === "CollapseBox" || ctrl.type === "Label" || ctrl.type === "LayoutBox") === false;
+            (ctrl.type === "Supplier" || ctrl.type === "VariableSupplier" || ctrl.type === "CollapseBox" || ctrl.type === "Label" || ctrl.type === "TargetLayoutBox" || ctrl.type === "LayoutBox") === false;
 
     if (isOptionCtrl) {
         if (optionName !== undefined)
@@ -478,9 +522,45 @@ const getIndent = function(count) {
     return s;
 };
 
+const ff = function(item) {
+    switch (item.type) {
+        case "Variables":
+        case "Variable":
+        case "Pairs":
+        case "Pair":
+            return "VariableSupplier";
+        case "Terms":
+        case "Term":
+            return "Supplier";
+    }
+
+    if (item.template !== undefined) {
+        let template = item.template;
+        if (template.elements !== undefined) {
+            for (let i = 0; i < template.elements.length; i++) {
+                let rr = ff(template.elements[i]);
+                if (rr !== null)
+                    return rr;
+            }
+        }
+
+        if (template.template !== undefined) {
+            let rr = ff(template.template);
+            if (rr !== null)
+                return rr;
+        }
+    }
+
+    return null;
+};
+
 const groupConstructors = {
 
     getAppropriateSupplier: function(item) {
+
+        let ss = ff(item);
+        if (ss !== null)
+            return ss;
 
         switch (item.type) {
             case "Variables":
@@ -492,10 +572,20 @@ const groupConstructors = {
             case "Term":
                 return "Supplier";
             case "Array":
+
                 return null;
         }
 
         return "LayoutBox";
+    },
+
+    open_TargetLayoutBox: function(label) {
+        let ctrl = { };
+        ctrl.type = "TargetLayoutBox";
+        if (label !== undefined)
+            ctrl.label = label;
+        ctrl.children = [ ];
+        return ctrl;
     },
 
     open_LayoutBox: function(margin) {
@@ -528,43 +618,58 @@ const groupConstructors = {
         ctrl.type = 'Supplier'
         ctrl.persistentItems = false;
         ctrl.stretchFactor = 1;
+        ctrl.format = 'term';
         ctrl.children = [ ];
         return ctrl;
     }
 };
 
+const CheckTemplateState = function(item, ctrl, isTemplate) {
+    if(item.name !== undefined) {
+        if (!isTemplate)
+            ctrl.name = item.name;
+    }
+};
+
+
 const constructors = {
 
-    Integer: function(item) {
+    Integer: function(item, isTemplate) {
         let ctrl = { };
-        ctrl.name = item.name;
         ctrl.type = 'TextBox';
-        ctrl.label = item.title !== undefined ? item.title : item.name;
+        CheckTemplateState(item, ctrl, isTemplate);
+        if (item.name !== undefined || item.title !== undefined)
+            ctrl.label = item.title !== undefined ? item.title : item.name;
         ctrl.format = "number";
         ctrl.inputPattern = "[0-9]+";
         return ctrl
     },
 
-    Number: function(item) {
+    Number: function(item, isTemplate) {
         let ctrl = { };
-        ctrl.name = item.name;
         ctrl.type = 'TextBox';
-        ctrl.label = item.title !== undefined ? item.title : item.name;
+        CheckTemplateState(item, ctrl, isTemplate);
+        if (item.name !== undefined || item.title !== undefined)
+            ctrl.label = item.title !== undefined ? item.title : item.name;
         ctrl.format = "number";
         ctrl.inputPattern = "[0-9]+";
         return ctrl
     },
 
-    Bool: function(item) {
+    Bool: function(item, isTemplate) {
         let ctrl = { };
-        ctrl.name = item.name;
         ctrl.type = 'CheckBox';
-        ctrl.label = item.title !== undefined ? item.title : item.name;
+        CheckTemplateState(item, ctrl, isTemplate);
+        if (item.name !== undefined || item.title !== undefined)
+            ctrl.label = item.title !== undefined ? item.title : item.name;
         return ctrl
     },
 
-    NMXList: function(item) {
+    NMXList: function(item, isTemplate) {
         let ctrl = groupConstructors.open_Label(item.title);
+        CheckTemplateState(item, ctrl, isTemplate);
+        if (item.options.length <= 3)
+            ctrl.style = "list-inline";
         for (let i = 0; i < item.options.length; i++) {
             let option = item.options[i];
             let checkbox = { };
@@ -575,148 +680,127 @@ const constructors = {
             checkbox.optionId = item.name;
             ctrl.children.push(checkbox);
         }
+
         return ctrl;
     },
 
-    List: function(item) {
+    List: function(item, isTemplate) {
         var ctrl = { };
-        ctrl.name = item.name;
         ctrl.type = 'ComboBox';
-        ctrl.label = item.title !== undefined ? item.title : item.name;
+        CheckTemplateState(item, ctrl, isTemplate);
+        if (item.name !== undefined || item.title !== undefined)
+            ctrl.label = item.title !== undefined ? item.title : item.name;
         if (item.options.length > 0) {
             ctrl.options = [];
-            for (let j = 0; j < item.options.length; j++)
-                ctrl.options.push({ label: item.options[j], value: item.options[j] });
+            for (let j = 0; j < item.options.length; j++) {
+                let option = item.options[j];
+                if (typeof option === "string")
+                    ctrl.options.push({ label: option, value: option });
+                else
+                    ctrl.options.push({ label: option.title, value: option.name });
+            }
         }
         return ctrl;
     },
 
-    Terms: function(item) {
-        var ctrl = { };
-
-        ctrl.type = 'TargetListBox';
-        ctrl.name = item.name;
-        ctrl.label = item.title !== undefined ? item.title : item.name;;
-        ctrl.showColumnHeaders = false;
-        ctrl.fullRowSelect = true;
-        ctrl.columns = [];
-        ctrl.columns.push( {
-            type: "ListItem.TermLabel",
-            name: "column1",
-            label: "",
-            stretchFactor: 1
-        })
-
+    Terms: function(item, isTemplate) {
+        let ctrl = { };
+        ctrl.type = 'ListBox';
+        CheckTemplateState(item, ctrl, isTemplate);
+        if (item.name !== undefined || item.title !== undefined)
+            ctrl._target_label = item.title !== undefined ? item.title : item.name;
+        ctrl.isTarget = true;
+        ctrl.template = {
+            type: "TermLabel"
+        };
 
         return ctrl;
     },
 
-    Variables: function(item) {
-        var ctrl = { };
-
-        ctrl.type = "VariableTargetListBox";
-        ctrl.name = item.name;
-        ctrl.label = item.title !== undefined ? item.title : item.name;;
-        ctrl.showColumnHeaders = false;
-        ctrl.fullRowSelect = true;
-        ctrl.columns = [];
-        ctrl.columns.push({
-            type: "ListItem.VariableLabel",
-            name: "column1",
-            label: "",
-            stretchFactor: 1
-        });
+    String: function(item, isTemplate) {
+        let ctrl = { };
+        ctrl.type = "TextBox";
+        CheckTemplateState(item, ctrl, isTemplate);
+        if (item.name !== undefined || item.title !== undefined)
+            ctrl.label = item.title !== undefined ? item.title : item.name;
+        ctrl.format = "string";
         return ctrl;
     },
 
-    Variable: function(item) {
-        var ctrl = { };
+    Variables: function(item, isTemplate) {
+        let ctrl = { }
+        ctrl.type = "VariablesListBox";
+        CheckTemplateState(item, ctrl, isTemplate);
+        if (isTemplate === false && (item.name !== undefined || item.title !== undefined))
+            ctrl._target_label = item.title !== undefined ? item.title : item.name;
+        ctrl.isTarget = true;
+        return ctrl;
+    },
 
-        ctrl.type = "VariableTargetListBox";
-        ctrl.name = item.name;
-        ctrl.label = item.title !== undefined ? item.title : item.name;;
+    Variable: function(item, isTemplate) {
+        let ctrl = { }
+        ctrl.type = "VariablesListBox";
+        CheckTemplateState(item, ctrl, isTemplate);
+        if (isTemplate === false && (item.name !== undefined || item.title !== undefined))
+            ctrl._target_label = item.title !== undefined ? item.title : item.name;
         ctrl.maxItemCount = 1;
-        ctrl.showColumnHeaders = false;
-        ctrl.fullRowSelect = true;
-        ctrl.columns = [ ];
-        ctrl.columns.push({
-            type: "ListItem.VariableLabel",
-            name: "column1",
-            label: "",
-            stretchFactor: 1
-        });
-
+        ctrl.isTarget = true;
         return ctrl;
     },
 
-    Array: function(item) {
+    Array: function(item, isTemplate) {
         var ctrl = { };
 
         ctrl.type = "ListBox";
-        ctrl.name = item.name;
-        ctrl.label = item.title !== undefined ? item.title : item.name;;
+        CheckTemplateState(item, ctrl, isTemplate);
+        if (isTemplate === false && (item.name !== undefined || item.title !== undefined))
+            ctrl._target_label = item.title !== undefined ? item.title : item.name;
         ctrl.showColumnHeaders = false;
         ctrl.fullRowSelect = true;
         ctrl.stretchFactor = 1;
-        ctrl.columns = [ ];
 
         if (item.template.type === 'Group') {
+            ctrl.columns = [ ];
             for (let i = 0; i < item.template.elements.length; i++) {
                 let column = item.template.elements[i];
                 let columnData = {
-                    type: "ListItem.Label",
                     name: column.name,
-                    label: "",
                     stretchFactor: 1
                 }
-                switch (column.type) {
-                    case "Variable":
-                        columnData.type = "ListItem.VariableLabel";
-                        break;
-                    case "List":
-                        columnData.type = "ListItem.ComboBox";
-                        columnData.options = column.options;
-                }
-
+                columnData.template = constructors[column.type](column, true);
                 ctrl.columns.push(columnData);
             }
         }
-        else {
-            let columnData = {
-                type: "ListItem.Label",
-                name: "column1",
-                label: "",
-                stretchFactor: 1
-            }
-            ctrl.columns.push(columnData);
-        }
+        else
+            ctrl.template = constructors[item.template.type](item.template, true);
 
         return ctrl;
     },
 
-    Pairs: function(item) {
+    Pairs: function(item, isTemplate) {
         var ctrl = { };
-
-        ctrl.type = "VariableTargetListBox";
-        ctrl.name = item.name;
-        ctrl.label = (item.title ? item.title : '');
-        ctrl.showColumnHeaders = false;
+        ctrl.type = "VariablesListBox";
+        CheckTemplateState(item, ctrl, isTemplate);
+        if (isTemplate === false && (item.name !== undefined || item.title !== undefined))
+            ctrl._target_label = item.title !== undefined ? item.title : item.name;
         ctrl.fullRowSelect = true;
-        ctrl.columns = [ ];
-        ctrl.columns.push({
-            type: "ListItem.VariableLabel",
-            name: "column1",
-            label: "",
-            stretchFactor: 1
-        });
-
-        ctrl.columns.push({
-            type: "ListItem.VariableLabel",
-            name: "column2",
-            label: "",
-            stretchFactor: 1
-        });
-
+        ctrl.isTarget = true;
+        ctrl.columns = [
+            {
+                name: "i1",
+                stretchFactor: 1,
+                template: {
+                    type: "VariableLabel"
+                }
+            },
+            {
+                name: "i2",
+                stretchFactor: 1,
+                template: {
+                    type: "VariableLabel"
+                }
+            }
+        ];
         return ctrl;
     }
 }

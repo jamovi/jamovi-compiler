@@ -13,23 +13,33 @@ ControlBase:
                   - ComboBox
                   - TextBox
                   - ListBox
-                  - TargetListBox
-                  - VariableTargetListBox
+                  - VariablesListBox
+                  - TargetLayoutBox
                   - Supplier
                   - VariableSupplier
                   - CollapseBox
                   - Label
                   - LayoutBox
-                  - ListItem.VariableLabel
-                  - ListItem.ComboBox
-                  - ListItem.Label
-                  - ListItem.TermLabel
-                  - ListItem.TextBox
+                  - VariableLabel
+                  - TermLabel
                   - RMAnovaFactorsBox
         name:
             type: string
         stage:
             type: integer
+        margin:
+            type: string
+            enum:
+                - small
+                - normal
+                - large
+                - none
+    required:
+        - type
+
+GridControl:
+    type: object
+    properties:
         cell:
             type: object
             additionalProperties: false
@@ -38,13 +48,6 @@ ControlBase:
                     type: integer
                 column:
                     type: integer
-        margin:
-            type: string
-            enum:
-                - small
-                - normal
-                - large
-                - none
         fitToGrid:
             type: boolean
         stretchFactor:
@@ -61,8 +64,16 @@ ControlBase:
                 - top
                 - center
                 - bottom
-    required:
-        - type
+        minWidth:
+            type: integer
+        minHeight:
+            type: integer
+        maxWidth:
+            type: integer
+        maxHeight:
+            type: integer
+        useSingleCell:
+            type: bool
 
 ControlContainer:
     type: object
@@ -91,17 +102,21 @@ OptionControl:
                 - inline
                 - list-inline
                 - inline-list
+        valueKey:
+            type: array
         enable:
             type: string
             pattern: "^\\([a-zA-Z0-9_\\:?\\=\\<\\>]+\\)"
+        isVirtual:
+            type: bool
         events:
             type: object
             additionalProperties: false
             properties:
                 change:
                     type: string
-    required:
-        - name
+                changing:
+                    type: string
 
 OptionListControl:
     type: object
@@ -114,6 +129,10 @@ OptionListControl:
             type: boolean
         maxItemCount:
             type: integer
+        addButton:
+            type: string
+        ghostText:
+            type: string
         removeAction:
             type: string
             enum:
@@ -127,23 +146,61 @@ OptionListControl:
                 - normal
                 - large
                 - largest
+                - auto
+        templateName:  #Technically part of column but shorthand can place them here
+            type: string
+        template: #Technically part of column but shorthand can place them here
+            type: object
+        selectable: #Technically part of column but shorthand can place them here
+            type: bool
+        isTarget:
+            type: bool
+        valueFilter:
+            type: string
+            enum:
+                - none
+                - unique
+                - uniquePerRow
+                - uniquePerColumn
+        events:
+            type: object
+            additionalProperties: false
+            properties:
+                listItemAdded:
+                    type: string
+                listItemRemoved:
+                    type: string
         columns:
             type: array
             items:
                 properties:
+                    templateName:
+                        type: string
+                    template:
+                        type: object
                     name:
                         type: string
-                    selectable:
-                        type: boolean
-                    stretchfactor:
-                        type: integer
                     label:
                         type:
                             - string
                             - null
+                    selectable:
+                        type: bool
+                    stretchfactor:
+                        type: integer
+                    headerAlign:
+                        enum:
+                            - left
+                            - center
+                            - right
+                    minWidth:
+                        type: integer
+                    maxWidth:
+                        type: integer
+                required:
+                    - name
+                    - template
             minItems: 1
-    required:
-        - columns
 
 CheckBox:
     type: object
@@ -171,8 +228,6 @@ ComboBox:
 RadioButton:
     type: object
     properties:
-        optionId:
-            type: string
         checkedValue:
             type: string
     required:
@@ -188,21 +243,29 @@ TextBox:
             type: string
         inputPattern:
             type: string
+        alignText:
+            - 'left'
+            - 'center'
+            - 'right'
+        borderless:
+            type: bool
     required:
         - format
 
-TargetList:
+TargetLayoutBox:
     type: object
     properties:
-        maxItemCount:
-            type: integer
-        valueFilter:
+        label:
+            type: string
+        style:
             type: string
             enum:
-                - none
-                - unique
-                - uniquePerRow
-                - uniquePerColumn
+                - list
+                - inline
+
+TargetListSupport:
+    type: object
+    properties:
         itemDropBehaviour:
             type: string
             enum:
@@ -213,14 +276,10 @@ TargetList:
             type: object
             additionalProperties: false
             properties:
-                change:
-                    type: string
-                changing:
-                    type: string
                 preprocess:
                     type: string
 
-VariableTargetList:
+VariablesListBox:
     type: object
     properties:
         suggested:
@@ -251,12 +310,18 @@ CollapseBox:
             type: boolean
         label:
             type: string
+    required:
+        - label
 
 Label:
     type: object
     properties:
         label:
             type: string
+
+EmbeddedChildSupport:
+    type: object
+    properties:
         style:
             type: string
             enum:
@@ -271,6 +336,8 @@ Supplier:
         persistentItems:
             type: boolean
         label:
+            type: string
+        format:
             type: string
         events:
             type: object
@@ -303,25 +370,22 @@ VariableSupplier:
             minItems: 1
             uniqueItems: true
 
-ListItem:
+Columns:
     type: object
     properties:
-        type:
+        templateName:
             type: string
+        template:
+            type: object
         name:
             type: string
-        horizontalAlignment:
-            type: string
+        label:
+            type string
+        headerAlign:
             enum:
                 - left
                 - center
                 - right
-        verticalAlignment:
-            type: string
-            enum:
-                - top
-                - center
-                - bottom
         minWidth:
             type: integer
         minHeight:
@@ -331,92 +395,83 @@ ListItem:
         maxHeight:
             type: integer
     required:
-        - type
-
-ListItemComboBox:
-    type: object
-    properties:
-        options:
-            type: Array
-            items:
-                type: string
-    required:
-        - options
-
-ListItemTextBox:
-    type: object
-    properties:
-        format:
-            type: string
-        inputPattern:
-            type: string
-    required:
-        - format
-
+        - name
+        - template
 
 ControlInheritance:
     RMAnovaFactorsBox:
         - ControlBase
+        - GridControl
         - OptionControl
     CheckBox:
         - ControlBase
+        - GridControl
         - OptionControl
         - CheckBox
+        - EmbeddedChildSupport
     RadioButton:
         - ControlBase
+        - GridControl
         - OptionControl
         - RadioButton
+        - EmbeddedChildSupport
     ComboBox:
         - ControlBase
+        - GridControl
         - OptionControl
         - ComboBox
     TextBox:
         - ControlBase
+        - GridControl
         - OptionControl
         - TextBox
     ListBox:
         - ControlBase
+        - GridControl
         - OptionControl
         - OptionListControl
-    TargetListBox:
+        - TargetListSupport
+    TargetLayoutBox:
         - ControlBase
-        - OptionControl
-        - OptionListControl
-        - TargetList
-    VariableTargetListBox:
+        - GridControl
+        - TargetLayoutBox
+    VariablesListBox:
         - ControlBase
+        - GridControl
         - OptionControl
         - OptionListControl
-        - TargetList
-        - VariableTargetList
+        - VariablesListBox
+        - TargetListSupport
     Supplier:
         - ControlBase
+        - GridControl
         - ControlContainer
         - Supplier
     VariableSupplier:
         - ControlBase
+        - GridControl
         - ControlContainer
         - Supplier
         - VariableSupplier
     CollapseBox:
         - ControlBase
+        - GridControl
         - CollapseBox
     Label:
         - ControlBase
+        - GridControl
+        - OptionControl
         - Label
+        - EmbeddedChildSupport
     LayoutBox:
         - ControlBase
+        - GridControl
         - ControlContainer
-    ListItem.VariableLabel:
-        - ListItem
-    ListItem.ComboBox:
-        allOf:
-        - ListItem
-        - ListItemComboBox
-    ListItem.Label:
-        - ListItem
-    ListItem.TermLabel:
-        - ListItem
-    ListItem.TextBox:
-        - ListItem
-        - ListItemTextBox
+    VariableLabel:
+        - ControlBase
+        - GridControl
+        - OptionControl
+    TermLabel:
+        - ControlBase
+        - GridControl
+        - OptionControl

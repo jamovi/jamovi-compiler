@@ -6,6 +6,7 @@
 const options = <%= JSON.stringify(analysis.options) %>;
 
 const view = View.extend({
+    jus: "<%= elements.jus %>",
 
     <%= elements.events %>
 
@@ -14,6 +15,7 @@ const view = View.extend({
 view.layout = ui.extend({
 
     label: "<%= elements.title %>",
+    jus: "<%= elements.jus %>",
     type: "root",
     stage: <%= elements.stage %>, //0 - release, 1 - development, 2 - proposed
     controls: <%= elements.controls %>
