@@ -128,8 +128,6 @@ const createSchema = function(ctrl) {
     schema.type = "object";
     schema.additionalProperties = false;
     schema.properties = { };
-    if (ctrl.children)
-        schema.properties.children = { type: "array" };
     let list = uiCtrlSchemas.ControlInheritance[ctrl.type];
     for (let i = 0; i < list.length; i++) {
         let partSchema = uiCtrlSchemas[list[i]];
@@ -143,13 +141,13 @@ const checkControl = function(ctrl, uifilename) {
     if (schema) {
         let report = validate(ctrl, schema);
         if ( ! report.valid)
-            throwVError(report, ctrl.name, uifilename);
+            throwVError(report, ctrl.name === undefined ? ctrl.type : ctrl.name, uifilename);
     }
 };
 
 const checkControls = function(ctrls, uifilename) {
     for (let i = 0; i < ctrls.length; i++) {
-        checkControl(ctrls[i]);
+        checkControl(ctrls[i], uifilename);
 
         if (ctrls[i].template)
             checkControl(ctrls[i].template, uifilename);
@@ -179,9 +177,7 @@ const removeMissingOptions = function(options, parent) {
         else if (containsOption(optionName, options) === false) {
             list.push(ctrl);
             if (ctrl.children !== undefined && ctrl.children.length > 0) {
-                let newCtrl = groupConstructors.open_LayoutBox();
-                for (let j = 0; j < ctrl.children.length; j++)
-                    newCtrl.children.push(ctrl.children[j]);
+                let newCtrl = createLayoutEquivalent(ctrl);
                 parent.children[i] = newCtrl;
             }
             else {
@@ -195,6 +191,50 @@ const removeMissingOptions = function(options, parent) {
     }
 
     return list;
+};
+
+const createLayoutEquivalent = function(ctrl) {
+    let newCtrl = groupConstructors.open_LayoutBox();
+    delete newCtrl.children;
+
+    if (ctrl.cell !== undefined)
+        newCtrl.cell = ctrl.cell;
+
+    if (ctrl.margin !== undefined)
+        newCtrl.margin = ctrl.margin;
+
+    if (ctrl.stage !== undefined)
+        newCtrl.stage = ctrl.stage;
+
+    if (ctrl.fitToGrid !== undefined)
+        newCtrl.fitToGrid = ctrl.fitToGrid;
+
+    if (ctrl.stretchFactor !== undefined)
+        newCtrl.stretchFactor = ctrl.stretchFactor;
+
+    if (ctrl.horizontalAlignment !== undefined)
+        newCtrl.horizontalAlignment = ctrl.horizontalAlignment;
+
+    if (ctrl.verticalAlignment !== undefined)
+        newCtrl.verticalAlignment = ctrl.verticalAlignment;
+
+    if (ctrl.minWidth !== undefined)
+        newCtrl.minWidth = ctrl.minWidth;
+
+    if (ctrl.minHeight !== undefined)
+        newCtrl.minHeight = ctrl.minHeight;
+
+    if (ctrl.maxWidth !== undefined)
+        newCtrl.maxWidth = ctrl.maxWidth;
+
+    if (ctrl.maxHeight !== undefined)
+        newCtrl.maxHeight = ctrl.maxHeight;
+
+    newCtrl.children = [];
+    for (let j = 0; j < ctrl.children.length; j++)
+        newCtrl.children.push(ctrl.children[j]);
+
+    return newCtrl;
 };
 
 const containsOption = function(name, options) {
@@ -312,43 +352,6 @@ const addChild = function(newCtrl, parentCtrl, index) {
     return index;
 };
 
-/*const createUIElements = function(options) {
-
-    var currentGroup = null;
-    var lastCtrlType = null;
-
-    var parentControls = [{ children: []}];
-    for (var i = 0; i < options.length; i++) {
-        var item = options[i];
-        var create = constructors[item.type];
-        if (create !== undefined) {
-
-            var neededGroup = groupConstructors.getAppropriateSupplier(item);
-
-            if (neededGroup !== currentGroup || areControlsGroupCompatible(lastCtrlType, item.type) === false) {
-                if (parentControls.length > 1)
-                    parentControls.shift();
-
-                currentGroup = neededGroup;
-
-                if (currentGroup !== null) {
-
-                    let ctrl = groupConstructors['open_' + neededGroup](item);
-
-                    parentControls[0].children.push(ctrl);
-                    parentControls.unshift(ctrl);
-                }
-            }
-
-            let ctrl =  create(item);
-            parentControls[0].children.push(ctrl);
-
-            lastCtrlType = item.type;
-        }
-    }
-
-    return { controls: yaml.safeDump(parentControls[parentControls.length - 1]) };
-};*/
 
 const replaceAt = function(value, index, character) {
     return value.substr(0, index) + character + value.substr(index+character.length);
@@ -480,13 +483,29 @@ const functionify = function(value, indent, args) {
     return init;
 };
 
+const isContainerControl = function(ctrl) {
+    if ((ctrl.type === "Label" || ctrl.type === "CheckBox" || ctrl.type === "RadioButton") && ctrl.children !== undefined)
+        return true;
+
+    let check = ctrl.type === "LayoutBox" || ctrl.type === "TargetLayoutBox" || ctrl.type === "CollapseBox" || ctrl.type === "Supplier" || ctrl.type === "VariableSupplier";
+    if (check && ctrl.children === undefined)
+        throw "The " + ctrl.type + " with name: '" + ctrl.name + "' does not have the 'children' property.";
+
+    if (check && (ctrl.optionId !== undefined || ctrl.valueKey !== undefined))
+        throw "The " + ctrl.type + " with name: '" + ctrl.name + "' cannot contain properties 'optionId' or 'valueKey'.";
+
+    return check;
+};
+
 const isPureContainerControl = function(ctrl) {
-    return ctrl.type === "LayoutBox" || ctrl.type === "TargetLayoutBox" || ctrl.type === "CollapseBox" || ctrl.type === "Supplier" || ctrl.type === "VariableSupplier" || ctrl.type === "Label";
+    if (ctrl.type === "CheckBox" || ctrl.type === "RadioButton" || (ctrl.type === "Label" && ctrl.label === undefined))
+        return false;
+
+    return isContainerControl(ctrl);
 };
 
 const isOptionControl = function(ctrl, optionName) {
-    let isOptionCtrl = ctrl.optionId !== undefined ||
-            (ctrl.type === "Supplier" || ctrl.type === "VariableSupplier" || ctrl.type === "CollapseBox" || ctrl.type === "Label" || ctrl.type === "TargetLayoutBox" || ctrl.type === "LayoutBox") === false;
+    let isOptionCtrl = isPureContainerControl(ctrl) === false;
 
     if (isOptionCtrl) {
         if (optionName !== undefined)
