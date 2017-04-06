@@ -83,6 +83,11 @@ ControlContainer:
             enum:
                 - list
                 - inline
+        children:
+            type: array
+    required:
+        - children
+
 
 OptionControl:
     type: object
@@ -257,11 +262,6 @@ TargetLayoutBox:
     properties:
         label:
             type: string
-        style:
-            type: string
-            enum:
-                - list
-                - inline
 
 TargetListSupport:
     type: object
@@ -329,6 +329,8 @@ EmbeddedChildSupport:
                 - inline
                 - list-inline
                 - inline-list
+        children:
+            type: Array
 
 Supplier:
     type: object
@@ -434,6 +436,7 @@ ControlInheritance:
     TargetLayoutBox:
         - ControlBase
         - GridControl
+        - ControlContainer
         - TargetLayoutBox
     VariablesListBox:
         - ControlBase
@@ -456,6 +459,7 @@ ControlInheritance:
     CollapseBox:
         - ControlBase
         - GridControl
+        - ControlContainer
         - CollapseBox
     Label:
         - ControlBase
