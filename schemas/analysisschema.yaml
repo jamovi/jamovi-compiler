@@ -81,9 +81,9 @@ properties:
                         - Array
                         - Pairs
                         - Sort
-                required:
-                    - name
-                    - type
+            required:
+                - name
+                - type
 required:
     - name
     - title
