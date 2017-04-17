@@ -6,6 +6,10 @@ const path = require('path');
 const util = require('util');
 const child_process = require('child_process');
 
+const isJExe = function(exe) {
+    return fs.existsSync(exe) && fs.statSync(exe).isFile();
+};
+
 const find = function(jamovi_home) {
 
     let exe;
@@ -13,29 +17,29 @@ const find = function(jamovi_home) {
     if (jamovi_home !== undefined) {
         jamovi_home = path.resolve(jamovi_home);
         exe = path.join(jamovi_home, 'jamovi');
-        if (fs.existsSync(exe))
+        if (isJExe(exe))
             return exe;
         exe = path.join(jamovi_home, 'jamovi.exe');
-        if (fs.existsSync(exe))
+        if (isJExe(exe))
             return exe;
         exe = path.join(jamovi_home, 'bin', 'jamovi');
-        if (fs.existsSync(exe))
+        if (isJExe(exe))
             return exe;
         exe = path.join(jamovi_home, 'bin', 'jamovi.exe');
-        if (fs.existsSync(exe))
+        if (isJExe(exe))
             return exe;
         exe = path.join(jamovi_home, 'Contents', 'MacOS', 'jamovi')
-        if (fs.existsSync(exe))
+        if (isJExe(exe))
             return exe;
         exe = path.join(jamovi_home + '.app', 'Contents', 'MacOS', 'jamovi')
-        if (fs.existsSync(exe))
+        if (isJExe(exe))
             return exe;
         throw 'jamovi could not be found at: ' + jamovi_home;
     }
 
     if (process.platform === 'darwin') {
         exe = '/Applications/jamovi.app/Contents/MacOS/jamovi';
-        if (fs.existsSync(exe))
+        if (isJExe(exe))
             return exe;
     }
 
@@ -45,10 +49,10 @@ const find = function(jamovi_home) {
 
     if (process.platform === 'linux') {
         exe = '/usr/lib/jamovi/bin/jamovi';
-        if (fs.existsSync(exe))
+        if (isJExe(exe))
             return exe;
         exe = '/usr/bin/jamovi';
-        if (fs.existsSync(exe))
+        if (isJExe(exe))
             return exe;
     }
 

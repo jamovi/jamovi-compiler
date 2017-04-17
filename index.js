@@ -93,14 +93,32 @@ try {
         process.exit(0);
     }
 
-    let rpath = '';
-    if (args.rpath) {
-        rpath = args.rpath;
+    let exe = installer.find(args.home);
+
+    let paths;
+
+    if (process.platform === 'win32') {
+        let bin  = path.dirname(exe);
+        let home = path.dirname(bin);
+        let rHome = path.join(home, 'Frameworks', 'R');
+        let rExe  = path.join(rHome, 'bin', 'x64', 'R.exe');
+        let rLibs = path.join(home, 'Resources', 'modules', 'base', 'R');
+        paths = { home, rHome, rExe, rLibs };
     }
-    else if (process.platform === 'win32') {
-        let exe = installer.find(args.home);
-        let bin = path.dirname(exe);
-        rpath = path.join(bin, '..', 'Frameworks', 'R', 'bin', 'x64')
+    else if (process.platform === 'darwin') {
+        let bin  = path.dirname(exe);
+        let home = path.dirname(bin);
+        let rHome = path.join(home, 'Frameworks', 'R.framework', 'Versions', '3.3', 'Resources');
+        let rExe  = path.join(bin, 'R');
+        let rLibs = path.join(home, 'Resources', 'modules', 'base', 'R');
+        paths = { home, rHome, rExe, rLibs };
+    }
+    else {
+        let bin  = path.dirname(exe);
+        let home = path.dirname(bin);
+        let rExe  = 'R';
+        let rLibs = path.join(home, 'Resources', 'modules', 'base', 'R');
+        paths = { home, rExe, rLibs };
     }
 
     srcDir = path.resolve(srcDir);
@@ -287,7 +305,7 @@ try {
 
             fs.writeFileSync(path.join(modDir, 'jamovi.yaml'), content);
 
-            compileR(srcDir, modDir, rpath, packageInfo);
+            compileR(srcDir, modDir, paths, packageInfo);
 
             if (isBuilding) {
 
