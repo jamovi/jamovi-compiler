@@ -68,29 +68,46 @@ const check = function(jamovi_home) {
             stdio: [ 'ignore', 'pipe', 'inherit' ],
             encoding: 'utf-8'
         });
+
     if (response.stdout === null) {
         throw 'jamovi did not respond';
     }
-    else if (response.stdout.match('^\r?\n?[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\r?\n')) {
-        if (process.platform === 'darwin') {
-            let m = exe.match(/^(.+)\/Contents\/MacOS\/jamovi$/);
-            if (m)
-                console.log('jamovi found at ' + m[1]);
-            else
+    else {
+        let match = response.stdout.match('^\r?\n?([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)\r?\n');
+
+        let mas = parseInt(match[1]);
+        let maj = parseInt(match[2]);
+        let min = parseInt(match[3]);
+        let rev = parseInt(match[4])
+
+        if (mas < 0 || maj < 7 || min < 3)
+            throw 'a newer version of jamovi is required, please update to the newest version';
+        if (mas > 0 || maj > 7 || min > 3)
+            throw 'a newer version of the jamovi-compiler (or jmvtools) is required';
+
+        if (match) {
+            if (process.platform === 'darwin') {
+                let m = exe.match(/^(.+)\/Contents\/MacOS\/jamovi$/);
+                if (m)
+                    console.log('jamovi found at ' + m[1]);
+                else
+                    console.log('jamovi found at ' + exe);
+            }
+            else {
                 console.log('jamovi found at ' + exe);
+            }
         }
         else {
-            console.log('jamovi found at ' + exe);
+            console.log(response.stdout + '\n')
+            throw 'jamovi could not be accessed';
         }
-    }
-    else {
-        console.log(response.stdout + '\n')
-        throw 'jamovi could not be accessed';
     }
 };
 
 const install = function(pth, jamovi_home) {
     let exe = find(jamovi_home);
+
+    check(exe);
 
     console.log('Installing ' + pth);
 
@@ -102,7 +119,6 @@ const install = function(pth, jamovi_home) {
     catch (e) {
         console.log(e)
         throw 'Could not install module';
-        //throw e;
     }
 };
 

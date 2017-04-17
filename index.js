@@ -93,6 +93,7 @@ try {
         process.exit(0);
     }
 
+    installer.check(args.home);
     let exe = installer.find(args.home);
 
     let paths;
