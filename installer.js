@@ -104,10 +104,10 @@ const check = function(jamovi_home) {
     }
 };
 
-const install = function(pth, jamovi_home) {
-    let exe = find(jamovi_home);
 
-    check(exe);
+const install = function(pth, jamovi_home) {
+
+    let exe = find(jamovi_home);
 
     console.log('Installing ' + pth);
 
