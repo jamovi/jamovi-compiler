@@ -856,7 +856,7 @@ const constructors = {
             let ctrl = { }
             ctrl.type = "VariablesListBox";
             CheckTemplateState(item, ctrl, isTemplate);
-            if (isTemplate === false && (item.name !== undefined || item.title !== undefined))
+            if (isTemplate !== true && (item.name !== undefined || item.title !== undefined))
                 ctrl._target_label = item.title !== undefined ? item.title : item.name;
             ctrl.isTarget = true;
             return ctrl;
@@ -871,7 +871,7 @@ const constructors = {
             let ctrl = { }
             ctrl.type = "VariablesListBox";
             CheckTemplateState(item, ctrl, isTemplate);
-            if (isTemplate === false && (item.name !== undefined || item.title !== undefined))
+            if (isTemplate !== true && (item.name !== undefined || item.title !== undefined))
                 ctrl._target_label = item.title !== undefined ? item.title : item.name;
             ctrl.maxItemCount = 1;
             ctrl.isTarget = true;
@@ -888,7 +888,7 @@ const constructors = {
 
             ctrl.type = "ListBox";
             CheckTemplateState(item, ctrl, isTemplate);
-            if (isTemplate === false && (item.name !== undefined || item.title !== undefined))
+            if (isTemplate !== true && (item.name !== undefined || item.title !== undefined))
                 ctrl._target_label = item.title !== undefined ? item.title : item.name;
             ctrl.showColumnHeaders = false;
             ctrl.fullRowSelect = true;
@@ -921,7 +921,7 @@ const constructors = {
             var ctrl = { };
             ctrl.type = "VariablesListBox";
             CheckTemplateState(item, ctrl, isTemplate);
-            if (isTemplate === false && (item.name !== undefined || item.title !== undefined))
+            if (isTemplate !== true && (item.name !== undefined || item.title !== undefined))
                 ctrl._target_label = item.title !== undefined ? item.title : item.name;
             ctrl.fullRowSelect = true;
             ctrl.isTarget = true;
@@ -968,7 +968,7 @@ const constructors = {
             let ctrl = { }
             ctrl.type = "ListBox";
             CheckTemplateState(item, ctrl, isTemplate);
-            if (isTemplate === false && (item.name !== undefined || item.title !== undefined))
+            if (isTemplate !== true && (item.name !== undefined || item.title !== undefined))
                 ctrl._target_label = item.title !== undefined ? item.title : item.name;
             ctrl.maxItemCount = 1;
 

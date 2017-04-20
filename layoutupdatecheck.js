@@ -102,11 +102,6 @@ const layoutUpgrade_2_0 = function(ctrl, parent) {
               type: "TargetLayoutBox"
         };
 
-        if (ctrl.label !== undefined) {
-            upgradedCtrl.label = ctrl.label;
-            delete ctrl.label
-        }
-
         upgradedCtrl.children = [ ctrl ];
     }
 
