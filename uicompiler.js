@@ -245,11 +245,11 @@ const createLayoutEquivalent = function(ctrl) {
 const isOptionValid = function(name, ctrl, options) {
     for (let i = 0; i < options.length; i++) {
         if (options[i].name === name) {
-            if (ctrl.focusValue !== undefined) {
+            if (ctrl.optionPart !== undefined) {
                 if (options[i].options !== undefined) {
                     for (let j = 0; j < options[i].options.length; j++) {
                         let subOption = options[i].options[j];
-                        if ((typeof subOption === 'string' && subOption === ctrl.focusValue) || subOption.name === ctrl.focusValue)
+                        if ((typeof subOption === 'string' && subOption === ctrl.optionPart) || subOption.name === ctrl.optionPart)
                             return compatibleDataTypes(ctrl, options[i]);
                     }
                 }
@@ -282,7 +282,7 @@ const insertMissingControls = function(options, uiData) {
         else if (option.options !== undefined) {
             let isfragmented = true;
             if (posDatas.length === 1)
-                isfragmented = posDatas[0].ctrl.focusValue !== undefined;
+                isfragmented = posDatas[0].ctrl.optionPart !== undefined;
 
             if (isfragmented) {
                 let fragUpdated = false;
@@ -292,7 +292,7 @@ const insertMissingControls = function(options, uiData) {
                     let subOptionName = typeof subOption === 'string' ? subOption : subOption.name;
                     let found = false;
                     for (let j = 0; j < posDatas.length; j++) {
-                        let focusValue = posDatas[j].ctrl.focusValue;
+                        let focusValue = posDatas[j].ctrl.optionPart;
                         if (focusValue === undefined)
                             throw 'Cannot have more then one non fragmented control.';
                         if (subOptionName === focusValue) {
@@ -558,9 +558,9 @@ const isOptionControl = function(ctrl, optionName) {
 
     if (isOptionCtrl) {
         if (optionName !== undefined)
-            return ctrl.optionId === optionName || ctrl.name === optionName;
+            return ctrl.optionName === optionName || ctrl.name === optionName;
 
-        return (ctrl.optionId === undefined) ? ctrl.name : ctrl.optionId;
+        return (ctrl.optionName === undefined) ? ctrl.name : ctrl.optionName;
     }
 
     return false;
@@ -688,13 +688,13 @@ const compatibleDataTypes = function(ctrl, opt) {
     let opt_raw = constructors[opt.type].toRaw(opt);
 
     let r = compareTypeObjects(ctrl_raw, opt_raw);
-    /*if (r === false) {
+    if (r === false) {
         console.log('#############################');
         console.log(util.inspect(ctrl_raw, false, null));
         console.log('=============================');
         console.log(util.inspect(opt_raw, false, null));
         console.log('-----------------------------');
-    }*/
+    }
     return r;
 };
 
@@ -790,8 +790,8 @@ const constructors = {
             let checkbox = { };
             checkbox.name = item.name + "_" + fragmentName;
             checkbox.type = 'CheckBox';
-            checkbox.focusValue = fragmentName;
-            checkbox.optionId = item.name;
+            checkbox.optionName = item.name;
+            checkbox.optionPart = fragmentName;
             return checkbox;
         },
         toRaw: function(obj) {
@@ -810,8 +810,8 @@ const constructors = {
             let ctrl = { };
             ctrl.name = item.name + "_" + fragmentName;
             ctrl.type = 'RadioButton';
-            ctrl.focusValue = fragmentName;
-            ctrl.optionId = item.name;
+            ctrl.optionName = item.name;
+            ctrl.optionPart = fragmentName;
             return ctrl;
         },
         toRaw: function(obj) {
@@ -1061,7 +1061,7 @@ const uiOptionControl = {
             return ctrl.isVirtual !== true;
         },
         toRaw: function(ctrl) {
-            if (ctrl.focusValue !== undefined)
+            if (ctrl.optionPart !== undefined)
                 return { type: "array", template: { type: "enum", template: "string" } };
 
             return "boolean";
@@ -1079,7 +1079,7 @@ const uiOptionControl = {
             return ctrl.isVirtual !== true;
         },
         toRaw: function(ctrl) {
-            if (ctrl.focusValue !== undefined)
+            if (ctrl.optionPart !== undefined)
                 return { type: "enum", template: "string" };
 
             return "boolean";

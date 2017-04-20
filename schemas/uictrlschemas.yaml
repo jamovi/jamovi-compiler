@@ -94,7 +94,7 @@ OptionControl:
     properties:
         name:
             type: string
-        optionId:
+        optionName:
             type: string
         label:
             type:
@@ -109,7 +109,7 @@ OptionControl:
                 - inline-list
         valueKey:
             type: array
-        focusValue:
+        optionPart:
             type: string
         enable:
             type: string
@@ -212,7 +212,7 @@ OptionListControl:
 CheckBox:
     type: object
     properties:
-        focusValue:
+        optionPart:
             type: string
 
 ComboBox:
@@ -233,11 +233,11 @@ ComboBox:
 RadioButton:
     type: object
     properties:
-        focusValue:
+        optionPart:
             type: string
     required:
-        - optionId
-        - focusValue
+        - optionName
+        - optionPart
 
 TextBox:
     type: object
