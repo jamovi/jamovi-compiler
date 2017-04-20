@@ -98,6 +98,27 @@ const layoutUpgrade_2_0 = function(ctrl, parent) {
         upgradedCtrl.children = [ ctrl ];
     }
 
+    if (ctrl.type === "ComboBox") {
+        _upgraded = true;
+        if (ctrl.options !== undefined) {
+            for (let i = 0; i < ctrl.options.length; i++) {
+                let option = ctrl.options[i];
+                option.title = option.label;
+                option.name = option.value;
+                delete option.label;
+                delete option.value;
+            }
+        }
+    }
+
+    if (ctrl.type === "CheckBox" || ctrl.type === "RadioButton") {
+        if (ctrl.checkedValue !== undefined) {
+            ctrl.focusValue = ctrl.checkedValue;
+            delete ctrl.checkedValue;
+            _upgraded = true;
+        }
+    }
+
     return upgradedCtrl;
 };
 

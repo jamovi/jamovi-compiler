@@ -19,7 +19,7 @@ const uicompile = function(analysisPath, uiPath, sTemplPath, outPath) {
     let content = fs.readFileSync(analysisPath, 'utf-8');
     let analysis = yaml.safeLoad(content);
 
-    let uiData = { title: analysis.title, name: analysis.name, jus: "2.0", stage: 0, children: [] };
+    let uiData = null;
 
     if (fs.existsSync(uiPath)) {
         try {
@@ -31,6 +31,12 @@ const uicompile = function(analysisPath, uiPath, sTemplPath, outPath) {
         if (uiData.children === undefined)
             uiData.children = [];
     }
+
+    if (uiData === null || uiData.compilerMode === 'aggressive')
+        uiData = { title: analysis.title, name: analysis.name, jus: "2.0", stage: 0, compilerMode: 'aggressive', children: [] };
+
+    if (uiData.compilerMode === undefined)
+        uiData.compilerMode = 'tame';
 
     let upgradeInfo = uiUpdateCheck(uiData);
     if (upgradeInfo.upgraded)
@@ -52,7 +58,7 @@ const uicompile = function(analysisPath, uiPath, sTemplPath, outPath) {
     }
 
     let added = insertMissingControls(analysis.options, uiData);
-    if (added.length > 0) {
+    if (uiData.compilerMode === 'tame' && added.length > 0) {
         if (removed.length === 0)
             console.log("modified: " + path.basename(uiPath));
         for (let i = 0; i < added.length; i++)
@@ -62,7 +68,6 @@ const uicompile = function(analysisPath, uiPath, sTemplPath, outPath) {
     let report = validate(uiData, uiSchema);
     if ( ! report.valid)
         throwVError(report, analysis.title, uiPath);
-
 
     checkControls(uiData.children, uiPath);
 
@@ -174,7 +179,7 @@ const removeMissingOptions = function(options, parent) {
                 removed = true;
             }
         }
-        else if (containsOption(optionName, options) === false) {
+        else if (isOptionValid(optionName, ctrl, options) === false) {
             list.push(ctrl);
             if (ctrl.children !== undefined && ctrl.children.length > 0) {
                 let newCtrl = createLayoutEquivalent(ctrl);
@@ -237,10 +242,22 @@ const createLayoutEquivalent = function(ctrl) {
     return newCtrl;
 };
 
-const containsOption = function(name, options) {
+const isOptionValid = function(name, ctrl, options) {
     for (let i = 0; i < options.length; i++) {
-        if (options[i].name === name)
-            return true;
+        if (options[i].name === name) {
+            if (ctrl.focusValue !== undefined) {
+                if (options[i].options !== undefined) {
+                    for (let j = 0; j < options[i].options.length; j++) {
+                        let subOption = options[i].options[j];
+                        if ((typeof subOption === 'string' && subOption === ctrl.focusValue) || subOption.name === ctrl.focusValue)
+                            return compatibleDataTypes(ctrl, options[i]);
+                    }
+                }
+                return false;
+            }
+            else
+                return compatibleDataTypes(ctrl, options[i]);
+        }
     }
 
     return false;
@@ -254,44 +271,90 @@ const insertMissingControls = function(options, uiData) {
         var option = options[i];
         if (option.hidden)
             continue;
-        let posData = findOptionControl(option, baseObj);
-        if (posData === null) {
-            posData = addOptionAsControl(option, lastPosData);
-            if (posData !== null)
+        let posDatas = findOptionControl(option, baseObj);
+        if (posDatas.length === 0) {
+            let posData = addOptionAsControl(option, null, lastPosData);
+            if (posData !== null) {
+                posDatas.push(posData);
                 updated.push(option);
+            }
+        }
+        else if (option.options !== undefined) {
+            let isfragmented = true;
+            if (posDatas.length === 1)
+                isfragmented = posDatas[0].ctrl.focusValue !== undefined;
+
+            if (isfragmented) {
+                let fragUpdated = false;
+                let insertPosData = lastPosData;
+                for (let k = 0; k < option.options.length; k++) {
+                    let subOption = option.options[k];
+                    let subOptionName = typeof subOption === 'string' ? subOption : subOption.name;
+                    let found = false;
+                    for (let j = 0; j < posDatas.length; j++) {
+                        let focusValue = posDatas[j].ctrl.focusValue;
+                        if (focusValue === undefined)
+                            throw 'Cannot have more then one non fragmented control.';
+                        if (subOptionName === focusValue) {
+                            found = true;
+                            insertPosData = posDatas[j];
+                            break;
+                        }
+                    }
+                    if (found === false) {
+                        let posData = addOptionAsControl(option, subOptionName, insertPosData);
+                        if (posData !== null) {
+                            posDatas.push(posData);
+                            fragUpdated = true;
+                            insertPosData = posData;
+                        }
+                    }
+                }
+                if (fragUpdated)
+                    updated.push(option);
+            }
         }
 
-        if (posData !== null)
-            lastPosData = posData;
+        if (posDatas.length > 0)
+            lastPosData = posDatas[posDatas.length - 1];
     }
 
     return updated;
 };
 
 const findOptionControl = function(option, posData) {
-    var ctrl = posData.ctrl;
+    let ctrls = [];
+    let ctrl = posData.ctrl;
     if (isOptionControl(ctrl, option.name))
-        return posData;
+        ctrls.push(posData);
 
     if (ctrl.children !== undefined) {
         for (let i = 0; i < ctrl.children.length; i++) {
             let found = findOptionControl(option, { ctrl: ctrl.children[i], index: i, parentData: posData } );
-            if (found !== null) {
-                return found;
-            }
+            if (found !== null)
+                ctrls = ctrls.concat(found);
         }
     }
 
-    return null;
+    return ctrls;
 };
 
-const addOptionAsControl = function(option, sibblingData) {
+const addOptionAsControl = function(option, focusValue, sibblingData) {
 
-    var create = constructors[option.type];
-    if (create === undefined)
+    var optType = constructors[option.type];
+    if (optType === undefined)
         return null;
 
-    let newCtrl =  create(option);
+    let newCtrl = null;
+
+    if (focusValue !== null) {
+        if (optType.createFragment === undefined)
+            throw 'This control does not support fragmentation.'
+        newCtrl = optType.createFragment(option, focusValue)
+    }
+    else
+        newCtrl = optType.create(option);
+
     var index;
 
     var neededGroup = groupConstructors.getAppropriateSupplier(option);
@@ -327,7 +390,7 @@ const addOptionAsControl = function(option, sibblingData) {
 
 const addChild = function(newCtrl, parentCtrl, index) {
     if (parentCtrl.type === "Supplier" || parentCtrl.type === "VariableSupplier") {
-        let label = newCtrl.name;;
+        let label = newCtrl.name;
         if (newCtrl._target_label !== undefined) {
             label = newCtrl._target_label;
             delete newCtrl._target_label;
@@ -483,29 +546,15 @@ const functionify = function(value, indent, args) {
     return init;
 };
 
-const isContainerControl = function(ctrl) {
-    if ((ctrl.type === "Label" || ctrl.type === "CheckBox" || ctrl.type === "RadioButton") && ctrl.children !== undefined)
-        return true;
-
-    let check = ctrl.type === "LayoutBox" || ctrl.type === "TargetLayoutBox" || ctrl.type === "CollapseBox" || ctrl.type === "Supplier" || ctrl.type === "VariableSupplier";
-    if (check && ctrl.children === undefined)
-        throw "The " + ctrl.type + " with name: '" + ctrl.name + "' does not have the 'children' property.";
-
-    if (check && (ctrl.optionId !== undefined || ctrl.valueKey !== undefined))
-        throw "The " + ctrl.type + " with name: '" + ctrl.name + "' cannot contain properties 'optionId' or 'valueKey'.";
-
-    return check;
-};
-
 const isPureContainerControl = function(ctrl) {
-    if (ctrl.type === "CheckBox" || ctrl.type === "RadioButton" || (ctrl.type === "Label" && ctrl.label === undefined))
-        return false;
-
-    return isContainerControl(ctrl);
+    return uiOptionControl[ctrl.type].isContainerControl(ctrl) && uiOptionControl[ctrl.type].isOptionControl(ctrl) === false
 };
 
 const isOptionControl = function(ctrl, optionName) {
-    let isOptionCtrl = isPureContainerControl(ctrl) === false;
+    if (ctrl.type === undefined)
+        return false;
+
+    let isOptionCtrl = uiOptionControl[ctrl.type].isOptionControl(ctrl);
 
     if (isOptionCtrl) {
         if (optionName !== undefined)
@@ -519,26 +568,10 @@ const isOptionControl = function(ctrl, optionName) {
 
 const areControlsCompatibleSibblings = function(ctrl1, ctrl2) {
 
-    if (ctrl1.type === 'CheckBox' || ctrl1.type === 'RadioButton')
-        return ctrl2.type === 'CheckBox' || ctrl2.type === 'RadioButton';
-    else if (ctrl2.type === 'CheckBox' || ctrl2.type === 'RadioButton')
-            return false
+    let i1 = uiOptionControl[ctrl1.type].usesSingleCell(ctrl1);
+    let i2 = uiOptionControl[ctrl2.type].usesSingleCell(ctrl2);
 
-    return true;
-};
-
-const areControlsGroupCompatible = function(optionType1, optionType2) {
-    if ((optionType1 === 'Bool' || optionType2 === 'Bool') && optionType1 !== optionType2)
-        return false;
-
-    return true;
-};
-
-const getIndent = function(count) {
-    var s = '';
-    for (let i = 0; i < count; i++)
-        s += '    ';
-    return s;
+    return i1 && i2;
 };
 
 const ff = function(item) {
@@ -591,7 +624,6 @@ const groupConstructors = {
             case "Term":
                 return "Supplier";
             case "Array":
-
                 return null;
         }
 
@@ -651,177 +683,660 @@ const CheckTemplateState = function(item, ctrl, isTemplate) {
 };
 
 
+const compatibleDataTypes = function(ctrl, opt) {
+    let ctrl_raw = uiOptionControl[ctrl.type].toRaw(ctrl);
+    let opt_raw = constructors[opt.type].toRaw(opt);
+
+    let r = compareTypeObjects(ctrl_raw, opt_raw);
+    /*if (r === false) {
+        console.log('#############################');
+        console.log(util.inspect(ctrl_raw, false, null));
+        console.log('=============================');
+        console.log(util.inspect(opt_raw, false, null));
+        console.log('-----------------------------');
+    }*/
+    return r;
+};
+
+const compareTypeObjects = function(subType, fullType) {
+    if (typeof subType !== 'object')
+        return subType === fullType;
+
+    if (typeof fullType !== 'object')
+        return false;
+
+    if (subType.type !== fullType.type)
+        return false;
+
+    if (subType.type === 'array')
+        return compareTypeObjects(subType.template, fullType.template);
+
+    if (subType.type === 'object') {
+        for (let i = 0; i < subType.elements.length; i++) {
+            let e1 = subType.elements[i];
+            let found = false;
+            for (let j = 0; j < fullType.elements.length; j++) {
+                let e2 = fullType.elements[j];
+                if (e1.key === e2.key) {
+                    found = true;
+                    break;
+                }
+            }
+            if (found === false)
+                return false;
+        }
+    }
+
+    return true;
+};
+
 const constructors = {
 
-    Integer: function(item, isTemplate) {
-        let ctrl = { };
-        ctrl.type = 'TextBox';
-        CheckTemplateState(item, ctrl, isTemplate);
-        if (item.name !== undefined || item.title !== undefined)
-            ctrl.label = item.title !== undefined ? item.title : item.name;
-        ctrl.format = "number";
-        ctrl.inputPattern = "[0-9]+";
-        return ctrl
-    },
-
-    Number: function(item, isTemplate) {
-        let ctrl = { };
-        ctrl.type = 'TextBox';
-        CheckTemplateState(item, ctrl, isTemplate);
-        if (item.name !== undefined || item.title !== undefined)
-            ctrl.label = item.title !== undefined ? item.title : item.name;
-        ctrl.format = "number";
-        ctrl.inputPattern = "[0-9]+";
-        return ctrl
-    },
-
-    Bool: function(item, isTemplate) {
-        let ctrl = { };
-        ctrl.type = 'CheckBox';
-        CheckTemplateState(item, ctrl, isTemplate);
-        if (item.name !== undefined || item.title !== undefined)
-            ctrl.label = item.title !== undefined ? item.title : item.name;
-        return ctrl
-    },
-
-    NMXList: function(item, isTemplate) {
-        let ctrl = groupConstructors.open_Label(item.title);
-        CheckTemplateState(item, ctrl, isTemplate);
-        if (item.options.length <= 3)
-            ctrl.style = "list-inline";
-        for (let i = 0; i < item.options.length; i++) {
-            let option = item.options[i];
-            let checkbox = { };
-            checkbox.name = item.name + "_" + option.name;
-            checkbox.type = 'CheckBox';
-            checkbox.label = option.title;
-            checkbox.checkedValue = option.name;
-            checkbox.optionId = item.name;
-            ctrl.children.push(checkbox);
+    Integer: {
+        create: function(item, isTemplate) {
+            let ctrl = { };
+            ctrl.type = 'TextBox';
+            CheckTemplateState(item, ctrl, isTemplate);
+            ctrl.format = "number";
+            ctrl.inputPattern = "[0-9]+";
+            return ctrl
+        },
+        toRaw: function() {
+            return "number";
         }
-
-        return ctrl;
     },
 
-    List: function(item, isTemplate) {
-        var ctrl = { };
-        ctrl.type = 'ComboBox';
-        CheckTemplateState(item, ctrl, isTemplate);
-        if (item.name !== undefined || item.title !== undefined)
-            ctrl.label = item.title !== undefined ? item.title : item.name;
-        if (item.options.length > 0) {
-            ctrl.options = [];
-            for (let j = 0; j < item.options.length; j++) {
-                let option = item.options[j];
-                if (typeof option === "string")
-                    ctrl.options.push({ label: option, value: option });
-                else
-                    ctrl.options.push({ label: option.title, value: option.name });
+    Number: {
+        create: function(item, isTemplate) {
+            let ctrl = { };
+            ctrl.type = 'TextBox';
+            CheckTemplateState(item, ctrl, isTemplate);
+            ctrl.format = "number";
+            ctrl.inputPattern = "[0-9]+";
+            return ctrl
+        },
+        toRaw: function() {
+            return "number";
+        }
+    },
+
+    Bool: {
+        create: function(item, isTemplate) {
+            let ctrl = { };
+            ctrl.type = 'CheckBox';
+            CheckTemplateState(item, ctrl, isTemplate);
+            return ctrl
+        },
+        toRaw: function() {
+            return "boolean";
+        }
+    },
+
+    NMXList: {
+        create: function(item, isTemplate) {
+            let ctrl = groupConstructors.open_Label(item.title);
+            CheckTemplateState(item, ctrl, isTemplate);
+            if (item.options.length <= 3)
+                ctrl.style = "list-inline";
+            for (let i = 0; i < item.options.length; i++) {
+                let option = item.options[i];
+                let checkbox = constructors.NMXList.createFragment(item, option.name);
+                ctrl.children.push(checkbox);
             }
+
+            return ctrl;
+        },
+        createFragment: function(item, fragmentName) {
+            let checkbox = { };
+            checkbox.name = item.name + "_" + fragmentName;
+            checkbox.type = 'CheckBox';
+            checkbox.focusValue = fragmentName;
+            checkbox.optionId = item.name;
+            return checkbox;
+        },
+        toRaw: function(obj) {
+            return { type: "array", template: { type: "enum", template: "string", options: obj.options } };
         }
-        return ctrl;
     },
 
-    Terms: function(item, isTemplate) {
-        let ctrl = { };
-        ctrl.type = 'ListBox';
-        CheckTemplateState(item, ctrl, isTemplate);
-        if (item.name !== undefined || item.title !== undefined)
-            ctrl._target_label = item.title !== undefined ? item.title : item.name;
-        ctrl.isTarget = true;
-        ctrl.template = {
-            type: "TermLabel"
-        };
-
-        return ctrl;
+    List: {
+        create: function(item, isTemplate) {
+            var ctrl = { };
+            ctrl.type = 'ComboBox';
+            CheckTemplateState(item, ctrl, isTemplate);
+            return ctrl;
+        },
+        createFragment: function(item, fragmentName) {
+            let ctrl = { };
+            ctrl.name = item.name + "_" + fragmentName;
+            ctrl.type = 'RadioButton';
+            ctrl.focusValue = fragmentName;
+            ctrl.optionId = item.name;
+            return ctrl;
+        },
+        toRaw: function(obj) {
+            return { type: "enum", template: "string", options: obj.options };
+        }
     },
 
-    String: function(item, isTemplate) {
-        let ctrl = { };
-        ctrl.type = "TextBox";
-        CheckTemplateState(item, ctrl, isTemplate);
-        if (item.name !== undefined || item.title !== undefined)
-            ctrl.label = item.title !== undefined ? item.title : item.name;
-        ctrl.format = "string";
-        return ctrl;
+    Terms: {
+        create: function(item, isTemplate) {
+            let ctrl = { };
+            ctrl.type = 'ListBox';
+            CheckTemplateState(item, ctrl, isTemplate);
+            if (item.name !== undefined || item.title !== undefined)
+                ctrl._target_label = item.title !== undefined ? item.title : item.name;
+            ctrl.isTarget = true;
+            ctrl.template = {
+                type: "TermLabel"
+            };
+
+            return ctrl;
+        },
+        toRaw: function() {
+            return { type: "array", template: { type: "array", template: "string" } };
+        }
     },
 
-    Variables: function(item, isTemplate) {
-        let ctrl = { }
-        ctrl.type = "VariablesListBox";
-        CheckTemplateState(item, ctrl, isTemplate);
-        if (isTemplate === false && (item.name !== undefined || item.title !== undefined))
-            ctrl._target_label = item.title !== undefined ? item.title : item.name;
-        ctrl.isTarget = true;
-        return ctrl;
+    String: {
+        create: function(item, isTemplate) {
+            let ctrl = { };
+            ctrl.type = "TextBox";
+            CheckTemplateState(item, ctrl, isTemplate);
+            ctrl.format = "string";
+            return ctrl;
+        },
+        toRaw: function() {
+            return "string";
+        }
     },
 
-    Variable: function(item, isTemplate) {
-        let ctrl = { }
-        ctrl.type = "VariablesListBox";
-        CheckTemplateState(item, ctrl, isTemplate);
-        if (isTemplate === false && (item.name !== undefined || item.title !== undefined))
-            ctrl._target_label = item.title !== undefined ? item.title : item.name;
-        ctrl.maxItemCount = 1;
-        ctrl.isTarget = true;
-        return ctrl;
+    Variables: {
+        create: function(item, isTemplate) {
+            let ctrl = { }
+            ctrl.type = "VariablesListBox";
+            CheckTemplateState(item, ctrl, isTemplate);
+            if (isTemplate === false && (item.name !== undefined || item.title !== undefined))
+                ctrl._target_label = item.title !== undefined ? item.title : item.name;
+            ctrl.isTarget = true;
+            return ctrl;
+        },
+        toRaw: function() {
+            return { type: "array", template: "string" };
+        }
     },
 
-    Array: function(item, isTemplate) {
-        var ctrl = { };
+    Variable: {
+        create: function(item, isTemplate) {
+            let ctrl = { }
+            ctrl.type = "VariablesListBox";
+            CheckTemplateState(item, ctrl, isTemplate);
+            if (isTemplate === false && (item.name !== undefined || item.title !== undefined))
+                ctrl._target_label = item.title !== undefined ? item.title : item.name;
+            ctrl.maxItemCount = 1;
+            ctrl.isTarget = true;
+            return ctrl;
+        },
+        toRaw: function() {
+            return "string";
+        }
+    },
 
-        ctrl.type = "ListBox";
-        CheckTemplateState(item, ctrl, isTemplate);
-        if (isTemplate === false && (item.name !== undefined || item.title !== undefined))
-            ctrl._target_label = item.title !== undefined ? item.title : item.name;
-        ctrl.showColumnHeaders = false;
-        ctrl.fullRowSelect = true;
-        ctrl.stretchFactor = 1;
+    Array: {
+        create: function(item, isTemplate) {
+            var ctrl = { };
 
-        if (item.template.type === 'Group') {
+            ctrl.type = "ListBox";
+            CheckTemplateState(item, ctrl, isTemplate);
+            if (isTemplate === false && (item.name !== undefined || item.title !== undefined))
+                ctrl._target_label = item.title !== undefined ? item.title : item.name;
+            ctrl.showColumnHeaders = false;
+            ctrl.fullRowSelect = true;
+            ctrl.stretchFactor = 1;
+
+            if (item.template.type === 'Group') {
+                ctrl.columns = [ ];
+                for (let i = 0; i < item.template.elements.length; i++) {
+                    let column = item.template.elements[i];
+                    let columnData = {
+                        name: column.name,
+                        stretchFactor: 1
+                    }
+                    columnData.template = constructors[column.type].create(column, true);
+                    ctrl.columns.push(columnData);
+                }
+            }
+            else
+                ctrl.template = constructors[item.template.type].create(item.template, true);
+
+            return ctrl;
+        },
+        toRaw: function(obj) {
+            return { type: "array", template: constructors[obj.template.type].toRaw(obj.template) };
+        }
+    },
+
+    Pairs: {
+        create: function(item, isTemplate) {
+            var ctrl = { };
+            ctrl.type = "VariablesListBox";
+            CheckTemplateState(item, ctrl, isTemplate);
+            if (isTemplate === false && (item.name !== undefined || item.title !== undefined))
+                ctrl._target_label = item.title !== undefined ? item.title : item.name;
+            ctrl.fullRowSelect = true;
+            ctrl.isTarget = true;
+            ctrl.columns = [
+                {
+                    name: "i1",
+                    stretchFactor: 1,
+                    template: {
+                        type: "VariableLabel"
+                    }
+                },
+                {
+                    name: "i2",
+                    stretchFactor: 1,
+                    template: {
+                        type: "VariableLabel"
+                    }
+                }
+            ];
+            return ctrl;
+        },
+        toRaw: function() {
+            return {
+                type: "array",
+                template: {
+                    type: "object",
+                    elements: [
+                        {
+                            key: "i1",
+                            type: "string"
+                        },
+                        {
+                            key: "i2",
+                            type: "string"
+                        }
+                    ]
+                }
+            };
+        }
+    },
+
+    Group: {
+        create: function(item, isTemplate) {
+            let ctrl = { }
+            ctrl.type = "ListBox";
+            CheckTemplateState(item, ctrl, isTemplate);
+            if (isTemplate === false && (item.name !== undefined || item.title !== undefined))
+                ctrl._target_label = item.title !== undefined ? item.title : item.name;
+            ctrl.maxItemCount = 1;
+
             ctrl.columns = [ ];
-            for (let i = 0; i < item.template.elements.length; i++) {
-                let column = item.template.elements[i];
+            for (let i = 0; i < item.elements.length; i++) {
+                let column = item.elements[i];
                 let columnData = {
                     name: column.name,
                     stretchFactor: 1
                 }
-                columnData.template = constructors[column.type](column, true);
+                columnData.template = constructors[column.type].create(column, true);
                 ctrl.columns.push(columnData);
             }
-        }
-        else
-            ctrl.template = constructors[item.template.type](item.template, true);
 
-        return ctrl;
+            return ctrl;
+        },
+        toRaw: function(obj) {
+            let props = [];
+            for (let i = 0; i < obj.elements.length; i++)
+                props[i] = { key: obj.elements[i].name, template: constructors[obj.elements[i].type].toRaw(obj.elements[i]) };
+
+            return { type: "object", elements: props }
+        }
+    },
+};
+
+const uiOptionControl = {
+    Label: {
+        usesSingleCell: function(ctrl) {
+            return true;
+        },
+        isContainerControl: function(ctrl) {
+            return ctrl.children !== undefined && ctrl.children.length > 0;
+        },
+        isOptionControl: function(ctrl) {
+            return ctrl.label === undefined && ctrl.isVirtual !== true;
+        },
+        toRaw: function(ctrl) {
+            if (ctrl.label !== undefined)
+                return null;
+
+            if (ctrl.format !== undefined)
+                return ctrl.format;
+            else
+                return "string";
+        }
     },
 
-    Pairs: function(item, isTemplate) {
-        var ctrl = { };
-        ctrl.type = "VariablesListBox";
-        CheckTemplateState(item, ctrl, isTemplate);
-        if (isTemplate === false && (item.name !== undefined || item.title !== undefined))
-            ctrl._target_label = item.title !== undefined ? item.title : item.name;
-        ctrl.fullRowSelect = true;
-        ctrl.isTarget = true;
-        ctrl.columns = [
-            {
-                name: "i1",
-                stretchFactor: 1,
-                template: {
-                    type: "VariableLabel"
-                }
-            },
-            {
-                name: "i2",
-                stretchFactor: 1,
-                template: {
-                    type: "VariableLabel"
+    TextBox: {
+        usesSingleCell: function(ctrl) {
+            return ctrl.useSingleCell === true;
+        },
+        isContainerControl: function(ctrl) {
+            return false;
+        },
+        isOptionControl: function(ctrl) {
+            return ctrl.isVirtual !== true;
+        },
+        toRaw: function(ctrl) {
+            if (ctrl.format !== undefined)
+                return ctrl.format;
+            else
+                return "string";
+        }
+    },
+
+    ComboBox: {
+        usesSingleCell: function(ctrl) {
+            return ctrl.useSingleCell === true;
+        },
+        isContainerControl: function(ctrl) {
+            return false;
+        },
+        isOptionControl: function(ctrl) {
+            return ctrl.isVirtual !== true;
+        },
+        toRaw: function(ctrl) {
+            return { type: "enum", template: "string" };
+        }
+    },
+
+    CheckBox:  {
+        usesSingleCell: function(ctrl) {
+            return true;
+        },
+        isContainerControl: function(ctrl) {
+            return ctrl.children !== undefined && ctrl.children.length > 0;
+        },
+        isOptionControl: function(ctrl) {
+            return ctrl.isVirtual !== true;
+        },
+        toRaw: function(ctrl) {
+            if (ctrl.focusValue !== undefined)
+                return { type: "array", template: { type: "enum", template: "string" } };
+
+            return "boolean";
+        }
+    },
+
+    RadioButton: {
+        usesSingleCell: function(ctrl) {
+            return true;
+        },
+        isContainerControl: function(ctrl) {
+            return ctrl.children !== undefined && ctrl.children.length > 0;
+        },
+        isOptionControl: function(ctrl) {
+            return ctrl.isVirtual !== true;
+        },
+        toRaw: function(ctrl) {
+            if (ctrl.focusValue !== undefined)
+                return { type: "enum", template: "string" };
+
+            return "boolean";
+        }
+    },
+
+    ListBox: {
+        usesSingleCell: function(ctrl) {
+            return true;
+        },
+        isContainerControl: function(ctrl) {
+            return false;
+        },
+        isOptionControl: function(ctrl) {
+            return ctrl.isVirtual !== true;
+        },
+        toRaw: function(ctrl) {
+
+            let template = null;
+            if (ctrl.template !== undefined)
+                template = determineTemplateType(ctrl.template);
+            else if (ctrl.columns !== undefined) {
+                if (ctrl.columns.length === 1)
+                    template = determineTemplateType(ctrl.columns[0].template);
+                else {
+                    let props = [];
+                    for (let i = 0; i < ctrl.columns.length; i++) {
+                        if (ctrl.columns[i].isVirtual !== true) {
+                            let temp = determineTemplateType(ctrl.columns[i].template);
+                            props.push({ key: ctrl.columns[i].name, template: temp });
+                        }
+                    }
+                    if (props.length > 1)
+                        template = { type: "object", elements: props };
+                    else
+                        template = props[0].template;
                 }
             }
-        ];
-        return ctrl;
+            else
+                throw "ListBox is missing columns.";
+
+            if (ctrl.maxItemCount === 1)
+                return template;
+
+            return { type: "array", template: template };
+
+        }
+    },
+
+    VariableLabel: {
+        usesSingleCell: function(ctrl) {
+            return true;
+        },
+        isContainerControl: function(ctrl) {
+            return false;
+        },
+        isOptionControl: function(ctrl) {
+            return ctrl.isVirtual !== true;
+        },
+        toRaw: function() {
+            return "string";
+        }
+    },
+
+    TermLabel: {
+        usesSingleCell: function(ctrl) {
+            return true;
+        },
+        isContainerControl: function(ctrl) {
+            return false;
+        },
+        isOptionControl: function(ctrl) {
+            return ctrl.isVirtual !== true;
+        },
+        toRaw: function() {
+            return { type: "array", template: "string" };;
+        }
+    },
+
+    VariablesListBox: {
+        usesSingleCell: function(ctrl) {
+            return true;
+        },
+        isContainerControl: function(ctrl) {
+            return false;
+        },
+        isOptionControl: function(ctrl) {
+            return ctrl.isVirtual !== true;
+        },
+        toRaw: function(ctrl) {
+
+            if (ctrl.columns !== undefined || ctrl.template !== undefined)
+                return uiOptionControl.ListBox.toRaw(ctrl);
+
+            if (ctrl.maxItemCount === 1)
+                return "string";
+
+            return { type: "array", template: "string" };
+        }
+    },
+
+    RMAnovaFactorsBox: {
+        usesSingleCell: function(ctrl) {
+            return true;
+        },
+        isContainerControl: function(ctrl) {
+            return false;
+        },
+        isOptionControl: function(ctrl) {
+            return ctrl.isVirtual !== true;
+        },
+        toRaw: function() {
+            return {
+                type: "array",
+                template: {
+                    type: "object",
+                    elements: [
+                        { key: "label", template: "string" },
+                        { key: "levels", template: { type: "array", template: "string" } }
+                    ]
+                }
+            };
+        }
+    },
+
+    TargetLayoutBox: {
+        usesSingleCell: function(ctrl) {
+            return false;
+        },
+        isContainerControl: function(ctrl) {
+            return true;
+        },
+        isOptionControl: function(ctrl) {
+            return false;
+        }
+    },
+
+    Supplier: {
+        usesSingleCell: function(ctrl) {
+            return true;
+        },
+        isContainerControl: function(ctrl) {
+            return true;
+        },
+        isOptionControl: function(ctrl) {
+            return false;
+        }
+    },
+
+    VariableSupplier: {
+        usesSingleCell: function(ctrl) {
+            return true;
+        },
+        isContainerControl: function(ctrl) {
+            return true;
+        },
+        isOptionControl: function(ctrl) {
+            return false;
+        }
+    },
+
+    CollapseBox: {
+        usesSingleCell: function(ctrl) {
+            return true;
+        },
+        isContainerControl: function(ctrl) {
+            return true;
+        },
+        isOptionControl: function(ctrl) {
+            return false;
+        }
+    },
+
+    LayoutBox: {
+        usesSingleCell: function(ctrl) {
+            return true;
+        },
+        isContainerControl: function(ctrl) {
+            return true;
+        },
+        isOptionControl: function(ctrl) {
+            return false;
+        }
     }
-}
+};
+
+const combineDataTypes = function(data1, data2) {
+    let nData = { };
+    if (data1.type === data2.type) {
+        if (data1.elements === undefined || data2.elements === undefined)
+            throw 'Cannot combine data types that have no elements.';
+
+        nData.type = data1.type;
+        nData.elements = data1.elements.slice();
+        for (let i = 0; i < data2.elements.length; i++) {
+            let found = false;
+            for (let j = 0; j < nData.elements.length; j++) {
+                if (nData.elements[j].key === data2.elements[i].key) {
+                    nData.elements[j] = combineDataTypes(nData.elements[j], data2.elements[i]);
+                    found = true;
+                    break;
+                }
+            }
+            if (found === false)
+                nData.elements.push(data2.elements[i]);
+        }
+    }
+    else
+        throw 'Cannot combine different data types.';
+
+};
+
+const determineTemplateType = function(template) {
+    let elements = [];
+    let ctrlInfo = uiOptionControl[template.type];
+    if (ctrlInfo !== undefined) {
+        let dataType = null;
+        if (template.children !== undefined) {
+            for (let i = 0; i < template.children.length; i++) {
+                let temp = determineTemplateType(template.children[i]);
+                if (temp !== null) {
+                    if (temp.key === undefined) {
+                        if (dataType !== null)
+                            dataType = combineDataTypes(dataType, temp);
+                        else
+                            dataType = temp
+                    }
+                    else {
+                        if (dataType !== null && dataType.elements === undefined)
+                            throw 'Cannot add element to a non object.';
+                        if (dataType === null && typeof temp.key === 'number')
+                            dataType = { type: 'array', elements: elements };
+                        else if ((dataType === null || dataType.type !== 'object') && typeof temp.key === 'string') {
+                            dataType = { type: 'object', elements: elements };
+                        }
+                        elements.push(temp);
+                    }
+                }
+            }
+        }
+
+        if (ctrlInfo.isOptionControl(template)) {
+            let dataType2 = uiOptionControl[template.type].toRaw(template);
+            if (template.valueKey !== undefined && template.valueKey.length > 0) {
+                for (let i = 0; i < template.valueKey.length; i++)
+                    dataType2 = { key: template.valueKey[template.valueKey.length - i - 1], template: dataType2 };
+            }
+            if (dataType !== null)
+                dataType = combineDataTypes(dataType, dataType2);
+            else
+                dataType = dataType2;
+        }
+
+        return dataType;
+    }
+
+    throw "Unknown control. This compiler does not currently support custom controls."
+};
 
 module.exports = uicompile;

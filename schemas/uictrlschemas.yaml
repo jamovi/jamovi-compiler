@@ -109,6 +109,8 @@ OptionControl:
                 - inline-list
         valueKey:
             type: array
+        focusValue:
+            type: string
         enable:
             type: string
             pattern: "^\\([a-zA-Z0-9_\\:?\\=\\<\\>]+\\)"
@@ -210,7 +212,7 @@ OptionListControl:
 CheckBox:
     type: object
     properties:
-        checkedValue:
+        focusValue:
             type: string
 
 ComboBox:
@@ -222,22 +224,20 @@ ComboBox:
                 type: object
                 additionalProperties: false
                 properties:
-                    label:
+                    title:
                         type: string
-                    value:
+                    name:
                         type: string
             minItems: 1
-    required:
-        - options
 
 RadioButton:
     type: object
     properties:
-        checkedValue:
+        focusValue:
             type: string
     required:
         - optionId
-        - checkedValue
+        - focusValue
 
 TextBox:
     type: object
