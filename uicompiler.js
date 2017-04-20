@@ -1336,7 +1336,7 @@ const determineTemplateType = function(template) {
         return dataType;
     }
 
-    throw "Unknown control. This compiler does not currently support custom controls."
+    throw "Unknown control '" + template.type + "'. This compiler does not currently support custom controls."
 };
 
 module.exports = uicompile;
