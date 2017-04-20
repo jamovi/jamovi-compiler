@@ -40,6 +40,18 @@ const layoutUpgrade_2_0 = function(ctrl, parent) {
         if (ctrl.columns !== undefined) {
             for (let c = 0; c < ctrl.columns.length; c++) {
                 let column = ctrl.columns[c];
+
+                if (column.type === "ListItem.TextBox")
+                    column.type = "TextBox";
+                else if (column.type === "ListItem.ComboBox")
+                    column.type = "ComboBox";
+                else if (column.type === "ListItem.TermLabel")
+                    column.type = "TermLabel";
+                else if (column.type === "ListItem.VariableLabel")
+                    column.type = "VariableLabel";
+                else if (column.type === "ListItem.Label")
+                    column.type = "Label";
+
                 if (column.template === undefined) {
 
                     let template = { type: column.type };
