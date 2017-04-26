@@ -85,6 +85,8 @@ ControlContainer:
                 - inline
         children:
             type: array
+        targetArea:
+            type: bool
     required:
         - children
 
@@ -262,6 +264,10 @@ TargetLayoutBox:
     properties:
         label:
             type: string
+        dropOverflow:
+            enum:
+                - tryNext
+                - discard
 
 TargetListSupport:
     type: object
@@ -331,6 +337,8 @@ EmbeddedChildSupport:
                 - inline-list
         children:
             type: Array
+        targetArea:
+            type: bool
 
 Supplier:
     type: object
