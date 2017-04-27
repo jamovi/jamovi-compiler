@@ -294,6 +294,8 @@ try {
 
     Promise.all(waits).then(() => {  // wait for all the browserifies to finish
 
+        console.log('writing module meta');
+
         let indexPath = path.join(defDir, '0000.yaml');
 
         if (packageInfo.date instanceof Date)
@@ -301,10 +303,12 @@ try {
 
         let content = '---\n' + yaml.safeDump(packageInfo) + '\n...\n';
         fs.writeFileSync(indexPath, content);
+        console.log('wrote: 0000.yaml');
 
         if (isBuilding || isInstallingTo) {
 
             fs.writeFileSync(path.join(modDir, 'jamovi.yaml'), content);
+            console.log('wrote: jamovi.yaml');
 
             compileR(srcDir, modDir, paths, packageInfo);
 
