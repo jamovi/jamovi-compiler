@@ -208,7 +208,13 @@ const optionify = function(option, optionName, optionValue, indent) {
             prop === 'description')
                 continue;
 
-        str += ',\n' + indent + prop + '=' + sourcifyOption(option[prop], optionName, 'NULL', indent);
+        let value = option[prop];
+
+        if ((option.type === 'List' || option.type === 'NMXList') &&
+            prop === 'options')
+                value = value.map(v => v.name ? v.name : v);
+
+        str += ',\n' + indent + prop + '=' + sourcifyOption(value, optionName, 'NULL', indent);
     }
 
     str += ')'
