@@ -31,6 +31,7 @@ properties:
                         - Preformatted
                         - Html
                         - State
+                        - Property
                 clearWith:
                     type:
                       - array

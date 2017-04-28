@@ -322,18 +322,38 @@ const resultsify = function(item, indent, root) {
         str += '\n    ' + indent + '    initialize=function(options) {';
         str += '\n    ' + indent + '        super$initialize(options=options, name="' + name + '", title="' + title + '")';
 
-        for (let child of items)
-            str += '\n    ' + indent + '        private$..' + child.name + ' <- ' + sourcifyResults(child, indent + '        ');
+        for (let child of items) {
+            let body;
+            if (child.type === 'Property')
+                body = 'NULL'
+            else
+                body = sourcifyResults(child, indent + '        ');
+            str += '\n    ' + indent + '        private$..' + child.name + ' <- ' + body;
+        }
 
-        for (let child of items)
-            str += '\n    ' + indent + '        self$add(private$..' + child.name + ')';
+        for (let child of items) {
+            if (child.type !== 'Property')
+                str += '\n    ' + indent + '        self$add(private$..' + child.name + ')';
+        }
 
         str += '}'
+
+        for (let child of items) {
+            if (child.type !== 'Property')
+                continue;
+            let name = child.name;
+            name = name[0].toUpperCase() + name.substring(1);
+            str += ',\n    ' + indent + '    set' + name + '=function(x) private$..' + child.name + ' <- x';
+        }
+
         str += ')'
         str += ')';
 
         if ( ! root)
             str += '$new(options=options)';
+    }
+    else if (item.type === 'Property') {
+        // do nothing
     }
     else if (item.type) {
 
