@@ -366,12 +366,17 @@ try {
 }
 catch (e) {
     fs.writeSync(2, '\n');
-    if (typeof(e) === 'string')
+    if (typeof(e) === 'string') {
         fs.writeSync(2, e);
-    else if ('message' in e)
+    }
+    else if ('message' in e) {
+        fs.writeSync(2, e.stack)
+        fs.writeSync(2, '\n\n');
         fs.writeSync(2, e.message);
-    else
+    }
+    else {
         fs.writeSync(2, e);
+    }
     fs.writeSync(2, '\n\n');
     process.exit(1);
 }
