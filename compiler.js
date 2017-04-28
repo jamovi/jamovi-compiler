@@ -142,7 +142,8 @@ const asciify = function(text) {
         .replace(/ω/g, 'omega')
         .replace(/α/g, 'alpha')
         .replace(/η/g, 'eta')
-        .replace(/χ/g, 'X');
+        .replace(/χ/g, 'X')
+        .replace(/─/g, '-')
 };
 
 const sourcifyOption = function(object, optionName, optionValue, indent) {
