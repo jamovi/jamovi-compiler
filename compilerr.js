@@ -54,22 +54,31 @@ const included = [
     'ggplot2',
 ];
 
-const compile = function(srcDir, moduleDir, paths, packageInfo) {
+const compile = function(srcDir, moduleDir, paths, packageInfo, log) {
 
     let rDir = path.join(moduleDir, 'R');
     let buildDir = path.join(srcDir, 'build', 'R');
 
     try {
+        log.debug('checking existence of ' + buildDir);
         fs.statSync(buildDir);
+        log.debug('exists');
     }
     catch (e) {
+        log.debug(e.message);
+        log.debug('creating ' + buildDir);
         fs.mkdirsSync(buildDir);
+        log.debug('created');
     }
 
+    log.debug('reading dir ' + buildDir);
     let installed = fs.readdirSync(buildDir);
+    log.debug('read');
 
+    log.debug('reading DESCRIPTION');
     let descPath = path.join(srcDir, 'DESCRIPTION');
     let desc = fs.readFileSync(descPath, 'utf-8');
+    log.debug('read');
     desc = desc.replace(/\r?\n /g, ' ')
 
     let depends = desc.match(/\nDepends\s*:\s*(.*)\r?\n/);
@@ -121,15 +130,21 @@ const compile = function(srcDir, moduleDir, paths, packageInfo) {
         }
     }
 
+    log.debug('creating temp dir');
     let tempPath = temp.mkdirSync();
+    log.debug('created');
+    log.debug('copying src to temp');
     fs.copySync(srcDir, tempPath);
+    log.debug('copied')
 
     let toAppend = ''
     for (let analysis of packageInfo.analyses)
         toAppend += util.format('\nexport(%s)\nexport(%sClass)\nexport(%sOptions)\n', analysis.name, analysis.name, analysis.name)
 
     let tempNAMESPACE = path.join(tempPath, 'NAMESPACE');
+    log.debug('appending to NAMESPACE');
     fs.appendFileSync(tempNAMESPACE, toAppend);
+    log.debug('appended');
 
     try {
         if (process.platform === 'darwin')
@@ -138,13 +153,17 @@ const compile = function(srcDir, moduleDir, paths, packageInfo) {
             cmd = util.format('"%s" CMD INSTALL "--library=%s" "%s"', paths.rExe, buildDir, tempPath);
         else
             cmd = util.format('R CMD INSTALL "--library=%s" "%s"', buildDir, tempPath);
+        log.debug('executing ' + cmd);
         sh(cmd, { stdio: [0, 1, 1], encoding: 'utf-8', env: env } );
+        log.debug('executed');
     }
     catch(e) {
         throw 'Could not build module';
     }
 
+    log.debug('copying to R dir');
     fs.copySync(buildDir, rDir);
+    log.debug('copied');
 }
 
 module.exports = compile

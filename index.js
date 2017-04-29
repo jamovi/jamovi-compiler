@@ -12,6 +12,7 @@ const JSZip = require('jszip');
 const walkSync = require('walk-sync');
 const CLA = require('command-line-args');
 const needle = require('needle');
+const Log = require('log');
 
 const ARGS = [
     { name: 'build',   alias: 'b', type: String },
@@ -22,6 +23,7 @@ const ARGS = [
     { name: 'home',  type: String },
     { name: 'to',    type: String },
     { name: 'rpath', type: String },
+    { name: 'debug', type: Boolean },
 ];
 
 const temp = require('temp');
@@ -49,6 +51,12 @@ try {
     let isSubmitting = false;
 
     const args = CLA(ARGS);
+
+    let log;
+    if (args.debug)
+        log = new Log('debug');
+    else
+        log = new Log('notice');
 
     let srcDir;
     let installDir;
@@ -310,7 +318,7 @@ try {
             fs.writeFileSync(path.join(modDir, 'jamovi.yaml'), content);
             console.log('wrote: jamovi.yaml');
 
-            compileR(srcDir, modDir, paths, packageInfo);
+            compileR(srcDir, modDir, paths, packageInfo, log);
 
             if (isBuilding) {
 
