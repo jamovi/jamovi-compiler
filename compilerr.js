@@ -133,6 +133,15 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log) {
     log.debug('creating temp dir');
     let tempPath = temp.mkdirSync();
     log.debug('created');
+
+    // it looks as though mkdirSync() doesn’t always complete synchronously
+    log.debug('sleeping');
+    let date = new Date();
+    let curDate = null;
+    do { curDate = new Date(); }
+    while(curDate-date < 2000);
+    log.debug('awoken');
+
     log.debug('copying src to temp');
     fs.copySync(srcDir, tempPath);
     log.debug('copied')
