@@ -58,6 +58,7 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log) {
 
     let rDir = path.join(moduleDir, 'R');
     let buildDir = path.join(srcDir, 'build', 'R');
+    let tempPath = path.join(srcDir, 'temp');
 
     try {
         log.debug('checking existence of ' + buildDir);
@@ -131,20 +132,28 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log) {
     }
 
     log.debug('creating temp dir');
-    let tempPath = temp.mkdirSync();
+    fs.emptydirSync(tempPath);
     log.debug('created');
 
-    // it looks as though mkdirSync() doesn’t always complete synchronously
-    log.debug('sleeping');
-    let date = new Date();
-    let curDate = null;
-    do { curDate = new Date(); }
-    while(curDate-date < 2000);
-    log.debug('awoken');
-
     log.debug('copying src to temp');
-    fs.copySync(srcDir, tempPath);
-    log.debug('copied')
+    for (let child of fs.readdirSync(srcDir)) {
+        if (child.startsWith('.'))
+            continue;
+        if (child === 'temp')
+            continue;
+        if (child === 'build')
+            continue;
+        if (child === '.git')
+            continue;
+        if (child.endsWith('.jmo'))
+            continue;
+        let src = path.join(srcDir, child);
+        let dest = path.join(tempPath, child);
+        log.debug('copying ' + child);
+        fs.copySync(src, dest);
+        log.debug('copied');
+    }
+    log.debug('all files copied to temp')
 
     let toAppend = ''
     for (let analysis of packageInfo.analyses)
@@ -173,6 +182,10 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log) {
     log.debug('copying to R dir');
     fs.copySync(buildDir, rDir);
     log.debug('copied');
+
+    log.debug('deleting temp');
+    fs.removeSync(tempPath);
+    log.debug('deleted');
 }
 
 module.exports = compile
