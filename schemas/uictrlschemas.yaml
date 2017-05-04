@@ -102,13 +102,6 @@ OptionControl:
             type:
                 - string
                 - null
-        style:
-            type: string
-            enum:
-                - list
-                - inline
-                - list-inline
-                - inline-list
         valueKey:
             type: array
         optionPart:
