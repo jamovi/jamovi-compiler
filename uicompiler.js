@@ -250,13 +250,13 @@ const isOptionValid = function(name, ctrl, options) {
                     for (let j = 0; j < options[i].options.length; j++) {
                         let subOption = options[i].options[j];
                         if ((typeof subOption === 'string' && subOption === ctrl.optionPart) || subOption.name === ctrl.optionPart)
-                            return compatibleDataTypes(ctrl, options[i]);
+                            return options[i].hidden !== true && compatibleDataTypes(ctrl, options[i]);
                     }
                 }
                 return false;
             }
             else
-                return compatibleDataTypes(ctrl, options[i]);
+                return options[i].hidden !== true && compatibleDataTypes(ctrl, options[i]);
         }
     }
 
