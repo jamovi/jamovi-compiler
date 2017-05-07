@@ -144,6 +144,8 @@ const asciify = function(text) {
         .replace(/η/g, 'eta')
         .replace(/χ/g, 'X')
         .replace(/─/g, '-')
+        .replace(/ₐ/g, 'a')
+        .replace(/≠/g, '!=')
 };
 
 const sourcifyOption = function(object, optionName, optionValue, indent) {
