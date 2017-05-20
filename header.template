@@ -17,7 +17,7 @@
             super$initialize(
                 package='<%= packageName %>',
                 name='<%= analysis.name %>',
-                requiresData=<%= analysis.options.filter(o => o.type === 'Data') ? 'TRUE' : 'FALSE' %>,
+                requiresData=<%= analysis.options.filter(o => o.type === 'Data').length !== 0 ? 'TRUE' : 'FALSE' %>,
                 ...)
         <%=analysis.options.filter(o => o.type !== 'Data').map(option => {
                 return '\n            private$..' + option.name + ' <- ' + imports.optionify(option);
