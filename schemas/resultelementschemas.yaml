@@ -11,6 +11,8 @@ Table:
             type: string
         title:
             type: string
+        description:
+            type: string
         rowSelect:
             type: string
             pattern: "^\\([A-Za-z][A-Za-z0-9_]*\\)$"
@@ -80,6 +82,8 @@ Image:
             type: string
         title:
             type: string
+        description:
+            type: string
         width:
             type: integer
             min: 32
@@ -143,6 +147,8 @@ Array:
             type: string
         title:
             type: string
+        description:
+            type: string
         items:
             type:
               - string
@@ -174,6 +180,8 @@ Preformatted:
             type: string
         title:
             type: string
+        description:
+            type: string
         content:
             type: string
         visible:
@@ -196,6 +204,8 @@ Html:
         type:
             type: string
         title:
+            type: string
+        description:
             type: string
         visible:
             type:

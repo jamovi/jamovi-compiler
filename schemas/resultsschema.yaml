@@ -22,6 +22,8 @@ properties:
                     pattern: "^[A-Za-z][A-Za-z0-9]*$"
                 title:
                     type: string
+                description:
+                    type: string
                 type:
                     enum:
                         - Table

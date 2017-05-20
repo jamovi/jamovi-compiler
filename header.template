@@ -106,7 +106,84 @@
     desc = desc.replace('  @param', '@param');
     return desc;
     }).join('\n') %>
-#' @export
+<%
+if (results.items) {
+    print("#' @return A results object containing:\n");
+    print("#' \\tabular{llllll}{\n");
+
+    var firstTable;
+    var firstArray;
+
+    for (var i = 0; i < results.items.length; i++) {
+        var element = results.items[i];
+
+        var desc;
+        var type;
+
+        if (element.type === 'Group') {
+            for (var j = 0; j < element.items.length; j++) {
+                var sub = element.items[j];
+                desc = sub.description;
+
+                type = sub.type;
+                if (type.match(/^[AEIOUaeiou]/))
+                    type = 'an ' + type.toLowerCase();
+                else
+                    type = 'a ' + type.toLowerCase();
+
+                if (desc === undefined)
+                    desc = type;
+                print("#'   \\code{results$" + element.name + '$' + sub.name + '} \\tab \\tab \\tab \\tab \\tab ' + desc + ' \\cr\n');
+            }
+        }
+        else if (element.type === 'Array') {
+
+            desc = element.description;
+            if ( ! desc)
+                desc = 'an array of ' + element.template.type.toLowerCase() + 's';
+            print("#'   \\code{results$" + element.name + '} \\tab \\tab \\tab \\tab \\tab ' + desc + ' \\cr\n');
+        }
+        else {
+            desc = element.description;
+
+            type = element.type;
+
+            if (type === 'Table' && ! firstTable)
+                firstTable = element.name;
+            else if (type === 'Array')
+                firstArray = element.name;
+
+            if (type.match(/^[AEIOUaeiou]/))
+                type = 'an ' + type.toLowerCase();
+            else
+                type = 'a ' + type.toLowerCase();
+
+            if (desc === undefined)
+                desc = type;
+
+            print("#'   \\code{results$" + element.name + '} \\tab \\tab \\tab \\tab \\tab ' + desc + ' \\cr\n');
+        }
+    }
+    print("#' }\n");
+    print("#'\n");
+
+    if (firstTable) {
+        print("#' Tables can be converted to data frames with \\code{asDF} or \\code{\\link{as.data.frame}}. For example:\n")
+        print("#'\n");
+        print("#' \\code{results$" + firstTable + "$asDF}\n")
+        print("#'\n");
+        print("#' \\code{as.data.frame(results$" + firstTable + ")}\n");
+        print("#'\n");
+    }
+
+    if (firstArray) {
+        print("#' Elements in arrays can be accessed with [[n]]. For example:\n")
+        print("#'\n");
+        print("#' \\code{results$" + firstArray + "[[1]] # accesses the first element}\n")
+        print("#'\n");
+    }
+}
+%>#' @export
 <%= analysis.name %> <- function(<%=analysis.options.map(option => {
     if (_.isUndefined(option['default']))
         return '\n    ' + option.name;
