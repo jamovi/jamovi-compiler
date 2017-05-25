@@ -446,7 +446,7 @@ const createChildTree = function(list, indent) {
         let child = children[i];
         let copy = "";
         for (let name in child) {
-            if (name !== "events" && copy !== "")
+            if (/*name !== "events" &&*/ copy !== "")
                 copy += ",\n";
 
             if (name === "type") {
@@ -458,9 +458,14 @@ const createChildTree = function(list, indent) {
             else if (name === "events") {
                 if (child.name === undefined)
                     throw "A control cannot have events with no name.";
-                if (events !== "")
+                /*if (events !== "")
                     events += ",\n";
-                events += processEventsList(child.name, child[name], "\t\t");
+                events += processEventsList(child.name, child[name], "\t\t");*/
+
+                let innerevents = processEventsList(null, child[name], indent + "\t\t");
+                copy += indent + "\t" + name + ": [\n";
+                copy += innerevents + "\n";
+                copy += indent + "\t" + "]";
             }
             else if (name === "children") {
                 var data = createChildTree(child.children, indent + "\t\t");
@@ -513,11 +518,15 @@ const processEventsList = function(ctrlName, events, indent) {
         var eventData = events[name];
         var event = "";
         if (name === "change") {
-            event += "onChange: '" + ctrlName + "', ";
+            if (ctrlName !== null)
+                event += "onChange: '" + ctrlName + "', ";
             event += "execute: " + functionify(eventData);
         }
         else {
-            event += "onEvent: '" + ctrlName + "." + name + "', ";
+            if (ctrlName !== null)
+                event += "onEvent: '" + ctrlName + "." + name + "', ";
+            else
+                event += "onEvent: '" + name + "', ";
             event += "execute: " + functionify(eventData, "data");
         }
         //event += "\n";
