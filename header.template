@@ -161,6 +161,8 @@ if (results.items) {
             if (desc === undefined)
                 desc = type;
 
+            desc = desc.replace(/`(.*?)`/g, '\\code{$1}');
+
             print("#'   \\code{results$" + element.name + '} \\tab \\tab \\tab \\tab \\tab ' + desc + ' \\cr\n');
         }
     }

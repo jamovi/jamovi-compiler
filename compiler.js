@@ -345,7 +345,7 @@ const resultsify = function(item, indent, root) {
                 continue;
             let name = child.name;
             name = name[0].toUpperCase() + name.substring(1);
-            str += ',\n    ' + indent + '    set' + name + '=function(x) private$..' + child.name + ' <- x';
+            str += ',\n    ' + indent + '    .set' + name + '=function(x) private$..' + child.name + ' <- x';
         }
 
         str += ')'
