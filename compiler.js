@@ -139,6 +139,7 @@ const compile = function(packageName, analysisPath, resultsPath, templPath, outP
 
 const asciify = function(text) {
     return text
+        .replace(/%/g, '\\%')
         .replace(/ω/g, 'omega')
         .replace(/α/g, 'alpha')
         .replace(/η/g, 'eta')
