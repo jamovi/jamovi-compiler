@@ -134,7 +134,11 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log) {
 
         depends = depends.join("','");
 
-        cmd = util.format('"%s" --slave -e "utils::install.packages(c(\'%s\'), lib=\'%s\', repos=c(\'https://repo.jamovi.org\', \'https://cran.r-project.org\'), INSTALL_opts=c(\'--no-data\', \'--no-help\', \'--no-demo\'))"', paths.rExe, depends, buildDir);
+        let installType = 'getOption(\'pkgType\')'
+        if (process.platform === 'darwin')
+            installType = '\'mac.binary.mavericks\''
+
+        cmd = util.format('"%s" --slave -e "utils::install.packages(c(\'%s\'), lib=\'%s\', type=%s, repos=c(\'https://repo.jamovi.org\', \'https://cran.r-project.org\'), INSTALL_opts=c(\'--no-data\', \'--no-help\', \'--no-demo\', \'--no-html\'))"', paths.rExe, depends, buildDir, installType);
         cmd = cmd.replace(/\\/g, '/');
         try {
             sh(cmd, { stdio: [0, 1, 1], encoding: 'utf-8', env: env } );
