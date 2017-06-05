@@ -146,7 +146,40 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log) {
         catch(e) {
             throw 'Failed to install dependencies';
         }
+
+        if (process.platform === 'darwin' && fs.existsSync('/usr/bin/install_name_tool')) {
+            log.debug('fixing paths')
+
+            let installed = fs.readdirSync(buildDir);
+
+            const subs = {
+                '/Library/Frameworks/R.framework/Versions/3.3/Resources/lib/libR.dylib':
+                    '@executable_path/../Frameworks/R.framework/Versions/3.3/Resources/lib/libR.dylib',
+                '/Library/Frameworks/R.framework/Versions/3.3/Resources/lib/libRlapack.dylib':
+                    '@executable_path/../Frameworks/R.framework/Versions/3.3/Resources/lib/libRlapack.dylib',
+                '/Library/Frameworks/R.framework/Versions/3.3/Resources/lib/libRblas.dylib':
+                    '@executable_path/../Frameworks/R.framework/Versions/3.3/Resources/lib/libRblas.dylib',
+                '/usr/local/lib/libgfortran.3.dylib':
+                    '@executable_path/../Frameworks/R.framework/Versions/3.3/Resources/lib/libgfortran.3.dylib',
+                '/usr/local/lib/libquadmath.0.dylib':
+                    '@executable_path/../Frameworks/R.framework/Versions/3.3/Resources/lib/libquadmath.0.dylib',
+            }
+
+            for (let pkg of installed) {
+                let so = pkg.replace(/\./g, '') + '.so';
+                let pkgPath = path.join(buildDir, pkg, 'libs', so);
+                if (fs.existsSync(pkgPath)) {
+                    for (let sub in subs) {
+                        cmd = util.format('/usr/bin/install_name_tool -change %s %s %s', sub, subs[sub], pkgPath);
+                        sh(cmd, { stdio: [0, 1, 1], encoding: 'utf-8', env: env } );
+                    }
+                }
+            }
+
+            log.debug('paths fixed')
+        }
     }
+
 
     log.debug('creating temp dir');
     fs.emptydirSync(tempPath);
