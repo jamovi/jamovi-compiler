@@ -52,6 +52,9 @@ const included = [
     'jmvcore',
     'R6',
     'ggplot2',
+
+    // suppress installation of
+    'testthat',
 ];
 
 const compile = function(srcDir, moduleDir, paths, packageInfo, log) {
@@ -84,6 +87,7 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log) {
 
     let depends = desc.match(/\nDepends\s*:\s*(.*)\r?\n/);
     let imports = desc.match(/\nImports\s*:\s*(.*)\r?\n/);
+    let suggests = desc.match(/\nSuggests\s*:\s*(.*)\r?\n/);
 
     if (depends !== null) {
         depends = depends[1];
@@ -101,7 +105,16 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log) {
         imports = [ ];
     }
 
+    if (suggests !== null) {
+        suggests = suggests[1];
+        suggests = suggests.match(/([A-Za-z][A-Za-z0-9_]*)/g);
+    }
+    else {
+        suggests = [ ];
+    }
+
     depends = depends.concat(imports);
+    depends = depends.concat(suggests);
     depends = depends.filter(x => included.indexOf(x) === -1);
     depends = depends.filter(x => installed.indexOf(x) === -1);
 
