@@ -146,6 +146,7 @@ const asciify = function(text) {
         .replace(/χ/g, 'X')
         .replace(/─/g, '-')
         .replace(/ₐ/g, 'a')
+        .replace(/ᵃ/g, 'a')
         .replace(/≠/g, '!=')
 };
 
