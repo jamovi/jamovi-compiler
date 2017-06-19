@@ -108,6 +108,7 @@ OptionControl:
             type: string
         enable:
             type: string
+            #pattern: "^\\([a-zA-Z0-9_\\:?\\=\\<\\>]+\\)"
         isVirtual:
             type: bool
         events:
@@ -256,6 +257,11 @@ TargetLayoutBox:
     properties:
         label:
             type: string
+        transferAction:
+            type: string
+            enum:
+                - none
+                - interactions
         dropOverflow:
             enum:
                 - tryNext
