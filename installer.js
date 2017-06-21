@@ -82,7 +82,7 @@ const check = function(jamovi_home) {
 
         if (mas < 0 || maj < 7 || min < 3)
             throw 'a newer version of jamovi is required, please update to the newest version';
-        if (mas > 0 || maj > 7 || min > 3)
+        if (mas > 0 || maj > 7 || min > 5)
             throw 'a newer version of the jamovi-compiler (or jmvtools) is required';
 
         if (match) {
