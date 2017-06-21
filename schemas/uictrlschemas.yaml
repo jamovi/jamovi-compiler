@@ -357,6 +357,10 @@ Supplier:
 VariableSupplier:
     type: object
     properties:
+        populate:
+            enum:
+                - auto
+                - manual
         suggested:
             type: array
             items:
