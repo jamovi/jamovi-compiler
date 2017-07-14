@@ -161,7 +161,11 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log) {
                     '@executable_path/../Frameworks/R.framework/Versions/3.3/Resources/lib/libRblas.dylib',
                 '/usr/local/lib/libgfortran.3.dylib':
                     '@executable_path/../Frameworks/R.framework/Versions/3.3/Resources/lib/libgfortran.3.dylib',
+                '/Library/Frameworks/R.framework/Versions/3.3/Resources/lib/libgfortran.3.dylib':
+                    '@executable_path/../Frameworks/R.framework/Versions/3.3/Resources/lib/libgfortran.3.dylib',
                 '/usr/local/lib/libquadmath.0.dylib':
+                    '@executable_path/../Frameworks/R.framework/Versions/3.3/Resources/lib/libquadmath.0.dylib',
+                '/Library/Frameworks/R.framework/Versions/3.3/Resources/lib/libquadmath.0.dylib':
                     '@executable_path/../Frameworks/R.framework/Versions/3.3/Resources/lib/libquadmath.0.dylib',
             }
 
