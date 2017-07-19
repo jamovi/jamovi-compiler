@@ -249,6 +249,24 @@ TextBox:
             - 'right'
         borderless:
             type: bool
+        suggestedValues:
+            type: array
+            items:
+                type:
+                  - type: object
+                    properties:
+                        value:
+                            type:
+                              - number
+                              - string
+                              - boolean
+                        label:
+                            type: string
+                  - number
+                  - string
+                  - boolean
+            minItems: 1
+            uniqueItems: true
     required:
         - format
 
