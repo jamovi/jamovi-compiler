@@ -233,11 +233,17 @@ const sourcifyResults = function(object, indent) {
         indent = '                ';
 
     let str = '';
-    if (object === null) {
+    if (object === undefined) {
         str = 'NULL';
     }
-    else if (object === true || object === false) {
-        str = (object ? 'TRUE' : 'FALSE');
+    else if (object === null) {
+        str = 'NULL';
+    }
+    else if (object === true) {
+        str = 'TRUE'
+    }
+    else if (object === false) {
+        str = 'FALSE'
     }
     else if (typeof(object) === 'number') {
         str = '' + object;
@@ -270,7 +276,7 @@ const sourcifyResults = function(object, indent) {
             let sep = '';
             for (let prop in object) {
                 let value = object[prop];
-                str += sep + '`' + prop + '`' + '=' + sourcifyResults(value, indent + '        ');
+                str += sep + '\n' + indent + '        ' + '`' + prop + '`' + '=' + sourcifyResults(value, indent + '    ');
                 sep = ', '
             }
             str += ')';
@@ -322,9 +328,13 @@ const resultsify = function(item, indent, root) {
         }
         str += '),'
 
-        str += '\n    ' + indent + 'public=list(';
-        str += '\n    ' + indent + '    initialize=function(options) {';
-        str += '\n    ' + indent + '        super$initialize(options=options, name="' + name + '", title="' + title + '")';
+        str +=  '\n    ' + indent + 'public=list(';
+        str +=  '\n    ' + indent + '    initialize=function(options) {';
+        str +=  '\n    ' + indent + '        super$initialize('
+        str +=  '\n    ' + indent + '            options=options'
+        str += ',\n    ' + indent + '            name="' + name + '"'
+        str += ',\n    ' + indent + '            title="' + title + '"'
+        str +=  ')';
 
         for (let child of items) {
             let body;
