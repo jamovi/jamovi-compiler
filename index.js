@@ -13,6 +13,7 @@ const walkSync = require('walk-sync');
 const CLA = require('command-line-args');
 const needle = require('needle');
 const Log = require('log');
+const _ = require('underscore');
 
 const ARGS = [
     { name: 'build',   alias: 'b', type: String },
@@ -35,6 +36,7 @@ const compileR = require('./compilerr');
 const parseR = require('./parser');
 const utils = require('./utils');
 const installer = require('./installer');
+const sourcify = require('./sourcify');
 
 try {
 
@@ -303,6 +305,25 @@ try {
     Promise.all(waits).then(() => {  // wait for all the browserifies to finish
 
         console.log('writing module meta');
+
+        let pOutPath = path.join(rDir, '00jmv.R');
+
+        if (packageInfo.references) {
+            let pOutPath = path.join(rDir, '00jmv.R');
+            let pTemplPath = path.join(__dirname, 'pkg.template');
+
+            let template = fs.readFileSync(pTemplPath, 'utf-8');
+            let compiler = _.template(template);
+
+            let object = { references: packageInfo.references, imports: { sourcify } };
+            let content = compiler(object);
+
+            fs.writeFileSync(pOutPath, content);
+            console.log('wrote: 00jmv.R');
+        }
+        else if (fs.existsSync(pOutPath)) {
+            fs.unlinkSync(pOutPath);
+        }
 
         let indexPath = path.join(defDir, '0000.yaml');
 

@@ -19,6 +19,12 @@ Table:
         sortSelect:
             type: string
             pattern: "^\\([A-Za-z][A-Za-z0-9_]*\\)$"
+        refs:
+            type:
+              - array
+              - string
+            items:
+                type: string
         columns:
             type: array
             items:
@@ -51,6 +57,12 @@ Table:
                         type:
                           - boolean
                           - string
+                    refs:
+                        type:
+                          - array
+                          - string
+                        items:
+                            type: string
                 required:
                     - name
         rows:
