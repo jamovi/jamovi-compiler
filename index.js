@@ -348,7 +348,7 @@ try {
                 let paths = walkSync(modDir, { directories: false });
 
                 for (let relPath of paths) {
-                    let archivePath = path.join(packageInfo.name, relPath).replace('\\', '/');
+                    let archivePath = path.join(packageInfo.name, relPath).replace(/\\/g, '/');
                     let fullPath = path.join(modDir, relPath);
                     let contents = fs.readFileSync(fullPath);
                     zip.file(archivePath, contents);
