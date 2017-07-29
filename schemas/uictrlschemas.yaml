@@ -210,6 +210,19 @@ CheckBox:
         optionPart:
             type: string
 
+IconSupport:
+    type: object
+    properties:
+        icons:
+            type: array
+            items:
+                type: string
+            minItems: 1
+        iconPosition:
+            enum:
+                - left
+                - right
+
 ComboBox:
     type: object
     properties:
@@ -439,12 +452,14 @@ ControlInheritance:
         - OptionControl
         - CheckBox
         - EmbeddedChildSupport
+        - IconSupport
     RadioButton:
         - ControlBase
         - GridControl
         - OptionControl
         - RadioButton
         - EmbeddedChildSupport
+        - IconSupport
     ComboBox:
         - ControlBase
         - GridControl
@@ -495,6 +510,7 @@ ControlInheritance:
         - OptionControl
         - Label
         - EmbeddedChildSupport
+        - IconSupport
     LayoutBox:
         - ControlBase
         - GridControl
