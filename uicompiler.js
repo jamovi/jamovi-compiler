@@ -708,6 +708,9 @@ const compatibleDataTypes = function(ctrl, opt) {
 };
 
 const compareTypeObjects = function(subType, fullType) {
+    if (subType === 'unknown' || fullType === 'unknown')
+        return true;
+
     if (typeof subType !== 'object')
         return subType === fullType;
 
@@ -1004,6 +1007,22 @@ const constructors = {
     },
 };
 
+const getControlRawType = function(ctrl) {
+    if (ctrl.format === undefined || ctrl.format.startsWith('./'))
+        return 'unknown';
+
+    if (ctrl.format === 'term')
+        return { type: "array", template: "string" };
+    else if (ctrl.format === 'terms')
+        return { type: "array", template: { type: "array", template: "string" } };
+    else if (ctrl.format === 'variable')
+        return "string";
+    else if (ctrl.format === 'variables')
+        return { type: "array", template: "string" };
+
+    return ctrl.format;
+}
+
 const uiOptionControl = {
     Label: {
         usesSingleCell: function(ctrl) {
@@ -1020,7 +1039,7 @@ const uiOptionControl = {
                 return null;
 
             if (ctrl.format !== undefined)
-                return ctrl.format;
+                return getControlRawType(ctrl);
             else
                 return "string";
         }
@@ -1038,7 +1057,7 @@ const uiOptionControl = {
         },
         toRaw: function(ctrl) {
             if (ctrl.format !== undefined)
-                return ctrl.format;
+                return getControlRawType(ctrl);
             else
                 return "string";
         }
@@ -1055,6 +1074,9 @@ const uiOptionControl = {
             return ctrl.isVirtual !== true;
         },
         toRaw: function(ctrl) {
+            if (ctrl.format !== undefined)
+                return { type: "enum", template: getControlRawType(ctrl) };
+
             return { type: "enum", template: "string" };
         }
     },
@@ -1164,7 +1186,7 @@ const uiOptionControl = {
             return ctrl.isVirtual !== true;
         },
         toRaw: function() {
-            return { type: "array", template: "string" };;
+            return { type: "array", template: "string" };
         }
     },
 
