@@ -1012,13 +1012,13 @@ const getControlRawType = function(ctrl) {
         return 'unknown';
 
     if (ctrl.format === 'term')
-        return { type: "array", template: "string" };
+        return { type: 'array', template: 'string' };
     else if (ctrl.format === 'terms')
-        return { type: "array", template: { type: "array", template: "string" } };
+        return { type: 'array', template: { type: 'array', template: 'string' } };
     else if (ctrl.format === 'variable')
-        return "string";
+        return 'string';
     else if (ctrl.format === 'variables')
-        return { type: "array", template: "string" };
+        return { type: 'array', template: 'string' };
 
     return ctrl.format;
 }
@@ -1206,9 +1206,9 @@ const uiOptionControl = {
                 return uiOptionControl.ListBox.toRaw(ctrl);
 
             if (ctrl.maxItemCount === 1)
-                return "string";
+                return 'string';
 
-            return { type: "array", template: "string" };
+            return { type: 'array', template: 'string' };
         }
     },
 
