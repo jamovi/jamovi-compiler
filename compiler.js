@@ -313,7 +313,10 @@ const resultsify = function(item, indent, root) {
 
         let sep = '';
         for (let child of items) {
-            str += sep + '\n        ' + indent + child.name + ' = function() private$..' + child.name
+            if (child.type !== 'Property')
+                str += sep + '\n        ' + indent + child.name + ' = function() private$.items[["' + child.name + '"]]'
+            else
+                str += sep + '\n        ' + indent + child.name + ' = function() private$..' + child.name
             sep = ',';
         }
         str += '),'
@@ -323,6 +326,8 @@ const resultsify = function(item, indent, root) {
 
         sep = '';
         for (let child of items) {
+            if (child.type !== 'Property')
+                continue;
             str += sep + '\n    ' + indent + '    ..' + child.name + ' = NA'
             sep = ',';
         }
@@ -342,12 +347,11 @@ const resultsify = function(item, indent, root) {
                 body = 'NULL'
             else
                 body = sourcifyResults(child, indent + '        ');
-            str += '\n    ' + indent + '        private$..' + child.name + ' <- ' + body;
-        }
 
-        for (let child of items) {
             if (child.type !== 'Property')
-                str += '\n    ' + indent + '        self$add(private$..' + child.name + ')';
+                str += '\n    ' + indent + '        self$add(' + body + ')';
+            else
+                str += '\n    ' + indent + '        private$..' + child.name + ' <- ' + body;
         }
 
         str += '}'
