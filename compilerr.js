@@ -225,9 +225,17 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log) {
         }
 
         for (let pkg of installed) {
-            let so = pkg.replace(/\./g, '') + '.so';
-            let pkgPath = path.join(buildDir, pkg, 'libs', so);
-            if (fs.existsSync(pkgPath)) {
+            let so1 = pkg + '.so';
+            let so2 = pkg.replace(/\./g, '') + '.so';
+            let pkgPath;
+            let pkgPath1 = path.join(buildDir, pkg, 'libs', so1);
+            let pkgPath2 = path.join(buildDir, pkg, 'libs', so2);
+            if (fs.existsSync(pkgPath1))
+                pkgPath = pkgPath1;
+            else if (fs.existsSync(pkgPath2))
+                pkgPath = pkgPath2;
+                
+            if (pkgPath) {
                 for (let sub in subs) {
                     cmd = util.format('/usr/bin/install_name_tool -change %s %s %s', sub, subs[sub], pkgPath);
                     sh(cmd, { stdio: [0, 1, 1], encoding: 'utf-8', env: env } );
