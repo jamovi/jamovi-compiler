@@ -171,6 +171,8 @@ Array:
             properties:
                 type:
                     type: string
+        layout:
+            type: string
         visible:
             type:
               - boolean
