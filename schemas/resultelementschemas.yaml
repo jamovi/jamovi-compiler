@@ -152,6 +152,8 @@ Group:
 Array:
     "$schema": http://json-schema.org/draft-04/schema#
     additionalProperties: false
+    required:
+      - template
     properties:
         name:
             type: string
@@ -168,6 +170,8 @@ Array:
             min: 0
         template:
             type: object
+            required:
+              - type
             properties:
                 type:
                     type: string
