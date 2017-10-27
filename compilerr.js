@@ -234,10 +234,10 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log) {
                 pkgPath = pkgPath1;
             else if (fs.existsSync(pkgPath2))
                 pkgPath = pkgPath2;
-                
+
             if (pkgPath) {
                 for (let sub in subs) {
-                    cmd = util.format('/usr/bin/install_name_tool -change %s %s %s', sub, subs[sub], pkgPath);
+                    cmd = util.format('/usr/bin/install_name_tool -change %s %s "%s"', sub, subs[sub], pkgPath);
                     sh(cmd, { stdio: [0, 1, 1], encoding: 'utf-8', env: env } );
                 }
             }
