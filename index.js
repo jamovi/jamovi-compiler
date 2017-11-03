@@ -127,9 +127,10 @@ try {
     else {
         let bin  = path.dirname(exe);
         let home = path.dirname(bin);
-        let rExe  = 'R';
+        let rHome = path.join(home, 'lib/R');
+        let rExe  = path.join(rHome, 'bin', 'R');
         let rLibs = path.join(home, 'Resources', 'modules', 'base', 'R');
-        paths = { home, rExe, rLibs };
+        paths = { home, rHome, rExe, rLibs };
     }
 
     srcDir = path.resolve(srcDir);
