@@ -177,6 +177,8 @@ Array:
                     type: string
         layout:
             type: string
+        hideHeadingOnlyChild:
+            type: boolean
         visible:
             type:
               - boolean
