@@ -22,6 +22,7 @@ const ARGS = [
     { name: 'submit', type: String },
     { name: 'check',   alias: 'c', type: Boolean },
     { name: 'home',  type: String },
+    { name: 'rhome', type: String },
     { name: 'to',    type: String },
     { name: 'rpath', type: String },
     { name: 'debug', type: Boolean },
@@ -127,7 +128,13 @@ try {
     else {
         let bin  = path.dirname(exe);
         let home = path.dirname(bin);
-        let rHome = path.join(home, 'lib/R');
+
+        let rHome;
+        if (args.rhome)
+            rHome = args.rhome;
+        else
+            rHome = path.join(home, 'lib/R');
+
         let rExe  = path.join(rHome, 'bin', 'R');
         let rLibs = path.join(home, 'Resources', 'modules', 'base', 'R');
         paths = { home, rHome, rExe, rLibs };
