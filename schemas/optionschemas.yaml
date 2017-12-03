@@ -61,6 +61,24 @@ Variables:
             type: boolean
         description: *Description
 
+Level:
+    "$schema": http://json-schema.org/draft-04/schema#
+    additionalProperties: false
+    properties:
+        name:
+            type: string
+        type:
+            type: string
+        variable:
+            type: string
+        content:
+            type: string
+        title:
+            type: string
+        hidden:
+            type: boolean
+        description: *Description
+
 Variable:
     "$schema": http://json-schema.org/draft-04/schema#
     additionalProperties: false

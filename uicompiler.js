@@ -850,6 +850,20 @@ const constructors = {
         }
     },
 
+    Level: {
+        create: function(item, isTemplate) {
+            let ctrl = { }
+            ctrl.type = "LevelSelector";
+            CheckTemplateState(item, ctrl, isTemplate);
+            if (isTemplate !== true && (item.name !== undefined || item.title !== undefined))
+                ctrl._target_label = item.title !== undefined ? item.title : item.name;
+            return ctrl;
+        },
+        toRaw: function() {
+            return "string";
+        }
+    },
+
     String: {
         create: function(item, isTemplate) {
             let ctrl = { };
@@ -1078,6 +1092,24 @@ const uiOptionControl = {
                 return { type: "enum", template: getControlRawType(ctrl) };
 
             return { type: "enum", template: "string" };
+        }
+    },
+
+    LevelSelector: {
+        usesSingleCell: function(ctrl) {
+            return ctrl.useSingleCell === true;
+        },
+        isContainerControl: function(ctrl) {
+            return false;
+        },
+        isOptionControl: function(ctrl) {
+            return ctrl.isVirtual !== true;
+        },
+        toRaw: function(ctrl) {
+            if (ctrl.format !== undefined)
+                return  getControlRawType(ctrl);
+
+            return "string";
         }
     },
 

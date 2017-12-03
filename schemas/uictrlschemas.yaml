@@ -23,6 +23,7 @@ ControlBase:
                   - VariableLabel
                   - TermLabel
                   - RMAnovaFactorsBox
+                  - LevelSelector
         name:
             type: string
         stage:
@@ -239,6 +240,13 @@ ComboBox:
                     name:
                         type: string
             minItems: 1
+
+LevelSelector:
+    type: object
+    properties:
+        variable:
+            type: string
+
 
 RadioButton:
     type: object
@@ -467,6 +475,11 @@ ControlInheritance:
         - GridControl
         - OptionControl
         - ComboBox
+    LevelSelector:
+        - ControlBase
+        - GridControl
+        - OptionControl
+        - LevelSelector
     TextBox:
         - ControlBase
         - GridControl
