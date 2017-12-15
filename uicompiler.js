@@ -694,9 +694,13 @@ const CheckTemplateState = function(item, ctrl, isTemplate) {
 
 const compatibleDataTypes = function(ctrl, opt) {
     let ctrl_raw = uiOptionControl[ctrl.type].toRaw(ctrl);
-    let opt_raw = constructors[opt.type].toRaw(opt);
+    let key = ctrl.valueKey === undefined ? [] : ctrl.valueKey;
+    let opt_raw = constructors[opt.type].toRaw(opt, key);
 
-    let r = compareTypeObjects(ctrl_raw, opt_raw);
+    let r = false;
+    if (opt_raw !== null)
+        r = compareTypeObjects(ctrl_raw, opt_raw);
+        
     if (r === false) {
         console.log('#############################');
         console.log(util.inspect(ctrl_raw, false, null));
@@ -753,8 +757,11 @@ const constructors = {
             ctrl.inputPattern = "[0-9]+";
             return ctrl
         },
-        toRaw: function() {
-            return "number";
+        toRaw: function(obj, key) {
+            if (key === undefined || key.length === 0)
+                return "number";
+
+            return null;
         }
     },
 
@@ -767,8 +774,11 @@ const constructors = {
             ctrl.inputPattern = "[0-9]+";
             return ctrl
         },
-        toRaw: function() {
-            return "number";
+        toRaw: function(obj, key) {
+            if (key === undefined || key.length === 0)
+                return "number";
+
+            return null;
         }
     },
 
@@ -779,8 +789,11 @@ const constructors = {
             CheckTemplateState(item, ctrl, isTemplate);
             return ctrl
         },
-        toRaw: function() {
-            return "boolean";
+        toRaw: function(obj, key) {
+            if (key === undefined || key.length === 0)
+                return "boolean";
+
+            return null;
         }
     },
 
@@ -806,8 +819,14 @@ const constructors = {
             checkbox.optionPart = fragmentName;
             return checkbox;
         },
-        toRaw: function(obj) {
-            return { type: "array", template: { type: "enum", template: "string", options: obj.options } };
+        toRaw: function(obj, key) {
+            if (key === undefined || key.length === 0)
+                return { type: "array", template: { type: "enum", template: "string", options: obj.options } };
+
+            if (key.length > 1)
+                return null;
+
+            return { type: "enum", template: "string", options: obj.options };
         }
     },
 
@@ -826,8 +845,11 @@ const constructors = {
             ctrl.optionPart = fragmentName;
             return ctrl;
         },
-        toRaw: function(obj) {
-            return { type: "enum", template: "string", options: obj.options };
+        toRaw: function(obj, key) {
+            if (key === undefined || key.length === 0)
+                return { type: "enum", template: "string", options: obj.options };
+
+            return null;
         }
     },
 
@@ -845,8 +867,17 @@ const constructors = {
 
             return ctrl;
         },
-        toRaw: function() {
-            return { type: "array", template: { type: "array", template: "string" } };
+        toRaw: function(obj, key) {
+            if (key === undefined || key.length === 0)
+                return { type: "array", template: { type: "array", template: "string" } };
+
+            if (key.length === 1)
+                return { type: "array", template: "string" };
+
+            if (key.length === 2)
+                return "string";
+
+            return null;
         }
     },
 
@@ -859,8 +890,11 @@ const constructors = {
                 ctrl._target_label = item.title !== undefined ? item.title : item.name;
             return ctrl;
         },
-        toRaw: function() {
-            return "string";
+        toRaw: function(obj, key) {
+            if (key === undefined || key.length === 0)
+                return "string";
+
+            return null;
         }
     },
 
@@ -872,8 +906,11 @@ const constructors = {
             ctrl.format = "string";
             return ctrl;
         },
-        toRaw: function() {
-            return "string";
+        toRaw: function(obj, key) {
+            if (key === undefined || key.length === 0)
+                return "string";
+
+            return null;
         }
     },
 
@@ -887,8 +924,15 @@ const constructors = {
             ctrl.isTarget = true;
             return ctrl;
         },
-        toRaw: function() {
-            return { type: "array", template: "string" };
+        toRaw: function(obj, key) {
+
+            if (key === undefined || key.length === 0)
+                return { type: "array", template: "string" };
+
+            if (key.length === 1)
+                return "string";
+
+            return null;
         }
     },
 
@@ -903,8 +947,11 @@ const constructors = {
             ctrl.isTarget = true;
             return ctrl;
         },
-        toRaw: function() {
-            return "string";
+        toRaw: function(obj, key) {
+            if (key === undefined || key.length === 0)
+                return "string";
+
+            return null;
         }
     },
 
@@ -937,8 +984,12 @@ const constructors = {
 
             return ctrl;
         },
-        toRaw: function(obj) {
-            return { type: "array", template: constructors[obj.template.type].toRaw(obj.template) };
+        toRaw: function(obj, key) {
+
+            if (key === undefined || key.length === 0)
+                return { type: "array", template: constructors[obj.template.type].toRaw(obj.template, key.slice(1)) };
+
+            return constructors[obj.template.type].toRaw(obj.template, key.slice(1))
         }
     },
 
@@ -969,23 +1020,29 @@ const constructors = {
             ];
             return ctrl;
         },
-        toRaw: function() {
-            return {
-                type: "array",
-                template: {
-                    type: "object",
-                    elements: [
-                        {
-                            key: "i1",
-                            type: "string"
-                        },
-                        {
-                            key: "i2",
-                            type: "string"
-                        }
-                    ]
-                }
-            };
+        toRaw: function(obj, key) {
+            if (key === undefined || key.length === 0)
+                return {
+                    type: "array",
+                    template: {
+                        type: "object",
+                        elements: [
+                            {
+                                key: "i1",
+                                type: "string"
+                            },
+                            {
+                                key: "i2",
+                                type: "string"
+                            }
+                        ]
+                    }
+                };
+
+            if (key.length === 1)
+                return "string";
+
+            return null;
         }
     },
 
@@ -1011,12 +1068,21 @@ const constructors = {
 
             return ctrl;
         },
-        toRaw: function(obj) {
+        toRaw: function(obj, key) {
             let props = [];
-            for (let i = 0; i < obj.elements.length; i++)
-                props[i] = { key: obj.elements[i].name, template: constructors[obj.elements[i].type].toRaw(obj.elements[i]) };
+            let x = -1;
+            for (let i = 0; i < obj.elements.length; i++) {
+                props[i] = { key: obj.elements[i].name, template: constructors[obj.elements[i].type].toRaw(obj.elements[i], key.slice(1)) };
+                if (key.length > 0 && obj.elements[i].name === key[0])
+                    x = i;
+            }
+            if (key === undefined || key.length === 0)
+                return { type: "object", elements: props };
 
-            return { type: "object", elements: props }
+            if (x !== -1)
+                return props[x].template;
+
+            return null;
         }
     },
 };
