@@ -88,6 +88,7 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log) {
     let depends = desc.match(/\nDepends\s*:\s*(.*)\r?\n/);
     let imports = desc.match(/\nImports\s*:\s*(.*)\r?\n/);
     let suggests = desc.match(/\nSuggests\s*:\s*(.*)\r?\n/);
+    let linkingTo = desc.match(/\nLinkingTo\s*:\s*(.*)\r?\n/);
 
     if (depends !== null) {
         depends = depends[1];
@@ -113,8 +114,17 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log) {
         suggests = [ ];
     }
 
+    if (linkingTo !== null) {
+        linkingTo = linkingTo[1];
+        linkingTo = linkingTo.match(/([A-Za-z][A-Za-z0-9_]*)/g);
+    }
+    else {
+        linkingTo = [ ];
+    }
+
     depends = depends.concat(imports);
     depends = depends.concat(suggests);
+    depends = depends.concat(linkingTo);
     depends = depends.filter(x => included.indexOf(x) === -1);
     depends = depends.filter(x => installed.indexOf(x) === -1);
 
