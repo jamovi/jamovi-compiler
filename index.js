@@ -363,7 +363,7 @@ try {
                 }
 
                 return new Promise((resolve, reject) => {
-                    zip.generateAsync({ type: 'nodebuffer' }).then(content => {
+                    zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' }).then(content => {
                         fs.writeFileSync(zipPath, content);
                         console.log('wrote module: ' + path.basename(zipPath) + '\n');
                         resolve(zipPath);
