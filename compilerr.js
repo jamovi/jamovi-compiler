@@ -127,6 +127,8 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log) {
     depends = depends.concat(linkingTo);
     depends = depends.filter(x => included.indexOf(x) === -1);
     depends = depends.filter(x => installed.indexOf(x) === -1);
+    // remove duplicates
+    depends = Array.from(new Set(depends));
 
     let cmd;
 
