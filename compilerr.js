@@ -165,6 +165,36 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log) {
         }
     }
 
+    if ( ! fs.existsSync(path.join(srcDir, 'src'))) {
+        log.debug('no src directory found - no compilation');
+    }
+    else {
+        log.debug('src directory found - compilation will begin!');
+        log.debug('building binaries');
+
+        let SHLIB_EXT = '.so';
+        if (process.platform === 'win32')
+            SHLIB_EXT = '.dll';
+
+        let srcs = [ ];
+        for (let child of fs.readdirSync(path.join(srcDir, 'src'))) {
+            if (child.match(/.+\.([cfmM]|cc|cpp|f90|f95|mm)$/g))
+                srcs.push(child);
+        }
+
+        let dllPath = path.join(srcDir, 'src', packageInfo.name + SHLIB_EXT);
+        let srcPaths = srcs.map(src => '"' + path.join(srcDir, 'src', src) + '"').join(' ');
+        let incPaths = linkingTo.map(pkg => '-I"' + path.join(buildDir, pkg, 'include') + '"').join(' ');
+
+        log.debug('setting CLINK_CPPFLAGS=' + incPaths);
+        env['CLINK_CPPFLAGS'] = incPaths;
+
+        cmd = util.format('"%s" SHLIB -o "%s" %s', path.join(paths.rHome, 'bin', 'Rcmd'), dllPath, srcPaths);
+
+        log.debug('running command:\n' + cmd);
+        sh(cmd, { stdio: [0, 1, 1], encoding: 'utf-8', env: env } );
+        log.debug('build complete');
+    }
 
     log.debug('creating temp dir');
     fs.emptydirSync(tempPath);
