@@ -37,6 +37,10 @@ Variables:
             type:
               - null
               - array
+        required:
+            type: boolean
+        rejectUnusedLevels:
+            type: boolean
         suggested:
             type: array
             items:
@@ -45,6 +49,7 @@ Variables:
                     - ordinal
                     - nominal
                     - nominaltext
+                    - id
             minItems: 1
             uniqueItems: true
         permitted:
@@ -55,6 +60,9 @@ Variables:
                     - ordinal
                     - nominal
                     - nominaltext
+                    - numeric
+                    - factor
+                    - id
             minItems: 1
             uniqueItems: true
         rejectInf:
@@ -94,6 +102,10 @@ Variable:
             type: boolean
         default:
             type: null
+        required:
+            type: boolean
+        rejectUnusedLevels:
+            type: boolean
         suggested:
             type: array
             items:
