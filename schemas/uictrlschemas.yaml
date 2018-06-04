@@ -336,17 +336,16 @@ VariablesListBox:
                     - continuous
                     - ordinal
                     - nominal
-                    - nominaltext
+                    - id
             minItems: 1
             uniqueItems: true
         permitted:
             type: array
             items:
                 enum:
-                    - continuous
-                    - ordinal
-                    - nominal
-                    - nominaltext
+                    - numeric
+                    - factor
+                    - id
             minItems: 1
             uniqueItems: true
 
@@ -411,17 +410,15 @@ VariableSupplier:
                     - continuous
                     - ordinal
                     - nominal
-                    - nominaltext
             minItems: 1
             uniqueItems: true
         permitted:
             type: array
             items:
                 enum:
-                    - continuous
-                    - ordinal
-                    - nominal
-                    - nominaltext
+                    - numeric
+                    - factor
+                    - id
             minItems: 1
             uniqueItems: true
 

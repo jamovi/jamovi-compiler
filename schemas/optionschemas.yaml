@@ -48,7 +48,6 @@ Variables:
                     - continuous
                     - ordinal
                     - nominal
-                    - nominaltext
                     - id
             minItems: 1
             uniqueItems: true
@@ -56,10 +55,6 @@ Variables:
             type: array
             items:
                 enum:
-                    - continuous
-                    - ordinal
-                    - nominal
-                    - nominaltext
                     - numeric
                     - factor
                     - id
@@ -113,17 +108,16 @@ Variable:
                     - continuous
                     - ordinal
                     - nominal
-                    - nominaltext
+                    - id
             minItems: 1
             uniqueItems: true
         permitted:
             type: array
             items:
                 enum:
-                    - continuous
-                    - ordinal
-                    - nominal
-                    - nominaltext
+                    - numeric
+                    - factor
+                    - id
             minItems: 1
             uniqueItems: true
         rejectInf:
@@ -307,17 +301,16 @@ Pairs:
                     - continuous
                     - ordinal
                     - nominal
-                    - nominaltext
+                    - id
             minItems: 1
             uniqueItems: true
         permitted:
             type: array
             items:
                 enum:
-                    - continuous
-                    - ordinal
-                    - nominal
-                    - nominaltext
+                    - numeric
+                    - factor
+                    - id
             minItems: 1
             uniqueItems: true
         description: *Description
