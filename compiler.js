@@ -82,7 +82,9 @@ const compile = function(packageName, analysisPath, resultsPath, templPath, outP
     let jas = analysis.jas.match(/^([0-9]+)\.([0-9]+)$/)
     if (jas === null)
         throw 'bad version string: ' + analysis.jas;
-    if (parseInt(jas[1]) !== 1 || parseInt(jas[2]) > 1)
+    if (parseInt(jas[1]) !== 1 || parseInt(jas[2]) <= 1)
+        reject(analysisPath, 'needs to be upgraded to a higher jas level');
+    if (parseInt(jas[1]) !== 1 || parseInt(jas[2]) > 2)
         reject(analysisPath, 'requires a newer jamovi-compiler');
 
     let report;
