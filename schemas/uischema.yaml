@@ -24,6 +24,8 @@ properties:
         type: object
         additionalProperties: false
         properties:
+            loaded:
+                type: string
             update:
                 type: string
             remoteDataChanged:
