@@ -192,6 +192,8 @@ String:
             type: string
         content:
             type: string
+        default:
+            type: string
         title:
             type: string
         hidden:
