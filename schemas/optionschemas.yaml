@@ -33,6 +33,8 @@ Variables:
             type: string
         hidden:
             type: boolean
+        takeFromDataIfMissing:
+            type: boolean
         default:
             type:
               - null

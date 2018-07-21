@@ -200,7 +200,10 @@ if (results.items) {
             parent.frame()<%=analysis.options.filter(o => o.type === 'Variable' || o.type === 'Variables').map(option => {
                     return ',\n            `if`( ! missing(' + option.name + '), ' + option.name + ', NULL)';
                 }).join('')%>)
-
+<%=analysis.options.filter(o => o.takeFromDataIfMissing === true).map(option => {
+        return '\n    ' + option.name + ' <- `if`( ! missing(' + option.name + '), ' + option.name + ', colnames(data))';
+    }).join()
+%>
     options <- <%= analysis.name %>Options$new(<%=analysis.options.filter(o => o.type !== 'Data').map(option => {
         return '\n        ' + option.name + ' = ' + option.name;
     }).join()
