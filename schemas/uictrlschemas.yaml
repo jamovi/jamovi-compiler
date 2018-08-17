@@ -274,6 +274,13 @@ TextBox:
             - 'right'
         borderless:
             type: bool
+        width:
+            type: string
+            enum:
+                - small
+                - normal
+                - large
+                - largest
         suggestedValues:
             type: array
             items:
