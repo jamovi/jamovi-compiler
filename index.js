@@ -130,12 +130,16 @@ try {
         let home = path.dirname(bin);
 
         let rHome;
-        if (args.rhome)
+        let rExe;
+        if (args.rhome) {
             rHome = args.rhome;
-        else
+            rExe = path.join(rHome, 'bin', 'R');
+        }
+        else {
             rHome = path.join(home, 'lib/R');
+            rExe  = 'flatpak" run --devel org.jamovi.jamovi "-R'
+        }
 
-        let rExe  = path.join(rHome, 'bin', 'R');
         let rLibs = path.join(home, 'Resources', 'modules', 'base', 'R');
         paths = { home, rHome, rExe, rLibs };
     }
