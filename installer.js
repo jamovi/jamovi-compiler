@@ -54,16 +54,29 @@ const find = function(jamovi_home) {
         exe = '/usr/bin/jamovi';
         if (isJExe(exe))
             return exe;
+
     }
 
     throw 'jamovi could not be found!';
 };
 
 const check = function(jamovi_home) {
-    let exe = find(jamovi_home);
+
+    let exe;
+    let args;
+
+    if (process.platform === 'linux') {
+        exe = '/usr/bin/flatpak';
+        args = [ 'run', 'org.jamovi.jamovi', '--version' ];
+    }
+    else {
+        exe = find(jamovi_home);
+        args = [ '--version' ];
+    }
+
     let response = child_process.spawnSync(
         exe,
-        [ '--version' ],
+        args,
         {
             stdio: [ 'ignore', 'pipe', 'inherit' ],
             encoding: 'utf-8'
@@ -107,11 +120,14 @@ const check = function(jamovi_home) {
 
 const install = function(pth, jamovi_home) {
 
-    let exe = find(jamovi_home);
+    let cmd;
+    if (process.platform === 'linux')
+        cmd = util.format('/usr/bin/flatpak run org.jamovi.jamovi --install "%s"', pth);
+    else
+        cmd = util.format('"%s" --install "%s"', find(jamovi_home), pth);
 
     console.log('Installing ' + pth);
 
-    let cmd = util.format('"%s" --install "%s"', exe, pth);
     try {
         child_process.execSync(cmd, { stdio: 'inherit', encoding: 'utf-8' });
         console.log('Module installed successfully');

@@ -105,11 +105,11 @@ try {
     }
 
     installer.check(args.home);
-    let exe = installer.find(args.home);
 
     let paths;
 
     if (process.platform === 'win32') {
+        let exe = installer.find(args.home);
         let bin  = path.dirname(exe);
         let home = path.dirname(bin);
         let rHome = path.join(home, 'Frameworks', 'R');
@@ -118,6 +118,7 @@ try {
         paths = { home, rHome, rExe, rLibs };
     }
     else if (process.platform === 'darwin') {
+        let exe = installer.find(args.home);
         let bin  = path.dirname(exe);
         let home = path.dirname(bin);
         let rHome = path.join(home, 'Frameworks', 'R.framework', 'Versions', '3.3', 'Resources');
@@ -126,22 +127,14 @@ try {
         paths = { home, rHome, rExe, rLibs };
     }
     else {
-        let bin  = path.dirname(exe);
-        let home = path.dirname(bin);
-
-        let rHome;
-        let rExe;
-        if (args.rhome) {
-            rHome = args.rhome;
-            rExe = path.join(rHome, 'bin', 'R');
-        }
-        else {
-            rHome = path.join(home, 'lib/R');
-            rExe  = 'flatpak" run --devel org.jamovi.jamovi "-R'
-        }
-
-        let rLibs = path.join(home, 'Resources', 'modules', 'base', 'R');
-        paths = { home, rHome, rExe, rLibs };
+        let result = require('child_process').execSync(
+            '/usr/bin/flatpak info org.jamovi.jamovi',
+            { encoding: 'utf-8' });
+        let location = /Location: (.*)/g.exec(result)[1];
+        let rHome = path.join(location, 'files/lib64/R');
+        let rLibs = path.join(rHome, 'library');
+        let rExe = 'flatpak" run --devel org.jamovi.jamovi "-R';
+        paths = { rHome, rExe, rLibs };
     }
 
     srcDir = path.resolve(srcDir);
