@@ -51,7 +51,9 @@ const included = [
 
     'jmvcore',
     'R6',
-    'ggplot2',
+    'Rcpp',
+    'stringi',
+    'stringr',
 
     // suppress installation of
     'testthat',
@@ -152,10 +154,10 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log) {
         depends = depends.join("','");
 
         let installType = 'getOption(\'pkgType\')'
-        if (process.platform === 'darwin')
-            installType = '\'mac.binary.mavericks\''
+        // if (process.platform === 'darwin')
+        //    installType = '\'mac.binary.mavericks\''
 
-        cmd = util.format('"%s" --slave -e "utils::install.packages(c(\'%s\'), lib=\'%s\', type=%s, repos=c(\'https://repo.jamovi.org\', \'https://cran.r-project.org\'), INSTALL_opts=c(\'--no-data\', \'--no-help\', \'--no-demo\', \'--no-html\'))"', paths.rExe, depends, buildDir, installType);
+        cmd = util.format('"%s" --slave -e "utils::install.packages(c(\'%s\'), lib=\'%s\', type=%s, repos=c(\'https://cran.r-project.org\'), INSTALL_opts=c(\'--no-data\', \'--no-help\', \'--no-demo\', \'--no-html\'))"', paths.rExe, depends, buildDir, installType);
         cmd = cmd.replace(/\\/g, '/');
         try {
             sh(cmd, { stdio: [0, 1, 1], encoding: 'utf-8', env: env } );
