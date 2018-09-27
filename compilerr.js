@@ -54,6 +54,7 @@ const included = [
     'Rcpp',
     'stringi',
     'stringr',
+    'ggplot2',
 
     // suppress installation of
     'testthat',
