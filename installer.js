@@ -14,6 +14,10 @@ const find = function(jamovi_home) {
 
     let exe;
 
+    if (jamovi_home === 'flatpak') {
+        return 'flatpak run org.jamovi.jamovi'
+    }
+
     if (jamovi_home !== undefined) {
         jamovi_home = path.resolve(jamovi_home);
         exe = path.join(jamovi_home, 'jamovi');
@@ -65,7 +69,7 @@ const check = function(jamovi_home) {
     let exe;
     let args;
 
-    if (process.platform === 'linux') {
+    if (jamovi_home === 'flatpak') {
         exe = '/usr/bin/flatpak';
         args = [ 'run', 'org.jamovi.jamovi', '--version' ];
     }
@@ -121,7 +125,7 @@ const check = function(jamovi_home) {
 const install = function(pth, jamovi_home) {
 
     let cmd;
-    if (process.platform === 'linux')
+    if (jamovi_home === 'flatpak')
         cmd = util.format('/usr/bin/flatpak run org.jamovi.jamovi --install "%s"', pth);
     else
         cmd = util.format('"%s" --install "%s"', find(jamovi_home), pth);

@@ -126,15 +126,29 @@ try {
         let rLibs = path.join(home, 'Resources', 'modules', 'base', 'R');
         paths = { home, rHome, rExe, rLibs };
     }
-    else {
+    else if (args.home === 'flatpak') {
         let result = require('child_process').execSync(
             '/usr/bin/flatpak info org.jamovi.jamovi',
             { encoding: 'utf-8' });
         let location = /Location: (.*)/g.exec(result)[1];
+        let home = 'flatpak';
         let rHome = path.join(location, 'files/lib64/R');
         let rLibs = path.join(rHome, 'library');
         let rExe = 'flatpak" run --devel org.jamovi.jamovi "-R';
-        paths = { rHome, rExe, rLibs };
+        paths = { home, rHome, rExe, rLibs };
+    }
+    else {
+        let exe = installer.find(args.home);
+        let bin  = path.dirname(exe);
+        let home = path.dirname(bin);
+        let rHome;
+        if (args.rhome)
+            rHome = args.rhome;
+        else
+            rHome = path.join(home, 'lib/R');
+        let rExe = path.join(rHome, 'bin', 'R');
+        let rLibs = path.join(home, 'Resources', 'modules', 'base', 'R');
+        paths = { home, rHome, rExe, rLibs };
     }
 
     srcDir = path.resolve(srcDir);
