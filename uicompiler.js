@@ -700,7 +700,7 @@ const compatibleDataTypes = function(ctrl, opt) {
     let r = false;
     if (opt_raw !== null)
         r = compareTypeObjects(ctrl_raw, opt_raw);
-        
+
     if (r === false) {
         console.log('#############################');
         console.log(util.inspect(ctrl_raw, false, null));
@@ -754,7 +754,7 @@ const constructors = {
             ctrl.type = 'TextBox';
             CheckTemplateState(item, ctrl, isTemplate);
             ctrl.format = "number";
-            ctrl.inputPattern = "[0-9]+";
+            ctrl.inputPattern = "^\-?[0-9]*\.?0+$";
             return ctrl
         },
         toRaw: function(obj, key) {
@@ -771,7 +771,7 @@ const constructors = {
             ctrl.type = 'TextBox';
             CheckTemplateState(item, ctrl, isTemplate);
             ctrl.format = "number";
-            ctrl.inputPattern = "[0-9]+";
+            ctrl.inputPattern = "^\-?[0-9]*\.?[0-9]+$";
             return ctrl
         },
         toRaw: function(obj, key) {
