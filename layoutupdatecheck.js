@@ -78,13 +78,6 @@ const layoutUpgrade_2_0 = function(ctrl, parent) {
                         delete column.verticalAlignment;
                     }
 
-                    if (template.type === "TextBox") {
-                        if (column.inputPattern !== undefined) {
-                            template.inputPattern = column.inputPattern;
-                            delete column.inputPattern;
-                        }
-                    }
-
                     if (template.type === "ComboBox") {
                         if (column.options !== undefined) {
                             template.options = column.options;

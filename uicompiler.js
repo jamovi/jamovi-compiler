@@ -142,6 +142,9 @@ const createSchema = function(ctrl) {
 }
 
 const checkControl = function(ctrl, uifilename) {
+    if (ctrl.inputPattern !== undefined)
+        reject(uifilename, 'The property "inputPattern" is no longer supported and should be removed. Option: ' + (ctrl.name === undefined ? ctrl.type : ctrl.name));
+
     let schema = createSchema(ctrl);
     if (schema) {
         let report = validate(ctrl, schema);
@@ -754,7 +757,6 @@ const constructors = {
             ctrl.type = 'TextBox';
             CheckTemplateState(item, ctrl, isTemplate);
             ctrl.format = "number";
-            ctrl.inputPattern = "^\-?[0-9]*\.?0+$";
             return ctrl
         },
         toRaw: function(obj, key) {
@@ -771,7 +773,6 @@ const constructors = {
             ctrl.type = 'TextBox';
             CheckTemplateState(item, ctrl, isTemplate);
             ctrl.format = "number";
-            ctrl.inputPattern = "^\-?[0-9]*\.?[0-9]+$";
             return ctrl
         },
         toRaw: function(obj, key) {

@@ -266,8 +266,6 @@ TextBox:
             type: string
         suffix:
             type: string
-        inputPattern:
-            type: string
         alignText:
             - 'left'
             - 'center'
