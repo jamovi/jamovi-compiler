@@ -168,16 +168,20 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log) {
         }
     }
 
+    let SHLIB_EXT = '.so';
+    if (process.platform === 'win32')
+        SHLIB_EXT = '.dll';
+    let dllPath = path.join(srcDir, 'src', packageInfo.name + SHLIB_EXT);
+
     if ( ! fs.existsSync(path.join(srcDir, 'src'))) {
         log.debug('no src directory found - no compilation');
+    }
+    else if (fs.existsSync(dllPath)) {
+        log.debug('src directory found, but binary already built');
     }
     else {
         log.debug('src directory found - compilation will begin!');
         log.debug('building binaries');
-
-        let SHLIB_EXT = '.so';
-        if (process.platform === 'win32')
-            SHLIB_EXT = '.dll';
 
         let srcs = [ ];
         for (let child of fs.readdirSync(path.join(srcDir, 'src'))) {
@@ -185,14 +189,14 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log) {
                 srcs.push(child);
         }
 
-        let dllPath = path.join(srcDir, 'src', packageInfo.name + SHLIB_EXT);
         let srcPaths = srcs.map(src => '"' + path.join(srcDir, 'src', src) + '"').join(' ');
         let incPaths = linkingTo.map(pkg => '-I"' + path.join(buildDir, pkg, 'include') + '"').join(' ');
+        incPaths += ' ' + linkingTo.map(pkg => '-I"' + path.join(paths.rHome, 'library', pkg, 'include') + '"').join(' ');
 
         log.debug('setting CLINK_CPPFLAGS=' + incPaths);
         env['CLINK_CPPFLAGS'] = incPaths;
 
-        cmd = util.format('"%s" SHLIB -o "%s" %s', path.join(paths.rHome, 'bin', 'Rcmd'), dllPath, srcPaths);
+        cmd = util.format('"%s" CMD SHLIB -o "%s" %s', paths.rExe, dllPath, srcPaths);
 
         log.debug('running command:\n' + cmd);
         sh(cmd, { stdio: [0, 1, 1], encoding: 'utf-8', env: env } );

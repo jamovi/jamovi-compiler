@@ -127,13 +127,9 @@ try {
         paths = { home, rHome, rExe, rLibs };
     }
     else if (args.home === 'flatpak') {
-        let result = require('child_process').execSync(
-            '/usr/bin/flatpak info org.jamovi.jamovi',
-            { encoding: 'utf-8' });
-        let location = /Location: (.*)/g.exec(result)[1];
         let home = 'flatpak';
-        let rHome = path.join(location, 'files/lib64/R');
-        let rLibs = path.join(rHome, 'library');
+        let rHome = '/app/lib/R';
+        let rLibs = rHome + 'library';
         let rExe = 'flatpak" run --devel org.jamovi.jamovi "-R';
         paths = { home, rHome, rExe, rLibs };
     }
