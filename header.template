@@ -203,7 +203,11 @@ if (results.items) {
 <%=analysis.options.filter(o => o.takeFromDataIfMissing === true).map(option => {
         return '\n    ' + option.name + ' <- `if`( ! missing(' + option.name + '), ' + option.name + ', colnames(data))';
     }).join()
+%><%=analysis.options.filter(o => o.type.startsWith('Variable') && _.isEqual(o.permitted, ['factor'])).map(option => {
+        return '\n    for (v in ' + option.name + ') data[[v]] <- as.factor(data[[v]])';
+    }).join('')
 %>
+
     options <- <%= analysis.name %>Options$new(<%=analysis.options.filter(o => o.type !== 'Data').map(option => {
         return '\n        ' + option.name + ' = ' + option.name;
     }).join()
