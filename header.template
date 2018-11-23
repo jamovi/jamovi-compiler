@@ -203,8 +203,14 @@ if (results.items) {
 <%=analysis.options.filter(o => o.takeFromDataIfMissing === true).map(option => {
         return '\n    ' + option.name + ' <- `if`( ! missing(' + option.name + '), ' + option.name + ', colnames(data))';
     }).join()
+%><%=analysis.options.filter(o => o.type.startsWith('Variable')).map(option => {
+        return '\n    ' + option.name + ' <- jmvcore:::resolveQuo(rlang::enquo(' + option.name + '))'
+    }).join('')
 %><%=analysis.options.filter(o => o.type.startsWith('Variable') && _.isEqual(o.permitted, ['factor'])).map(option => {
         return '\n    for (v in ' + option.name + ') data[[v]] <- as.factor(data[[v]])';
+    }).join('')
+%><%=analysis.options.filter(o => o.type === 'Terms' || (o.type === 'Array' && o.template.type === 'Variables')).map(option => {
+        return '\n    if (inherits(' + option.name + ', \'formula\')) ' + option.name + ' <- jmvcore:::decomposeFormula(' + option.name + ')';
     }).join('')
 %>
 
