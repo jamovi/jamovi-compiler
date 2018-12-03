@@ -297,9 +297,9 @@ try {
                 aObj.menuSubtitle = analysis.menuSubtitle;
             if (analysis.description) {
                 if (typeof analysis.description === 'string')
-                    aObj.description = analysis.description;
+                    aObj.description = analysis.description.split('\n\n')[0];
                 else if (typeof analysis.description.main === 'string')
-                    aObj.description = analysis.description.main;
+                    aObj.description = analysis.description.main.split('\n\n')[0];
             }
             if (analysis.hidden === true)
                 aObj.hidden = analysis.hidden;
