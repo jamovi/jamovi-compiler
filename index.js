@@ -340,6 +340,15 @@ try {
             fs.unlinkSync(pOutPath);
         }
 
+        if (packageInfo.datasets) {
+            for (let dataset of packageInfo.datasets) {
+                let from = path.join(srcDir, 'data', dataset.path);
+                let to = path.join(modDir, 'data', dataset.path);
+                fs.copySync(from, to);
+                console.log('copied', dataset.path);
+            }
+        }
+
         let indexPath = path.join(defDir, '0000.yaml');
 
         if (packageInfo.date instanceof Date)
