@@ -394,6 +394,8 @@ Supplier:
             type: string
         format:
             type: string
+        higherOrders:
+            type: boolean
         events:
             type: object
             additionalProperties: false
