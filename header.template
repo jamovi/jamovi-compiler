@@ -185,7 +185,7 @@ if (results.items) {
     }
 }
 %>#' @export
-<%= analysis.name %> <- function(<%=analysis.options.map(option => {
+<%= analysis.rename ? analysis.rename : analysis.name %> <- function(<%=analysis.options.map(option => {
     if (_.isUndefined(option['default']))
         return '\n    ' + option.name;
     return '\n    ' + option.name + ' = ' + imports.sourcifyOption(option['default']);
@@ -193,7 +193,7 @@ if (results.items) {
 %>) {
 
     if ( ! requireNamespace('jmvcore'))
-        stop('<%= analysis.name %> requires jmvcore to be installed (restart may be required)')
+        stop('<%= analysis.rename ? analysis.rename : analysis.name %> requires jmvcore to be installed (restart may be required)')
 
     if (missing(data))
         data <- jmvcore:::marshalData(

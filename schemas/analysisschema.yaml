@@ -9,6 +9,9 @@ properties:
     name:
         type: string
         pattern: "^[A-Za-z][A-Za-z0-9]*$"
+    rename:
+        type: string
+        pattern: "^[A-Za-z][A-Za-z0-9]*$"
     title:
         type: string
     version:
