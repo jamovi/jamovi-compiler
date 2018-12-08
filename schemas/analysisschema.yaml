@@ -64,6 +64,17 @@ properties:
                     items:
                         type: string
                         pattern: "^[A-Za-z][A-Za-z0-9]*$"
+    formula:
+        type: object
+        item:
+            type: object
+            properties:
+                from:
+                    type: string
+                type:
+                    type: string
+                permitted:
+                    type: string
     options:
         type: array
         items:

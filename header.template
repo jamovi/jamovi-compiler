@@ -101,7 +101,7 @@
     desc = desc.replace('  @param', '@param');
     desc = desc.split('\n').map(s => s.trimRight()).join('\n');  // trim trailing whitespace
     return desc;
-    }).join('\n') %>
+    }).join('\n') %><%= analysis.formula ? "\n#' @param formula (optional) the formula to use, see the examples" : '' %>
 <%
 if (results.items) {
     print("#' @return A results object containing:\n");
@@ -190,11 +190,25 @@ if (results.items) {
         return '\n    ' + option.name;
     return '\n    ' + option.name + ' = ' + imports.sourcifyOption(option['default']);
 }).join()
-%>) {
+%><%= analysis.formula ? ',\n    formula' : '' %>) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('<%= analysis.rename ? analysis.rename : analysis.name %> requires jmvcore to be installed (restart may be required)')
-<%=analysis.options.filter(o => o.type.startsWith('Variable')).map(option => {
+<% if (analysis.formula) {
+    print('\n    if ( ! missing(formula)) {')
+    for (var name in analysis.formula) {
+        var marsh = analysis.formula[name]
+        print('\n        if (missing(' + name + '))')
+        print('\n            ' + name + ' <- jmvcore:::marshalFormula(')
+        print('\n                formula=formula,')
+        print('\n                data=data')
+        for (var part in marsh) {
+            print(',\n                ' + part + '=\'' + marsh[part] + '\'');
+        }
+        print(')')
+    }
+    print('\n    }\n')
+} %><%=analysis.options.filter(o => o.type.startsWith('Variable')).map(option => {
         return '\n    if ( ! missing(' + option.name + ')) ' + option.name + ' <- jmvcore:::resolveQuo(jmvcore:::enquo(' + option.name + '))'
     }).join('')
 %>
