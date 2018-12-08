@@ -194,7 +194,10 @@ if (results.items) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('<%= analysis.rename ? analysis.rename : analysis.name %> requires jmvcore to be installed (restart may be required)')
-
+<%=analysis.options.filter(o => o.type.startsWith('Variable')).map(option => {
+        return '\n    if ( ! missing(' + option.name + ')) ' + option.name + ' <- jmvcore:::resolveQuo(jmvcore:::enquo(' + option.name + '))'
+    }).join('')
+%>
     if (missing(data))
         data <- jmvcore:::marshalData(
             parent.frame()<%=analysis.options.filter(o => o.type === 'Variable' || o.type === 'Variables').map(option => {
@@ -203,9 +206,6 @@ if (results.items) {
 <%=analysis.options.filter(o => o.takeFromDataIfMissing === true).map(option => {
         return '\n    ' + option.name + ' <- `if`( ! missing(' + option.name + '), ' + option.name + ', colnames(data))';
     }).join()
-%><%=analysis.options.filter(o => o.type.startsWith('Variable')).map(option => {
-        return '\n    ' + option.name + ' <- jmvcore:::resolveQuo(rlang::enquo(' + option.name + '))'
-    }).join('')
 %><%=analysis.options.filter(o => o.type.startsWith('Variable') && _.isEqual(o.permitted, ['factor'])).map(option => {
         return '\n    for (v in ' + option.name + ') data[[v]] <- as.factor(data[[v]])';
     }).join('')
