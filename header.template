@@ -221,7 +221,7 @@ if (results.items) {
         return '\n    ' + option.name + ' <- `if`( ! missing(' + option.name + '), ' + option.name + ', colnames(data))';
     }).join()
 %><%=analysis.options.filter(o => o.type.startsWith('Variable') && _.isEqual(o.permitted, ['factor'])).map(option => {
-        return '\n    for (v in ' + option.name + ') data[[v]] <- as.factor(data[[v]])';
+        return '\n    for (v in ' + option.name + ') if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])';
     }).join('')
 %><%=analysis.options.filter(o => o.type === 'Terms' || (o.type === 'Array' && o.template.type === 'Variables')).map(option => {
         return '\n    if (inherits(' + option.name + ', \'formula\')) ' + option.name + ' <- jmvcore:::decomposeFormula(' + option.name + ')';
