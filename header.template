@@ -201,9 +201,16 @@ if (results.items) {
         print('\n        if (missing(' + name + '))')
         print('\n            ' + name + ' <- jmvcore:::marshalFormula(')
         print('\n                formula=formula,')
-        print('\n                data=data')
+        print('\n                data=`if`( ! missing(data), data, NULL)')
         for (var part in marsh) {
-            print(',\n                ' + part + '=\'' + marsh[part] + '\'');
+            var v = marsh[part];
+            if (v === true)
+                v = 'TRUE'
+            else if (v === false)
+                v = 'FALSE'
+            else
+                v = "'" + v + "'";
+            print(',\n                ' + part + '=' + v);
         }
         print(')')
     }

@@ -75,6 +75,10 @@ properties:
                     type: string
                 permitted:
                     type: string
+                subset:
+                    type: string
+                required:
+                    type: boolean
     options:
         type: array
         items:
