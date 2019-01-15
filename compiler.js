@@ -11,6 +11,8 @@ const wrap = require('word-wrap');
 
 const validate = require('jsonschema').validate;
 
+const sourcify = require('./sourcify');
+
 let analysisSchemaPath = path.join(__dirname, 'schemas', 'analysisschema.yaml');
 let analysisSchema = yaml.safeLoad(fs.readFileSync(analysisSchemaPath));
 let resultsSchemaPath = path.join(__dirname, 'schemas', 'resultsschema.yaml');
@@ -343,6 +345,10 @@ const resultsify = function(item, indent, root) {
         str +=  '\n    ' + indent + '            options=options'
         str += ',\n    ' + indent + '            name="' + name + '"'
         str += ',\n    ' + indent + '            title="' + title + '"'
+
+        if (item.clearWith)
+            str += ',\n    ' + indent + '            clearWith=' + sourcify(item.clearWith);
+
         str +=  ')';
 
         for (let child of items) {
