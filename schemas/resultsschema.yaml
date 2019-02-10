@@ -50,6 +50,10 @@ properties:
                       - null
                     items:
                         type: string
+                refs:
+                    type:
+                      - string
+                      - array
             required:
                 - name
                 - type

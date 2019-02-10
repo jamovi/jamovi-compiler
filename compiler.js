@@ -346,6 +346,9 @@ const resultsify = function(item, indent, root) {
         str += ',\n    ' + indent + '            name="' + name + '"'
         str += ',\n    ' + indent + '            title="' + title + '"'
 
+        if (item.refs)
+            str += ',\n    ' + indent + '            refs=' + sourcify(item.refs);
+
         if (item.clearWith)
             str += ',\n    ' + indent + '            clearWith=' + sourcify(item.clearWith);
 

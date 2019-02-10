@@ -163,6 +163,7 @@ try {
     let jsBuildDir = path.join(srcDir, 'build', 'js');
     let jsSrcDir = path.join(defDir, 'js');
     let packageInfoPath = path.join(defDir, '0000.yaml');
+    let refsPath = path.join(defDir, '00refs.yaml');
 
     let packageInfo;
 
@@ -179,6 +180,12 @@ try {
     }
     else {
         packageInfo = parseR(srcDir);
+    }
+
+    let refs = undefined;
+    if (utils.exists(refsPath)) {
+        let content = fs.readFileSync(refsPath);
+        refs = yaml.safeLoad(content).refs;
     }
 
     if ( ! utils.exists(defDir))
@@ -236,11 +243,11 @@ try {
             let bTemplPath = path.join(__dirname, 'body.template');
             let sTemplPath = path.join(__dirname, 'src.template');
 
-            compiler(packageInfo.name, analysisPath, resultsPath, hTemplPath, hOutPath);
+            compiler(packageInfo.name, analysisPath, resultsPath, hTemplPath, hOutPath, refs);
             console.log('wrote: ' + path.basename(hOutPath));
 
             if ( ! utils.exists(bOutPath)) {
-                compiler(packageInfo.name, analysisPath, resultsPath, bTemplPath, bOutPath);
+                compiler(packageInfo.name, analysisPath, resultsPath, bTemplPath, bOutPath, refs);
                 console.log('wrote: ' + path.basename(bOutPath));
             }
 
@@ -323,14 +330,14 @@ try {
 
         let pOutPath = path.join(rDir, '00jmv.R');
 
-        if (packageInfo.references) {
+        if (refs) {
             let pOutPath = path.join(rDir, '00jmv.R');
             let pTemplPath = path.join(__dirname, 'pkg.template');
 
             let template = fs.readFileSync(pTemplPath, 'utf-8');
             let compiler = _.template(template);
 
-            let object = { references: packageInfo.references, imports: { sourcify } };
+            let object = { refs: refs, imports: { sourcify } };
             let content = compiler(object);
 
             fs.writeFileSync(pOutPath, content);
@@ -362,6 +369,14 @@ try {
 
             fs.writeFileSync(path.join(modDir, 'jamovi.yaml'), content);
             console.log('wrote: jamovi.yaml');
+
+            try {
+                content = fs.readFileSync(refsPath);
+                fs.writeFileSync(path.join(modDir, 'refs.yaml'), content);
+            }
+            catch (e) {
+                // do nothing
+            }
 
             compileR(srcDir, modDir, paths, packageInfo, log);
 

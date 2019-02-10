@@ -168,6 +168,12 @@ Array:
               - string
               - integer
             min: 0
+        refs:
+            type:
+              - array
+              - string
+            items:
+                type: string
         template:
             type: object
             required:
