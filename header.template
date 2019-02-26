@@ -206,7 +206,7 @@ if (results.items) {
             print('\n                name="' + name + '"')
         }
         else {
-            print('\n            ' + name + ' <- jmvcore:::marshalFormula(')
+            print('\n            ' + name + ' <- jmvcore::marshalFormula(')
             print('\n                formula=formula,')
             print('\n                data=`if`( ! missing(data), data, NULL)')
             for (var part in marsh) {
@@ -224,11 +224,11 @@ if (results.items) {
     }
     print('\n    }\n')
 } %><%=analysis.options.filter(o => o.type.startsWith('Variable')).map(option => {
-        return '\n    if ( ! missing(' + option.name + ')) ' + option.name + ' <- jmvcore:::resolveQuo(jmvcore:::enquo(' + option.name + '))'
+        return '\n    if ( ! missing(' + option.name + ')) ' + option.name + ' <- jmvcore::resolveQuo(jmvcore::enquo(' + option.name + '))'
     }).join('')
 %>
     if (missing(data))
-        data <- jmvcore:::marshalData(
+        data <- jmvcore::marshalData(
             parent.frame()<%=analysis.options.filter(o => o.type === 'Variable' || o.type === 'Variables').map(option => {
                     return ',\n            `if`( ! missing(' + option.name + '), ' + option.name + ', NULL)';
                 }).join('')%>)
@@ -239,7 +239,7 @@ if (results.items) {
         return '\n    for (v in ' + option.name + ') if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])';
     }).join('')
 %><%=analysis.options.filter(o => o.type === 'Terms' || (o.type === 'Array' && o.template.type === 'Variables')).map(option => {
-        return '\n    if (inherits(' + option.name + ', \'formula\')) ' + option.name + ' <- jmvcore:::decomposeFormula(' + option.name + ')';
+        return '\n    if (inherits(' + option.name + ', \'formula\')) ' + option.name + ' <- jmvcore::decomposeFormula(' + option.name + ')';
     }).join('')
 %>
 
