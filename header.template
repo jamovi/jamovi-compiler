@@ -197,20 +197,28 @@ if (results.items) {
 <% if (analysis.formula) {
     print('\n    if ( ! missing(formula)) {')
     for (var name in analysis.formula) {
-        var marsh = analysis.formula[name]
+        var marsh = analysis.formula[name];
         print('\n        if (missing(' + name + '))')
-        print('\n            ' + name + ' <- jmvcore:::marshalFormula(')
-        print('\n                formula=formula,')
-        print('\n                data=`if`( ! missing(data), data, NULL)')
-        for (var part in marsh) {
-            var v = marsh[part];
-            if (v === true)
-                v = 'TRUE'
-            else if (v === false)
-                v = 'FALSE'
-            else
-                v = "'" + v + "'";
-            print(',\n                ' + part + '=' + v);
+        if (marsh.custom) {
+            print('\n            ' + name + ' <- ' + analysis.name + 'Class$private_methods$.marshalFormula(')
+            print('\n                formula=formula,')
+            print('\n                data=`if`( ! missing(data), data, NULL),')
+            print('\n                name="' + name + '"')
+        }
+        else {
+            print('\n            ' + name + ' <- jmvcore:::marshalFormula(')
+            print('\n                formula=formula,')
+            print('\n                data=`if`( ! missing(data), data, NULL)')
+            for (var part in marsh) {
+                var v = marsh[part];
+                if (v === true)
+                    v = 'TRUE'
+                else if (v === false)
+                    v = 'FALSE'
+                else
+                    v = "'" + v + "'";
+                print(',\n                ' + part + '=' + v);
+            }
         }
         print(')')
     }
