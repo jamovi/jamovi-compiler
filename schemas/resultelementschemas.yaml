@@ -116,7 +116,13 @@ Image:
               - null
             items:
                 type: string
-
+        refs:
+            type:
+              - array
+              - string
+            items:
+                type: string
+                
 Group:
     "$schema": http://json-schema.org/draft-04/schema#
     additionalProperties: false
