@@ -226,7 +226,7 @@ if (results.items) {
 } %><%=analysis.options.filter(o => o.type.startsWith('Variable')).map(option => {
         return '\n    if ( ! missing(' + option.name + ')) ' + option.name + ' <- jmvcore::resolveQuo(jmvcore::enquo(' + option.name + '))'
     }).join('')
-%>
+%><% if (analysis.options.filter(o => o.type === 'Data').length !== 0) { %>
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame()<%=analysis.options.filter(o => o.type === 'Variable' || o.type === 'Variables').map(option => {
@@ -241,7 +241,7 @@ if (results.items) {
 %><%=analysis.options.filter(o => o.type === 'Terms' || (o.type === 'Array' && o.template.type === 'Variables')).map(option => {
         return '\n    if (inherits(' + option.name + ', \'formula\')) ' + option.name + ' <- jmvcore::decomposeFormula(' + option.name + ')';
     }).join('')
-%>
+%><% } %>
 
     options <- <%= analysis.name %>Options$new(<%=analysis.options.filter(o => o.type !== 'Data').map(option => {
         return '\n        ' + option.name + ' = ' + option.name;
