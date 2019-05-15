@@ -402,6 +402,8 @@ Supplier:
             properties:
                 change:
                     type: string
+                update:
+                    type: string
 
 VariableSupplier:
     type: object
@@ -520,6 +522,12 @@ ControlInheritance:
         - ControlContainer
         - Supplier
         - VariableSupplier
+    OutputSupplier:
+        - ControlBase
+        - GridControl
+        - ControlContainer
+        - Supplier
+        - OutputSupplier
     CollapseBox:
         - ControlBase
         - GridControl
