@@ -522,6 +522,12 @@ ControlInheritance:
         - ControlContainer
         - Supplier
         - VariableSupplier
+    OutputSupplier:
+        - ControlBase
+        - GridControl
+        - ControlContainer
+        - Supplier
+        - OutputSupplier
     CollapseBox:
         - ControlBase
         - GridControl
