@@ -145,6 +145,11 @@ const checkControl = function(ctrl, uifilename) {
     if (ctrl.inputPattern !== undefined)
         reject(uifilename, 'The property "inputPattern" is no longer supported and should be removed. Option: ' + (ctrl.name === undefined ? ctrl.type : ctrl.name));
 
+    if ((ctrl.type === 'Supplier' || (ctrl.type === 'VariableSupplier' && ctrl.populate === 'manual')) &&
+        (ctrl.events === undefined || ctrl.events.update === undefined))
+        reject(uifilename, `The use of a ${ ctrl.type === 'Supplier' ? ("'" + ctrl.type + "' control") : ("'" + ctrl.type + "' control, with the property > populate: 'manual',") } requires an 'update' event handler to be assigned. Option: ${ctrl.name === undefined ? ctrl.type : ctrl.name}`);
+
+
     let schema = createSchema(ctrl);
     if (schema) {
         let report = validate(ctrl, schema);
