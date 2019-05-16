@@ -859,6 +859,25 @@ const constructors = {
         }
     },
 
+    Term: {
+        create: function(item, isTemplate) {
+            let ctrl = { };
+            ctrl.type = 'TermLabel';
+            CheckTemplateState(item, ctrl, isTemplate);
+
+            return ctrl;
+        },
+        toRaw: function(obj, key) {
+            if (key === undefined || key.length === 0)
+                return { type: "array", template: "string" };
+
+            if (key.length === 1)
+                return "string";
+
+            return null;
+        }
+    },
+
     Terms: {
         create: function(item, isTemplate) {
             let ctrl = { };
