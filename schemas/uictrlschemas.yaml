@@ -402,6 +402,8 @@ Supplier:
             properties:
                 change:
                     type: string
+                update:
+                    type: string
 
 VariableSupplier:
     type: object
