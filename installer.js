@@ -97,7 +97,7 @@ const check = function(jamovi_home) {
         let min = parseInt(match[3]);
         let rev = parseInt(match[4])
 
-        if (mas < 0 || maj < 9 || (maj === 9 && min < 1))
+        if (mas === 0 && (maj < 9 || (maj === 9 && min < 6)))
             throw 'a newer version of jamovi is required, please update to the newest version';
         if (mas > 1 || (mas === 1 && maj >= 1))
             throw 'a newer version of the jamovi-compiler (or jmvtools) is required';
