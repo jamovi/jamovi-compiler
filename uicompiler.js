@@ -623,6 +623,8 @@ const createUIElementsFromYaml = function(uiData) {
         for (let handler in handlers) {
             if (handler.startsWith('view_')) {
                 let eventName = checkEventAliases(handler.substring(5));
+                if (validEvent(null, eventName) === false)
+                    continue;
 
                 if (mainEvents && mainEvents[eventName] !== undefined)
                     continue;
@@ -662,7 +664,7 @@ const createChildTree = function(list, indent) {
                 if (child.name === undefined)
                     throw "A control cannot have events with no name.";
                 eventsChecked = true;
-                let innerevents = processEventsList(child.name, child[name], indent + "\t\t");
+                let innerevents = processEventsList(child, child[name], indent + "\t\t");
                 copy += indent + "\t" + name + ": [\n";
                 copy += innerevents + "\n";
                 copy += indent + "\t" + "]";
@@ -690,7 +692,7 @@ const createChildTree = function(list, indent) {
         if (child.name !== undefined && eventsChecked === false) {
             if (copy !== "")
                 copy += ",\n";
-            let innerevents = processEventsList(child.name, { }, indent + "\t\t");
+            let innerevents = processEventsList(child, { }, indent + "\t\t");
             copy += indent + "\tevents: [\n";
             copy += innerevents + "\n";
             copy += indent + "\t" + "]";
@@ -730,7 +732,24 @@ const checkEventAliases = function(eventName) {
     }
 };
 
-const processEventsList = function(ctrlName, events, indent) {
+const validEvent = function(ctrl, eventName) {
+    let schema = uiSchema;
+    if (ctrl)
+        schema = createSchema(ctrl);
+
+    let events = schema.properties.events;
+    if (events === undefined)
+        return false;
+
+    for (let event in events.properties) {
+        if (event === eventName)
+            return true;
+    }
+
+    return false;
+};
+
+const processEventsList = function(ctrl, events, indent) {
     var list = "";
     for (let name in events) {
         let eventName = checkEventAliases(name);
@@ -749,10 +768,13 @@ const processEventsList = function(ctrlName, events, indent) {
         list += event;
     }
 
-    if (magicHandlers && ctrlName !== null) {
+    if (magicHandlers && ctrl.name !== null) {
         for (let handler in handlers) {
-            if (handler.startsWith(ctrlName + '_')) {
+            if (handler.startsWith(ctrl.name + '_')) {
                 let eventName = checkEventAliases(handler.substring(handler.indexOf('_') + 1));
+
+                if (validEvent(ctrl, eventName) === false)
+                    continue;
 
                 if (events[eventName] !== undefined)
                     continue;
