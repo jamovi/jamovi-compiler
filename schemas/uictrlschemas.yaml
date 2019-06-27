@@ -24,6 +24,7 @@ ControlBase:
                   - TermLabel
                   - RMAnovaFactorsBox
                   - LevelSelector
+                  - CustomControl
         name:
             type: string
         stage:
@@ -118,7 +119,9 @@ OptionControl:
             type: object
             additionalProperties: false
             properties:
-                change:
+                change: # old and not to be used anymore, use changed instead
+                    type: string
+                changed:
                     type: string
                 changing:
                     type: string
@@ -385,6 +388,18 @@ EmbeddedChildSupport:
         targetArea:
             type: bool
 
+CustomControl:
+    type: object
+    properties:
+        events:
+            type: object
+            additionalProperties: false
+            properties:
+                creating:
+                    type: string
+                updated:
+                    type: string
+
 Supplier:
     type: object
     properties:
@@ -400,9 +415,13 @@ Supplier:
             type: object
             additionalProperties: false
             properties:
-                change:
+                change: # old and not to be used anymore, use changed instead
                     type: string
-                update:
+                changed:
+                    type: string
+                update:  # old and not to be used anymore, use updated instead
+                    type: string
+                updated:
                     type: string
 
 VariableSupplier:
@@ -460,6 +479,10 @@ Columns:
         - template
 
 ControlInheritance:
+    CustomControl:
+        - ControlBase
+        - GridControl
+        - CustomControl
     RMAnovaFactorsBox:
         - ControlBase
         - GridControl

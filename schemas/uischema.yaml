@@ -26,9 +26,13 @@ properties:
         properties:
             loaded:
                 type: string
-            update:
+            update: # old event should use updated instead
+                type: string
+            updated:
                 type: string
             remoteDataChanged:
+                type: string
+            creating:
                 type: string
     children:
         type: array

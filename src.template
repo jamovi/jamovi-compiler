@@ -5,12 +5,16 @@
 
 const options = <%= JSON.stringify(analysis.options) %>;
 
-const view = View.extend({
-    jus: "<%= elements.jus %>",
+const view = function() {
+    View.extend({
+        jus: "<%= elements.jus %>",
 
-    <%= elements.events %>
+        <%= elements.events %>
 
-});
+    }).call(this);
+
+    <%= analysis.constructor %>
+}
 
 view.layout = ui.extend({
 
@@ -20,5 +24,6 @@ view.layout = ui.extend({
     stage: <%= elements.stage %>, //0 - release, 1 - development, 2 - proposed
     controls: <%= elements.controls %>
 });
+
 
 module.exports = { view : view, options: options };
