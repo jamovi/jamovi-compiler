@@ -235,6 +235,7 @@ try {
             let basename = path.basename(analysisPath, '.a.yaml');
             let resultsPath = path.join(defDir, basename + '.r.yaml');
             let uiPath = path.join(defDir, basename + '.u.yaml');
+            let jsPath = path.join(jsSrcDir, basename + '.js');
             let hOutPath = path.join(rDir, basename + '.h.R');
             let bOutPath = path.join(rDir, basename + '.b.R');
             let sOutPath = path.join(jsBuildDir, basename + '.src.js');
@@ -251,7 +252,7 @@ try {
                 console.log('wrote: ' + path.basename(bOutPath));
             }
 
-            uicompiler(analysisPath, uiPath, sTemplPath, sOutPath);
+            uicompiler(analysisPath, uiPath, jsPath, basename, sTemplPath, sOutPath);
 
 
             if (isBuilding || isInstallingTo) {

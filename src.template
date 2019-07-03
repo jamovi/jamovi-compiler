@@ -5,12 +5,17 @@
 
 const options = <%= JSON.stringify(analysis.options) %>;
 
-const view = View.extend({
-    jus: "<%= elements.jus %>",
+const view = function() {
+    
+    <%= analysis.constructor %>
 
-    <%= elements.events %>
+    View.extend({
+        jus: "<%= elements.jus %>",
 
-});
+        <%= elements.events %>
+
+    }).call(this);
+}
 
 view.layout = ui.extend({
 

@@ -13,8 +13,12 @@ let uiSchemaPath = path.join(__dirname, 'schemas', 'uischema.yaml');
 let uiSchema = yaml.safeLoad(fs.readFileSync(uiSchemaPath));
 let uiCtrlSchemasPath = path.join(__dirname, 'schemas', 'uictrlschemas.yaml');
 let uiCtrlSchemas = yaml.safeLoad(fs.readFileSync(uiCtrlSchemasPath));
+let currentBasename = '';
+let magicHandlers = false;
 
-const uicompile = function(analysisPath, uiPath, sTemplPath, outPath) {
+const uicompile = function(analysisPath, uiPath, jsPath, basename, sTemplPath, outPath) {
+
+    currentBasename = basename;
 
     let content = fs.readFileSync(analysisPath, 'utf-8');
     let analysis = yaml.safeLoad(content);
@@ -33,7 +37,7 @@ const uicompile = function(analysisPath, uiPath, sTemplPath, outPath) {
     }
 
     if (uiData === null || uiData.compilerMode === 'aggressive')
-        uiData = { title: analysis.title, name: analysis.name, jus: "2.0", stage: 0, compilerMode: 'aggressive', children: [] };
+        uiData = { title: analysis.title, name: analysis.name, jus: "3.0", stage: 0, compilerMode: 'aggressive', children: [] };
 
     if (uiData.compilerMode === undefined)
         uiData.compilerMode = 'tame';
@@ -46,9 +50,10 @@ const uicompile = function(analysisPath, uiPath, sTemplPath, outPath) {
         reject(uiPath, "no 'jus' present");
 
     let jus = uiData.jus.match(/^([0-9]+)\.([0-9]+)$/)
-    if ((jus[1] !== '1' && jus[1] !== '2') || jus[2] !== '0')
+    if ((jus[1] !== '1' && jus[1] !== '2' && jus[1] !== '3') || jus[2] !== '0')
         reject(uiPath, 'requires a newer jamovi-compiler');
 
+    magicHandlers = parseInt(jus[1]) >= 3;
 
     let removed = removeMissingOptions(analysis.options, uiData);
     if (removed.length > 0) {
@@ -80,6 +85,9 @@ const uicompile = function(analysisPath, uiPath, sTemplPath, outPath) {
     let compiler = _.template(template);
 
     let elements = createUIElementsFromYaml(uiData);
+
+    analysis.constructor = createConstructorCode(jus, jsPath, basename);
+
     let object = { analysis: analysis, elements: elements };
     content = compiler(object);
 
@@ -88,7 +96,18 @@ const uicompile = function(analysisPath, uiPath, sTemplPath, outPath) {
     console.log('wrote: ' + path.basename(outPath));
 };
 
+const createConstructorCode = function(jus, jsPath, basename) {
+    if (parseInt(jus[1]) < 3)
+        return '';
 
+    let handlers = '{ }';
+    if (fs.existsSync(jsPath))
+        handlers = `require('./${basename}')`;
+
+
+
+    return `this.handlers = ${ handlers }`
+}
 
 const reject = function(filePath, message) {
     throw "Unable to compile '" + path.basename(filePath) + "':\n\t" + message;
@@ -141,13 +160,18 @@ const createSchema = function(ctrl) {
     return schema;
 }
 
+const checkForEventHandle = function(eventName, ctrl) {
+    return ctrl.events !== undefined && ctrl.events[eventName] !== undefined;
+}
+
 const checkControl = function(ctrl, uifilename) {
     if (ctrl.inputPattern !== undefined)
         reject(uifilename, 'The property "inputPattern" is no longer supported and should be removed. Option: ' + (ctrl.name === undefined ? ctrl.type : ctrl.name));
 
-    if ((ctrl.type === 'Supplier' || (ctrl.type === 'VariableSupplier' && ctrl.populate === 'manual')) &&
-        (ctrl.events === undefined || ctrl.events.update === undefined))
-        reject(uifilename, `The use of a ${ ctrl.type === 'Supplier' ? ("'" + ctrl.type + "' control") : ("'" + ctrl.type + "' control, with the property > populate: 'manual',") } requires an 'update' event handler to be assigned. Option: ${ctrl.name === undefined ? ctrl.type : ctrl.name}`);
+    if ((ctrl.type === 'Supplier' || (ctrl.type === 'VariableSupplier' && ctrl.populate === 'manual')) && checkForEventHandle('update', ctrl) === false && checkForEventHandle('updated', ctrl) === false) {
+        if (magicHandlers === false)
+            reject(uifilename, `The use of a ${ ctrl.type === 'Supplier' ? ("'" + ctrl.type + "' control") : ("'" + ctrl.type + "' control, with the property > populate: 'manual',") } requires an 'updated' event handler to be assigned. Option: ${ctrl.name === undefined ? ctrl.type : ctrl.name}`);
+    }
 
 
     let schema = createSchema(ctrl);
@@ -438,7 +462,7 @@ const createUIElementsFromYaml = function(uiData) {
     let mainEvents = uiData.events;
     let events = "events: [\n" + data.events + "\n\t]";
     for (let eventName in mainEvents)
-        events = events + ",\n\n\t" + eventName + ": " + functionify(mainEvents[eventName]);
+        events = events + ",\n\n\t" + checkEventAliases(eventName) + ": " + functionify(mainEvents[eventName]);
 
     return { events: events, controls: "[\n" + data.ctrls + "\n\t]", title: uiData.title, name: uiData.name, stage: uiData.stage, jus: uiData.jus };
 };
@@ -454,11 +478,13 @@ const createChildTree = function(list, indent) {
         let child = children[i];
         let copy = "";
         for (let name in child) {
-            if (/*name !== "events" &&*/ copy !== "")
+            if (copy !== "")
                 copy += ",\n";
 
             if (name === "type") {
                 copy += indent + "\t" + name + ": " + processEnum("DefaultControls", child[name]);
+                if (child[name].startsWith('.') === false)
+                    copy += ",\n" + indent + "\ttypeName: '" + child[name] + "'";
             }
             else if (name === "format") {
                 copy += indent + "\t" + name + ": " + processEnum("FormatDef", child[name]);
@@ -466,11 +492,7 @@ const createChildTree = function(list, indent) {
             else if (name === "events") {
                 if (child.name === undefined)
                     throw "A control cannot have events with no name.";
-                /*if (events !== "")
-                    events += ",\n";
-                events += processEventsList(child.name, child[name], "\t\t");*/
-
-                let innerevents = processEventsList(null, child[name], indent + "\t\t");
+                let innerevents = processEventsList(child, child[name], indent + "\t\t");
                 copy += indent + "\t" + name + ": [\n";
                 copy += innerevents + "\n";
                 copy += indent + "\t" + "]";
@@ -519,23 +541,28 @@ const processEnum = function(type, value) {
     return pvalue;
 };
 
-const processEventsList = function(ctrlName, events, indent) {
+const checkEventAliases = function(eventName) {
+    switch (eventName) {
+        case 'updated':
+            return 'update';
+        case 'changed':
+            return 'change';
+        default:
+            return eventName;
+    }
+};
+
+const processEventsList = function(ctrl, events, indent) {
     var list = "";
     for (let name in events) {
-
-        var eventData = events[name];
+        let eventName = checkEventAliases(name);
+        var eventData = events[eventName];
         var event = "";
-        if (name === "change") {
-            if (ctrlName !== null)
-                event += "onChange: '" + ctrlName + "', ";
+        if (eventName === "change")
             event += "execute: " + functionify(eventData);
-        }
         else {
-            if (ctrlName !== null)
-                event += "onEvent: '" + ctrlName + "." + name + "', ";
-            else
-                event += "onEvent: '" + name + "', ";
-            event += "execute: " + functionify(eventData, "data");
+            event += "onEvent: '" + checkEventAliases(eventName) + "', ";
+            event += "execute: " + functionify(eventData);
         }
         //event += "\n";
         event = indent + "{ " + event + " }";
@@ -546,11 +573,11 @@ const processEventsList = function(ctrlName, events, indent) {
     return list;
 };
 
-const functionify = function(value, indent, args) {
+const functionify = function(value) {
 
     let init = value;
     if (init === undefined)
-        init = "function(ui" + (args !== undefined ? (", " + args) : "") + ") { }";
+        init = "function(ui) { }";
     else if (init.startsWith('.')) {
         let initList = init.split("::");
         init = "require('" + initList[0] + "')";
@@ -558,7 +585,7 @@ const functionify = function(value, indent, args) {
             init = init + "." + initList[1];
     }
     else
-        init = "function(ui" + (args !== undefined ? (", " + args) : "") + ") { " + init + " }";
+        init = "require('./" + currentBasename + "')." + init;
 
     return init;
 };
@@ -1365,6 +1392,18 @@ const uiOptionControl = {
         },
         isContainerControl: function(ctrl) {
             return true;
+        },
+        isOptionControl: function(ctrl) {
+            return false;
+        }
+    },
+
+    CustomControl: {
+        usesSingleCell: function(ctrl) {
+            return true;
+        },
+        isContainerControl: function(ctrl) {
+            return false;
         },
         isOptionControl: function(ctrl) {
             return false;
