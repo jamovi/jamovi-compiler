@@ -248,9 +248,6 @@ if (results.items) {
     }).join()
     %>)
 
-    results <- <%= analysis.name %>Results$new(
-        options = options)
-
     analysis <- <%= analysis.name %>Class$new(
         options = options,
         data = data)
