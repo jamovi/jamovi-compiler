@@ -7,10 +7,10 @@
     public = list(
         initialize = function(<%=analysis.options.filter(o => o.type !== 'Data').map(option => {
                 if (typeof(option['default']) === 'undefined')
-                    return '\n            ' + option.name + ' = NULL';
-                return '\n            ' + option.name + ' = ' + imports.sourcifyOption(option['default']);
-            }).join()
-            %>, ...) {
+                    return '\n            ' + option.name + ' = NULL,';
+                return '\n            ' + option.name + ' = ' + imports.sourcifyOption(option['default']) + ',';
+            }).join('')
+            %> ...) {
 
             super$initialize(
                 package='<%= packageName %>',
