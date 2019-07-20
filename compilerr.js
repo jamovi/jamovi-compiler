@@ -95,7 +95,7 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log) {
 
     if (depends !== null) {
         depends = depends[1];
-        depends = depends.match(/([A-Za-z][A-Za-z0-9_]*)/g);
+        depends = depends.match(/([A-Za-z][A-Za-z0-9_\.]*)/g);
     }
     else {
         depends = [ ];
@@ -103,7 +103,7 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log) {
 
     if (imports !== null) {
         imports = imports[1];
-        imports = imports.match(/([A-Za-z][A-Za-z0-9_]*)/g);
+        imports = imports.match(/([A-Za-z][A-Za-z0-9_\.]*)/g);
     }
     else {
         imports = [ ];
@@ -111,7 +111,7 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log) {
 
     if (suggests !== null) {
         suggests = suggests[1];
-        suggests = suggests.match(/([A-Za-z][A-Za-z0-9_]*)/g);
+        suggests = suggests.match(/([A-Za-z][A-Za-z0-9_\.]*)/g);
     }
     else {
         suggests = [ ];
@@ -119,7 +119,7 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log) {
 
     if (linkingTo !== null) {
         linkingTo = linkingTo[1];
-        linkingTo = linkingTo.match(/([A-Za-z][A-Za-z0-9_]*)/g);
+        linkingTo = linkingTo.match(/([A-Za-z][A-Za-z0-9_\.]*)/g);
     }
     else {
         linkingTo = [ ];
