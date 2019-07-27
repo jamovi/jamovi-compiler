@@ -32,6 +32,8 @@ properties:
         type: boolean
     completeWhenFilled:
         type: boolean
+    export:
+        type: boolean
     description:
         type: object
         additionalProperties: false

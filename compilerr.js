@@ -229,7 +229,7 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log) {
 
     let toAppend = ''
     for (let analysis of packageInfo.analyses)
-        toAppend += util.format('\nexport(%s)\nexport(%sClass)\nexport(%sOptions)\n', analysis.name, analysis.name, analysis.name)
+        toAppend += util.format('\nexport(%sClass)\nexport(%sOptions)\n', analysis.name, analysis.name)
 
     let tempNAMESPACE = path.join(tempPath, 'NAMESPACE');
     log.debug('appending to NAMESPACE');
