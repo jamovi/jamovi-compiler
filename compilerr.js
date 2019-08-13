@@ -55,6 +55,7 @@ const included = [
     'stringi',
     'stringr',
     'ggplot2',
+    'knitr',
 
     // suppress installation of
     'testthat',
