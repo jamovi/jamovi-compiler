@@ -14,6 +14,7 @@ const CLA = require('command-line-args');
 const needle = require('needle');
 const Log = require('log');
 const _ = require('underscore');
+const child_process = require('child_process');
 
 const ARGS = [
     { name: 'build',   alias: 'b', type: String },
@@ -146,6 +147,16 @@ try {
         let rLibs = path.join(home, 'Resources', 'modules', 'base', 'R');
         paths = { home, rHome, rExe, rLibs };
     }
+
+    let env = Object.assign({}, process.env);
+    env['R_HOME'] = paths.rHome;
+    let rVersionOutput = child_process.spawnSync(paths.rExe, ['--version'], { encoding: 'UTF-8', env: env }).output;
+    let rVersion = /R version ([0-9]+\.[0-9]+\.[0-9]+)/g.exec(rVersionOutput);
+
+    if (rVersion === null)
+        throw 'unable to determine R version';
+    rVersion = rVersion[1];
+
 
     srcDir = path.resolve(srcDir);
 
@@ -367,6 +378,9 @@ try {
         console.log('wrote: 0000.yaml');
 
         if (isBuilding || isInstallingTo) {
+
+            packageInfo.rVersion = rVersion;
+            content = '---\n' + yaml.safeDump(packageInfo) + '\n...\n';
 
             fs.writeFileSync(path.join(modDir, 'jamovi.yaml'), content);
             console.log('wrote: jamovi.yaml');
