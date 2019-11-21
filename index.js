@@ -198,6 +198,12 @@ try {
         packageInfo = parseR(srcDir);
     }
 
+    if ( ! ('usesNative' in packageInfo))
+        packageInfo.usesNative = true;
+
+    if ( ! ('minApp' in packageInfo))
+        packageInfo.minApp = '1.0.8';
+
     let refs = undefined;
     if (utils.exists(refsPath)) {
         let content = fs.readFileSync(refsPath);
