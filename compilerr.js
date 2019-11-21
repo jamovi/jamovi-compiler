@@ -240,11 +240,11 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log) {
 
     try {
         if (process.platform === 'darwin')
-            cmd = util.format('"%s" "--library=%s" "%s"', path.join(paths.rHome, 'bin', 'INSTALL'), buildDir, tempPath);
+            cmd = util.format('"%s" "--library=%s" --no-help --no-demo --no-html "%s"', path.join(paths.rHome, 'bin', 'INSTALL'), buildDir, tempPath);
         else if (paths.rHome)
-            cmd = util.format('"%s" CMD INSTALL "--library=%s" "%s"', paths.rExe, buildDir, tempPath);
+            cmd = util.format('"%s" CMD INSTALL "--library=%s" --no-help --no-demo --no-html "%s"', paths.rExe, buildDir, tempPath);
         else
-            cmd = util.format('R CMD INSTALL "--library=%s" "%s"', buildDir, tempPath);
+            cmd = util.format('R CMD INSTALL "--library=%s" --no-help --no-demo --no-html "%s"', buildDir, tempPath);
         log.debug('executing ' + cmd);
         sh(cmd, { stdio: [0, 1, 1], encoding: 'utf-8', env: env } );
         log.debug('executed');
