@@ -86,6 +86,7 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log) {
     log.debug('reading DESCRIPTION');
     let descPath = path.join(srcDir, 'DESCRIPTION');
     let desc = fs.readFileSync(descPath, 'utf-8');
+    desc += '\n';  // add a newline to the end to help the regexes below
     log.debug('read');
     desc = desc.replace(/\t/g, ' ');
     desc = desc.replace(/\r?\n /g, ' ');
