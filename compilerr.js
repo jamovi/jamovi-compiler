@@ -87,7 +87,8 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log) {
     let descPath = path.join(srcDir, 'DESCRIPTION');
     let desc = fs.readFileSync(descPath, 'utf-8');
     log.debug('read');
-    desc = desc.replace(/\r?\n /g, ' ')
+    desc = desc.replace(/\t/g, ' ');
+    desc = desc.replace(/\r?\n /g, ' ');
 
     let depends = desc.match(/\nDepends\s*:\s*(.*)\r?\n/);
     let imports = desc.match(/\nImports\s*:\s*(.*)\r?\n/);
