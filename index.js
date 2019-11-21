@@ -402,7 +402,10 @@ try {
                 let paths = walkSync(modDir, { directories: false });
 
                 for (let relPath of paths) {
-                    let archivePath = path.join(packageInfo.name, relPath).replace(/\\/g, '/');
+                    relPath = relPath.replace(/\\/g, '/');
+                    if (relPath.startsWith('R/BH'))
+                        continue;
+                    let archivePath = path.join(packageInfo.name, relPath);
                     let fullPath = path.join(modDir, relPath);
                     let contents = fs.readFileSync(fullPath);
                     zip.file(archivePath, contents);
