@@ -408,7 +408,7 @@ try {
 
             if (isBuilding) {
 
-                let zipPath = `${ packageInfo.name }_${ packageInfo.version }-R${ packageInfo.rVersion }-${ platName }.jmo`;
+                let zipPath = `${ packageInfo.name }_${ packageInfo.version }-${ platName }-R${ packageInfo.rVersion }.jmo`;
                 let zip = new JSZip();
                 let paths = walkSync(modDir, { directories: false });
 
