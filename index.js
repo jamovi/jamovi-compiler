@@ -108,6 +108,7 @@ try {
     installer.check(args.home);
 
     let paths;
+    let platName;
 
     if (process.platform === 'win32') {
         let exe = installer.find(args.home);
@@ -117,6 +118,7 @@ try {
         let rExe  = path.join(rHome, 'bin', 'x64', 'R.exe');
         let rLibs = path.join(home, 'Resources', 'modules', 'base', 'R');
         paths = { home, rHome, rExe, rLibs };
+        platName = 'win64';
     }
     else if (process.platform === 'darwin') {
         let exe = installer.find(args.home);
@@ -126,6 +128,7 @@ try {
         let rExe  = path.join(bin, 'R');
         let rLibs = path.join(home, 'Resources', 'modules', 'base', 'R');
         paths = { home, rHome, rExe, rLibs };
+        platName = 'macos';
     }
     else if (args.home === 'flatpak') {
         let home = 'flatpak';
@@ -133,6 +136,7 @@ try {
         let rLibs = rHome + 'library';
         let rExe = 'flatpak" run --devel org.jamovi.jamovi "-R';
         paths = { home, rHome, rExe, rLibs };
+        platName = 'linux';
     }
     else {
         let exe = installer.find(args.home);
@@ -146,6 +150,7 @@ try {
         let rExe = path.join(rHome, 'bin', 'R');
         let rLibs = path.join(home, 'Resources', 'modules', 'base', 'R');
         paths = { home, rHome, rExe, rLibs };
+        platName = 'linux';
     }
 
     let env = Object.assign({}, process.env);
@@ -397,7 +402,7 @@ try {
 
             if (isBuilding) {
 
-                let zipPath = packageInfo.name + '.jmo';
+                let zipPath = `${ packageInfo.name }_${ packageInfo.version }-R${ packageInfo.rVersion }-${ platName }.jmo`;
                 let zip = new JSZip();
                 let paths = walkSync(modDir, { directories: false });
 
