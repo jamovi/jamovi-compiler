@@ -95,6 +95,7 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log) {
     let imports = desc.match(/\nImports\s*:\s*(.*)\r?\n/);
     let suggests = desc.match(/\nSuggests\s*:\s*(.*)\r?\n/);
     let linkingTo = desc.match(/\nLinkingTo\s*:\s*(.*)\r?\n/);
+    let remotes = desc.match(/\nRemotes\s*:\s*(.*)\r?\n/);
 
     if (depends !== null) {
         depends = depends[1];
@@ -128,6 +129,14 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log) {
         linkingTo = [ ];
     }
 
+    if (remotes !== null) {
+        remotes = remotes[1];
+        remotes = remotes.match(/([A-Za-z0-9\#_\./@-]+)/g);
+    }
+    else {
+        remotes = [ ];
+    }
+
     depends = depends.concat(imports);
     depends = depends.concat(suggests);
     depends = depends.concat(linkingTo);
@@ -151,15 +160,15 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log) {
         }
     }
 
+    let installType = 'getOption(\'pkgType\')'
+    // if (process.platform === 'darwin')
+    //    installType = '\'mac.binary.mavericks\''
+
     if (depends.length > 0) {
-        console.log('Installing dependencies')
+        console.log('Installing dependencies');
         console.log(depends.join(', '));
 
         depends = depends.join("','");
-
-        let installType = 'getOption(\'pkgType\')'
-        // if (process.platform === 'darwin')
-        //    installType = '\'mac.binary.mavericks\''
 
         cmd = util.format('"%s" --slave -e "utils::install.packages(c(\'%s\'), lib=\'%s\', type=%s, repos=c(\'https://cran.r-project.org\'), INSTALL_opts=c(\'--no-data\', \'--no-help\', \'--no-demo\', \'--no-html\'))"', paths.rExe, depends, buildDir, installType);
         cmd = cmd.replace(/\\/g, '/');
@@ -168,6 +177,23 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log) {
         }
         catch(e) {
             throw 'Failed to install dependencies';
+        }
+    }
+
+    if (remotes.length > 0) {
+        console.log('Installing remotes');
+        console.log(remotes.join(', '));
+
+        for (let remote of remotes) {
+
+            cmd = util.format('"%s" --slave -e "remotes::install_github(\'%s\', lib=\'%s\', type=%s, INSTALL_opts=c(\'--no-data\', \'--no-help\', \'--no-demo\', \'--no-html\'), dependencies=FALSE, upgrade=FALSE)"', paths.rExe, remote, buildDir, installType);
+            cmd = cmd.replace(/\\/g, '/');
+            try {
+                sh(cmd, { stdio: [0, 1, 1], encoding: 'utf-8', env: env } );
+            }
+            catch(e) {
+                throw 'Failed to install remotes';
+            }
         }
     }
 
