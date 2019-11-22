@@ -155,7 +155,8 @@ try {
 
     let env = Object.assign({}, process.env);
     env['R_HOME'] = paths.rHome;
-    let rVersionOutput = child_process.spawnSync(paths.rExe, ['--version'], { encoding: 'UTF-8', env: env }).output;
+    let cmd = '"' + paths.rExe + '" --version'
+    let rVersionOutput = child_process.execSync(cmd, { encoding: 'UTF-8', env: env });
     let rVersion = /R version ([0-9]+\.[0-9]+\.[0-9]+)/g.exec(rVersionOutput);
 
     if (rVersion === null)
