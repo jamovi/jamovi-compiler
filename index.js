@@ -159,6 +159,10 @@ try {
     let rVersionOutput = child_process.execSync(cmd, { encoding: 'UTF-8', env: env });
     let rVersion = /R version ([0-9]+\.[0-9]+\.[0-9]+)/g.exec(rVersionOutput);
 
+    if (rVersion === null && process.platform === 'win32') {
+        rVersion = [ undefined, '3.4.1' ];
+    }
+
     if (rVersion === null)
         throw 'unable to determine R version';
     rVersion = rVersion[1];
