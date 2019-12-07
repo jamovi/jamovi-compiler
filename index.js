@@ -433,7 +433,7 @@ try {
                     relPath = relPath.replace(/\\/g, '/');
                     if (relPath.startsWith('R/BH'))
                         continue;
-                    let archivePath = path.join(packageInfo.name, relPath);
+                    let archivePath = packageInfo.name + '/' + relPath;
                     let fullPath = path.join(modDir, relPath);
                     let contents = fs.readFileSync(fullPath);
                     zip.file(archivePath, contents);
