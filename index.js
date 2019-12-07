@@ -155,8 +155,20 @@ try {
 
     let env = Object.assign({}, process.env);
     env['R_HOME'] = paths.rHome;
-    let cmd = '"' + paths.rExe + '" --version'
-    let rVersionOutput = child_process.execSync(cmd, { encoding: 'UTF-8', env: env });
+
+    let rVersionOutput;
+    if (process.platform === 'win32') {
+        // on windows, R outputs version, etc. stuff to stderr, which execSync doesn't catch
+        // so we have to use spawnSync instead
+        rVersionOutput = child_process.spawnSync(paths.rExe, ['--version'], { encoding: 'UTF-8', env: env }).output;
+    }
+    else {
+        // on linux, we use 'flatpak org.jamovi.jamovi ....' as the cmd, which is why
+        // i'm using execSync, rather than spawnSync
+        let cmd = '"' + paths.rExe + '" --version'
+        rVersionOutput = child_process.execSync(cmd, { encoding: 'UTF-8', env: env });
+    }
+
     let rVersion = /R version ([0-9]+\.[0-9]+\.[0-9]+)/g.exec(rVersionOutput);
 
     if (rVersion === null && process.platform === 'win32') {
