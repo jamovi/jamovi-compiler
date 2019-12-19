@@ -27,6 +27,7 @@ const ARGS = [
     { name: 'to',    type: String },
     { name: 'rpath', type: String },
     { name: 'debug', type: Boolean },
+    { name: 'jmo',   type: String },
 ];
 
 const temp = require('temp');
@@ -425,7 +426,12 @@ try {
 
             if (isBuilding) {
 
-                let zipPath = `${ packageInfo.name }_${ packageInfo.version }-${ platName }-R${ packageInfo.rVersion }.jmo`;
+                let zipPath;
+                if (args.jmo)
+                    zipPath = args.jmo
+                else
+                    zipPath = `${ packageInfo.name }_${ packageInfo.version }-${ platName }-R${ packageInfo.rVersion }.jmo`;
+
                 let zip = new JSZip();
                 let paths = walkSync(modDir, { directories: false });
 
