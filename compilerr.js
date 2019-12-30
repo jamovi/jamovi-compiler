@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs-extra');
 const util = require('util');
 const sh = require('child_process').execSync;
+const process = require('process');
 
 const temp = require('temp');
 temp.track();
@@ -66,6 +67,26 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log) {
     let rDir = path.join(moduleDir, 'R');
     let buildDir = path.join(srcDir, 'build', 'R');
     let tempPath = path.join(srcDir, 'temp');
+
+    let platform;
+    switch (process.platform) {
+    case 'win32':
+        platform = 'win64';
+        break;
+    case 'darwin':
+        platform = 'macos';
+        break;
+    default:
+        platform = 'linux';
+        break;
+    }
+
+    let rVersion = packageInfo.rVersion;
+
+    if ((platform === 'win64' && rVersion !== '3.4.1')
+            || (platform === 'macos' && rVersion !== '3.3.0')
+            || (platform === 'linux' && rVersion !== '3.5.1'))
+        buildDir = path.join(srcDir, `build-${ platform }-R${ rVersion }`);
 
     try {
         log.debug('checking existence of ' + buildDir);
