@@ -184,8 +184,8 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
     }
 
     let installType = 'getOption(\'pkgType\')'
-    // if (process.platform === 'darwin')
-    //    installType = '\'mac.binary.mavericks\''
+    if (process.platform === 'darwin')
+        installType = '\'mac.binary.el-capitan\''
 
     if (depends.length > 0) {
         console.log('Installing dependencies');
@@ -309,20 +309,20 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
         let installed = fs.readdirSync(buildDir);
 
         const subs = {
-            '/Library/Frameworks/R.framework/Versions/3.3/Resources/lib/libR.dylib':
-                '@executable_path/../Frameworks/R.framework/Versions/3.3/Resources/lib/libR.dylib',
-            '/Library/Frameworks/R.framework/Versions/3.3/Resources/lib/libRlapack.dylib':
-                '@executable_path/../Frameworks/R.framework/Versions/3.3/Resources/lib/libRlapack.dylib',
-            '/Library/Frameworks/R.framework/Versions/3.3/Resources/lib/libRblas.dylib':
-                '@executable_path/../Frameworks/R.framework/Versions/3.3/Resources/lib/libRblas.dylib',
+            '/Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libR.dylib':
+                '@executable_path/../Frameworks/R.framework/Versions/3.6/Resources/lib/libR.dylib',
+            '/Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRlapack.dylib':
+                '@executable_path/../Frameworks/R.framework/Versions/3.6/Resources/lib/libRlapack.dylib',
+            '/Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRblas.dylib':
+                '@executable_path/../Frameworks/R.framework/Versions/3.6/Resources/lib/libRblas.dylib',
             '/usr/local/lib/libgfortran.3.dylib':
-                '@executable_path/../Frameworks/R.framework/Versions/3.3/Resources/lib/libgfortran.3.dylib',
-            '/Library/Frameworks/R.framework/Versions/3.3/Resources/lib/libgfortran.3.dylib':
-                '@executable_path/../Frameworks/R.framework/Versions/3.3/Resources/lib/libgfortran.3.dylib',
+                '@executable_path/../Frameworks/R.framework/Versions/3.6/Resources/lib/libgfortran.3.dylib',
+            '/Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libgfortran.3.dylib':
+                '@executable_path/../Frameworks/R.framework/Versions/3.6/Resources/lib/libgfortran.3.dylib',
             '/usr/local/lib/libquadmath.0.dylib':
-                '@executable_path/../Frameworks/R.framework/Versions/3.3/Resources/lib/libquadmath.0.dylib',
-            '/Library/Frameworks/R.framework/Versions/3.3/Resources/lib/libquadmath.0.dylib':
-                '@executable_path/../Frameworks/R.framework/Versions/3.3/Resources/lib/libquadmath.0.dylib',
+                '@executable_path/../Frameworks/R.framework/Versions/3.6/Resources/lib/libquadmath.0.dylib',
+            '/Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libquadmath.0.dylib':
+                '@executable_path/../Frameworks/R.framework/Versions/3.6/Resources/lib/libquadmath.0.dylib',
         }
 
         for (let pkg of installed) {
