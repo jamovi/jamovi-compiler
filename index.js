@@ -28,6 +28,7 @@ const ARGS = [
     { name: 'rpath', type: String },
     { name: 'debug', type: Boolean },
     { name: 'jmo',   type: String },
+    { name: 'mirror', type: String },
 ];
 
 const temp = require('temp');
@@ -105,6 +106,8 @@ try {
         console.log(usage);
         process.exit(0);
     }
+
+    let mirror = args.mirror || 'https://cran.microsoft.com/snapshot/2020-01-01';
 
     installer.check(args.home);
 
@@ -422,7 +425,7 @@ try {
                 // do nothing
             }
 
-            compileR(srcDir, modDir, paths, packageInfo, log);
+            compileR(srcDir, modDir, paths, packageInfo, log, { mirror });
 
             if (isBuilding) {
 

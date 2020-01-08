@@ -62,7 +62,9 @@ const included = [
     'testthat',
 ];
 
-const compile = function(srcDir, moduleDir, paths, packageInfo, log) {
+const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
+
+    options = options || {};
 
     let rDir = path.join(moduleDir, 'R');
     let buildDir = path.join(srcDir, 'build', 'R');
@@ -191,7 +193,7 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log) {
 
         depends = depends.join("','");
 
-        cmd = util.format('"%s" --slave -e "utils::install.packages(c(\'%s\'), lib=\'%s\', type=%s, repos=c(\'https://cran.r-project.org\'), INSTALL_opts=c(\'--no-data\', \'--no-help\', \'--no-demo\', \'--no-html\'))"', paths.rExe, depends, buildDir, installType);
+        cmd = util.format('"%s" --slave -e "utils::install.packages(c(\'%s\'), lib=\'%s\', type=%s, repos=c(\'%s\'), INSTALL_opts=c(\'--no-data\', \'--no-help\', \'--no-demo\', \'--no-html\'))"', paths.rExe, depends, buildDir, installType, options.mirror);
         cmd = cmd.replace(/\\/g, '/');
         try {
             sh(cmd, { stdio: [0, 1, 1], encoding: 'utf-8', env: env } );
