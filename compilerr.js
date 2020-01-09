@@ -267,6 +267,8 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
             continue;
         if (child === 'build')
             continue;
+        if (child.startsWith('build-'))
+            continue;
         if (child === '.git')
             continue;
         if (child.endsWith('.jmo'))
@@ -341,7 +343,12 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
                     cmd = util.format('/usr/bin/install_name_tool -change %s %s "%s"', sub, subs[sub], pkgPath);
                     sh(cmd, { stdio: [0, 1, 1], encoding: 'utf-8', env: env } );
                 }
+
+                let dSymPath = pkgPath + '.dSYM';
+                if (fs.existsSync(dSymPath))
+                    fs.removeSync(dSymPath);
             }
+
         }
 
         log.debug('paths fixed')
