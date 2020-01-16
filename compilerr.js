@@ -220,6 +220,64 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
         }
     }
 
+    if (process.platform === 'darwin' && fs.existsSync('/usr/bin/install_name_tool')) {
+        log.debug('fixing paths')
+
+        let installed = fs.readdirSync(buildDir);
+
+        const subs = {
+            '/Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libR.dylib':
+                '@executable_path/../Frameworks/R.framework/Versions/3.6/Resources/lib/libR.dylib',
+            '/Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRlapack.dylib':
+                '@executable_path/../Frameworks/R.framework/Versions/3.6/Resources/lib/libRlapack.dylib',
+            '/Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRblas.dylib':
+                '@executable_path/../Frameworks/R.framework/Versions/3.6/Resources/lib/libRblas.dylib',
+            '/usr/local/lib/libgfortran.3.dylib':
+                '@executable_path/../Frameworks/R.framework/Versions/3.6/Resources/lib/libgfortran.3.dylib',
+            '/Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libgfortran.3.dylib':
+                '@executable_path/../Frameworks/R.framework/Versions/3.6/Resources/lib/libgfortran.3.dylib',
+            '/usr/local/lib/libquadmath.0.dylib':
+                '@executable_path/../Frameworks/R.framework/Versions/3.6/Resources/lib/libquadmath.0.dylib',
+            '/Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libquadmath.0.dylib':
+                '@executable_path/../Frameworks/R.framework/Versions/3.6/Resources/lib/libquadmath.0.dylib',
+            '/Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libomp.dylib':
+                '@executable_path/../Frameworks/R.framework/Versions/3.6/Resources/lib/libomp.dylib',
+            '/Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libc++.1.dylib':
+                '@executable_path/../Frameworks/R.framework/Versions/3.6/Resources/lib/libc++.1.dylib',
+            '/Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libc++abi.1.dylib':
+                '@executable_path/../Frameworks/R.framework/Versions/3.6/Resources/lib/libc++abi.1.dylib',
+        }
+
+        for (let pkg of installed) {
+            let so1 = pkg + '.so';
+            let so2 = pkg.replace(/\./g, '') + '.so';
+            let pkgPath;
+            let pkgPath1 = path.join(buildDir, pkg, 'libs', so1);
+            let pkgPath2 = path.join(buildDir, pkg, 'libs', so2);
+            if (fs.existsSync(pkgPath1))
+                pkgPath = pkgPath1;
+            else if (fs.existsSync(pkgPath2))
+                pkgPath = pkgPath2;
+
+            if (pkgPath) {
+
+                log.debug('patching ' + pkgPath);
+
+                for (let sub in subs) {
+                    cmd = util.format('/usr/bin/install_name_tool -change %s %s "%s"', sub, subs[sub], pkgPath);
+                    sh(cmd, { stdio: [0, 1, 1], encoding: 'utf-8', env: env } );
+                }
+
+                let dSymPath = pkgPath + '.dSYM';
+                if (fs.existsSync(dSymPath))
+                    fs.removeSync(dSymPath);
+            }
+
+        }
+
+        log.debug('paths fixed')
+    }
+
     let SHLIB_EXT = '.so';
     if (process.platform === 'win32')
         SHLIB_EXT = '.dll';
@@ -303,55 +361,6 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
     }
     catch(e) {
         throw 'Could not build module';
-    }
-
-    if (process.platform === 'darwin' && fs.existsSync('/usr/bin/install_name_tool')) {
-        log.debug('fixing paths')
-
-        let installed = fs.readdirSync(buildDir);
-
-        const subs = {
-            '/Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libR.dylib':
-                '@executable_path/../Frameworks/R.framework/Versions/3.6/Resources/lib/libR.dylib',
-            '/Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRlapack.dylib':
-                '@executable_path/../Frameworks/R.framework/Versions/3.6/Resources/lib/libRlapack.dylib',
-            '/Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRblas.dylib':
-                '@executable_path/../Frameworks/R.framework/Versions/3.6/Resources/lib/libRblas.dylib',
-            '/usr/local/lib/libgfortran.3.dylib':
-                '@executable_path/../Frameworks/R.framework/Versions/3.6/Resources/lib/libgfortran.3.dylib',
-            '/Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libgfortran.3.dylib':
-                '@executable_path/../Frameworks/R.framework/Versions/3.6/Resources/lib/libgfortran.3.dylib',
-            '/usr/local/lib/libquadmath.0.dylib':
-                '@executable_path/../Frameworks/R.framework/Versions/3.6/Resources/lib/libquadmath.0.dylib',
-            '/Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libquadmath.0.dylib':
-                '@executable_path/../Frameworks/R.framework/Versions/3.6/Resources/lib/libquadmath.0.dylib',
-        }
-
-        for (let pkg of installed) {
-            let so1 = pkg + '.so';
-            let so2 = pkg.replace(/\./g, '') + '.so';
-            let pkgPath;
-            let pkgPath1 = path.join(buildDir, pkg, 'libs', so1);
-            let pkgPath2 = path.join(buildDir, pkg, 'libs', so2);
-            if (fs.existsSync(pkgPath1))
-                pkgPath = pkgPath1;
-            else if (fs.existsSync(pkgPath2))
-                pkgPath = pkgPath2;
-
-            if (pkgPath) {
-                for (let sub in subs) {
-                    cmd = util.format('/usr/bin/install_name_tool -change %s %s "%s"', sub, subs[sub], pkgPath);
-                    sh(cmd, { stdio: [0, 1, 1], encoding: 'utf-8', env: env } );
-                }
-
-                let dSymPath = pkgPath + '.dSYM';
-                if (fs.existsSync(dSymPath))
-                    fs.removeSync(dSymPath);
-            }
-
-        }
-
-        log.debug('paths fixed')
     }
 
     log.debug('copying to R dir');
