@@ -88,7 +88,7 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
     if ((platform === 'win64' && rVersion !== '3.4.1')
             || (platform === 'macos' && rVersion !== '3.3.0')
             || (platform === 'linux' && rVersion !== '3.5.1'))
-        buildDir = path.join(srcDir, `build-${ platform }-R${ rVersion }`);
+        buildDir = path.join(srcDir, 'build', `R${ rVersion }-${ platform }`);
 
     try {
         log.debug('checking existence of ' + buildDir);
