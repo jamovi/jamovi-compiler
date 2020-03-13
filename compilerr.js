@@ -174,6 +174,7 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
     env.R_LIBS = buildDir;
     env.R_LIBS_SITE = paths.rLibs;
     env.R_LIBS_USER = 'notthere';
+    env.R_REMOTES_NO_ERRORS_FROM_WARNINGS = '1';
 
     if (paths.rHome) {
         env.R_HOME = paths.rHome;
