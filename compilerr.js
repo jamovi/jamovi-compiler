@@ -193,7 +193,7 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
 
         depends = depends.join("','");
 
-        cmd = util.format('"%s" --slave -e "utils::install.packages(c(\'%s\'), lib=\'%s\', type=%s, repos=c(\'%s\'), INSTALL_opts=c(\'--no-data\', \'--no-help\', \'--no-demo\', \'--no-html\'))"', paths.rExe, depends, buildDir, installType, options.mirror);
+        cmd = util.format('"%s" --vanilla --slave -e "utils::install.packages(c(\'%s\'), lib=\'%s\', type=%s, repos=c(\'%s\'), INSTALL_opts=c(\'--no-data\', \'--no-help\', \'--no-demo\', \'--no-html\'))"', paths.rExe, depends, buildDir, installType, options.mirror);
         cmd = cmd.replace(/\\/g, '/');
         try {
             sh(cmd, { stdio: [0, 1, 1], encoding: 'utf-8', env: env } );
@@ -209,7 +209,7 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
 
         for (let remote of remotes) {
 
-            cmd = util.format('"%s" --slave -e "remotes::install_github(\'%s\', lib=\'%s\', type=%s, INSTALL_opts=c(\'--no-data\', \'--no-help\', \'--no-demo\', \'--no-html\'), dependencies=FALSE, upgrade=FALSE)"', paths.rExe, remote, buildDir, installType);
+            cmd = util.format('"%s" --vanilla --slave -e "remotes::install_github(\'%s\', lib=\'%s\', type=%s, INSTALL_opts=c(\'--no-data\', \'--no-help\', \'--no-demo\', \'--no-html\'), dependencies=FALSE, upgrade=FALSE)"', paths.rExe, remote, buildDir, installType);
             cmd = cmd.replace(/\\/g, '/');
             try {
                 sh(cmd, { stdio: [0, 1, 1], encoding: 'utf-8', env: env } );
