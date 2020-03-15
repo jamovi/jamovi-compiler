@@ -433,7 +433,7 @@ try {
                 if (args.jmo)
                     zipPath = args.jmo
                 else
-                    zipPath = `${ packageInfo.name }_${ packageInfo.version }-${ platName }-R${ packageInfo.rVersion }.jmo`;
+                    zipPath = `${ packageInfo.name }_${ packageInfo.version }.jmo`;
 
                 let zip = new JSZip();
                 let paths = walkSync(modDir, { directories: false });
