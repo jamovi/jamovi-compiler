@@ -11,6 +11,8 @@ Data:
             type: string
         hidden:
             type: boolean
+        requiresMissings:
+            type: boolean
         description: &Description
             oneOf:
               - type: string

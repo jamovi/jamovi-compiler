@@ -54,7 +54,8 @@
                 analysisId = analysisId,
                 revision = revision,
                 pause = <%= imports.sourcifyResults(analysis.pause ? analysis.pause : null, '            ')%>,
-                completeWhenFilled = <%= analysis.completeWhenFilled ? 'TRUE' : 'FALSE' %>)
+                completeWhenFilled = <%= analysis.completeWhenFilled ? 'TRUE' : 'FALSE' %>,
+                requiresMissings = <%= (analysis.options.length > 0 && analysis.options[0].type === 'Data' && analysis.options[0].requiresMissings) ? 'TRUE' : 'FALSE' %>)
         }))
 <% if (analysis.export !== false) { %>
 #' <%= analysis.title %>
