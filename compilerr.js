@@ -194,7 +194,9 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
 
         depends = depends.join("','");
 
-        cmd = util.format('"%s" --vanilla --slave -e "utils::install.packages(c(\'%s\'), lib=\'%s\', type=%s, repos=c(\'%s\'), INSTALL_opts=c(\'--no-data\', \'--no-help\', \'--no-demo\', \'--no-html\'))"', paths.rExe, depends, buildDir, installType, options.mirror);
+        let mirrors = options.mirror.split(',').map(x => `'${x}'`).join(',');
+
+        cmd = util.format('"%s" --vanilla --slave -e "utils::install.packages(c(\'%s\'), lib=\'%s\', type=%s, repos=c(%s), INSTALL_opts=c(\'--no-data\', \'--no-help\', \'--no-demo\', \'--no-html\'))"', paths.rExe, depends, buildDir, installType, mirrors);
         cmd = cmd.replace(/\\/g, '/');
         try {
             sh(cmd, { stdio: [0, 1, 1], encoding: 'utf-8', env: env } );
