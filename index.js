@@ -181,8 +181,7 @@ try {
         throw 'unable to determine R version';
     rVersion = rVersion[1];
 
-    let mirror; = args.mirror || ;
-
+    let mirror;
     if (args.mirror) {
         mirror = args.mirror;
     }
