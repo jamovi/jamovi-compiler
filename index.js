@@ -107,8 +107,6 @@ try {
         process.exit(0);
     }
 
-    let mirror = args.mirror || 'https://cran.microsoft.com/snapshot/2020-01-01';
-
     installer.check(args.home);
 
     let paths;
@@ -183,6 +181,17 @@ try {
         throw 'unable to determine R version';
     rVersion = rVersion[1];
 
+    let mirror; = args.mirror || ;
+
+    if (args.mirror) {
+        mirror = args.mirror;
+    }
+    else {
+        if (rVersion == '3.6.1')
+            mirror = 'https://cran.microsoft.com/snapshot/2020-01-01'
+        else
+            mirror = 'https://cran.microsoft.com/snapshot/2020-05-01'
+    }
 
     srcDir = path.resolve(srcDir);
 
