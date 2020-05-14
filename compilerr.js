@@ -254,23 +254,6 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
         }
     }
 
-    if (remotes.length > 0) {
-        console.log('Installing remotes');
-        console.log(remotes.join(', '));
-
-        for (let remote of remotes) {
-
-            cmd = util.format('"%s" --vanilla --slave -e "remotes::install_github(\'%s\', lib=\'%s\', type=%s, INSTALL_opts=c(\'--no-data\', \'--no-help\', \'--no-demo\', \'--no-html\'), dependencies=FALSE, upgrade=FALSE)"', paths.rExe, remote, buildDir, installType);
-            cmd = cmd.replace(/\\/g, '/');
-            try {
-                sh(cmd, { stdio: [0, 1, 1], encoding: 'utf-8', env: env } );
-            }
-            catch(e) {
-                throw 'Failed to install remotes';
-            }
-        }
-    }
-
     if (process.platform === 'darwin' && fs.existsSync('/usr/bin/install_name_tool')) {
         log.debug('fixing paths')
 
@@ -327,6 +310,23 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
         }
 
         log.debug('paths fixed')
+    }
+
+    if (remotes.length > 0) {
+        console.log('Installing remotes');
+        console.log(remotes.join(', '));
+
+        for (let remote of remotes) {
+
+            cmd = util.format('"%s" --vanilla --slave -e "remotes::install_github(\'%s\', lib=\'%s\', type=%s, INSTALL_opts=c(\'--no-data\', \'--no-help\', \'--no-demo\', \'--no-html\'), dependencies=FALSE, upgrade=FALSE)"', paths.rExe, remote, buildDir, installType);
+            cmd = cmd.replace(/\\/g, '/');
+            try {
+                sh(cmd, { stdio: [0, 1, 1], encoding: 'utf-8', env: env } );
+            }
+            catch(e) {
+                throw 'Failed to install remotes';
+            }
+        }
     }
 
     let SHLIB_EXT = '.so';
