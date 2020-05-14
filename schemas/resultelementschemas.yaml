@@ -154,6 +154,12 @@ Group:
               - null
             items:
                 type: string
+        refs:
+            type:
+              - array
+              - string
+            items:
+                type: string
 
 Array:
     "$schema": http://json-schema.org/draft-04/schema#
@@ -226,6 +232,13 @@ Preformatted:
               - null
             items:
                 type: string
+        refs:
+            type:
+              - array
+              - string
+            items:
+                type: string
+
 
 Html:
     "$schema": http://json-schema.org/draft-04/schema#
@@ -247,6 +260,12 @@ Html:
             type:
               - array
               - null
+            items:
+                type: string
+        refs:
+            type:
+              - array
+              - string
             items:
                 type: string
         content:
