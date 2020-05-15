@@ -252,6 +252,8 @@ LevelSelector:
             pattern: ^\([A-Za-z][A-Za-z0-9_]*\)$
         defaultLevelIndex:
             type: integer
+        allowNone:
+            type: bool
 
 RadioButton:
     type: object
