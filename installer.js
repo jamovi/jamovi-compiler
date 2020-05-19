@@ -92,26 +92,27 @@ const check = function(jamovi_home) {
     else {
         let match = response.stdout.match('^\r?\n?([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)\r?\n');
 
-        let mas = parseInt(match[1]);
-        let maj = parseInt(match[2]);
-        let min = parseInt(match[3]);
-        let rev = parseInt(match[4])
-
-        if (mas < 1 || maj < 2 || (maj === 2 && min < 1))
-            throw 'a newer version of jamovi is required, please update to the newest version';
-        if (mas > 1 || (mas === 1 && maj > 3))
-            throw 'a newer version of the jamovi-compiler (or jmvtools) is required';
-
         if (match) {
+
+            let mas = parseInt(match[1]);
+            let maj = parseInt(match[2]);
+            let min = parseInt(match[3]);
+            let rev = parseInt(match[4]);
+
+            if (mas < 1 || maj < 2 || (maj === 2 && min < 1))
+                throw 'a newer version of jamovi is required, please update to the newest version';
+            if (mas > 1 || (mas === 1 && maj > 3))
+                throw 'a newer version of the jamovi-compiler (or jmvtools) is required';
+
             if (process.platform === 'darwin') {
                 let m = exe.match(/^(.+)\/Contents\/MacOS\/jamovi$/);
                 if (m)
-                    console.log('jamovi found at ' + m[1]);
+                    console.log(`jamovi ${ mas }.${ maj }.${ min } found at ${ m[1] }`);
                 else
-                    console.log('jamovi found at ' + exe);
+                    console.log(`jamovi ${ mas }.${ maj }.${ min } found at ${ exe }`);
             }
             else {
-                console.log('jamovi found at ' + exe);
+                console.log(`jamovi ${ mas }.${ maj }.${ min } found at ${ exe }`);
             }
         }
         else {
