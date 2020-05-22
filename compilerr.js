@@ -235,6 +235,8 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
     let installType = 'getOption(\'pkgType\')'
     if (process.platform === 'darwin')
         installType = '\'mac.binary.el-capitan\''
+    else if (process.platform === 'win32')
+        installType = '\'win.binary\''
 
     if (depends.length > 0) {
         console.log('Installing dependencies');
