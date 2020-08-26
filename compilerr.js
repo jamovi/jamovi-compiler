@@ -10,7 +10,7 @@ const process = require('process');
 const temp = require('temp');
 temp.track();
 
-const included = [
+let included = [
 
     // base
 
@@ -48,15 +48,14 @@ const included = [
     'spatial',
     'survival',
 
-    // jamovi
+    // jmvcore
 
     'jmvcore',
-    'curl',
-    'remotes',
     'R6',
     'RColorBrewer',
     'base64enc',
     'bitops',
+    'curl',
     'fansi',
     'farver',
     'highr',
@@ -66,6 +65,7 @@ const included = [
     'prettyunits',
     'rlang',
     'rstudioapi',
+    'systemfonts',
     'utf8',
     'viridisLite',
     'yaml',
@@ -84,18 +84,22 @@ const included = [
     'mime',
     'pkgconfig',
     'ps',
+    'ragg',
+    'remotes',
     'stringi',
     'withr',
     'xfun',
     'RInside',
     'RProtoBuf',
     'cli',
+    'htmltools',
     'lifecycle',
     'markdown',
     'munsell',
     'processx',
     'rprojroot',
     'stringr',
+    'tinytex',
     'vctrs',
     'callr',
     'desc',
@@ -103,6 +107,7 @@ const included = [
     'pillar',
     'scales',
     'pkgbuild',
+    'rmarkdown',
     'tibble',
     'pkgload',
     'testthat',
@@ -110,9 +115,142 @@ const included = [
     'ggplot2',
 ];
 
+const jmv = [
+    'BH',
+    'GPArotation',
+    'RcppParallel',
+    'ca',
+    'carData',
+    'contfrac',
+    'cpp11',
+    'glasso',
+    'jpeg',
+    'lisrelToR',
+    'matrixStats',
+    'matrixcalc',
+    'nloptr',
+    'numDeriv',
+    'pbivnorm',
+    'png',
+    'polyclip',
+    'qvcalc',
+    'rematch',
+    'rjson',
+    'tmvnsim',
+    'truncnorm',
+    'whisker',
+    'zip',
+    'Formula',
+    'MatrixModels',
+    'PMCMR',
+    'RUnit',
+    'RcppArmadillo',
+    'RcppEigen',
+    'Rsolnp',
+    'SparseM',
+    'TH.data',
+    'XML',
+    'abind',
+    'caTools',
+    'cellranger',
+    'checkmate',
+    'clipr',
+    'coda',
+    'corpcor',
+    'data.table',
+    'deSolve',
+    'elliptic',
+    'estimability',
+    'fdrtool',
+    'forcats',
+    'generics',
+    'ggrepel',
+    'gridExtra',
+    'gtools',
+    'hms',
+    'htmlwidgets',
+    'igraph',
+    'latticeExtra',
+    'minqa',
+    'mnormt',
+    'mvnormtest',
+    'mvtnorm',
+    'openxlsx',
+    'pbapply',
+    'plyr',
+    'purrr',
+    'relimp',
+    'sp',
+    'ssanv',
+    'statmod',
+    'tweenr',
+    'xtable',
+    'zoo',
+    'BDgraph',
+    'StanHeaders',
+    'conquer',
+    'd3Network',
+    'emmeans',
+    'exactci',
+    'gdata',
+    'ggridges',
+    'gnm',
+    'graphlayouts',
+    'htmlTable',
+    'huge',
+    'hypergeo',
+    'kutils',
+    'lavaan',
+    'lme4',
+    'lmtest',
+    'maptools',
+    'progress',
+    'psych',
+    'readr',
+    'reshape',
+    'reshape2',
+    'rpf',
+    'sandwich',
+    'tidyselect',
+    'viridis',
+    'BayesFactor',
+    'GGally',
+    'Hmisc',
+    'OpenMx',
+    'dplyr',
+    'exact2x2',
+    'ggforce',
+    'gplots',
+    'haven',
+    'lmerTest',
+    'multcomp',
+    'pbkrtest',
+    'quantreg',
+    'readxl',
+    'regsem',
+    'rockchalk',
+    'vcd',
+    'ROCR',
+    'arm',
+    'rio',
+    'tidyr',
+    'vcdExtra',
+    'car',
+    'mi',
+    'tidygraph',
+    'afex',
+    'ggraph',
+    'sem',
+    'qgraph',
+    'semPlot',
+];
+
 const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
 
     options = options || {};
+
+    if (packageInfo.name !== 'jmv')
+        included = included.concat(jmv)
 
     let rDir = path.join(moduleDir, 'R');
     let buildDir = path.join(srcDir, 'build', 'R');
@@ -234,7 +372,7 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
 
     let installType = 'getOption(\'pkgType\')'
     if (process.platform === 'darwin')
-        installType = '\'mac.binary.el-capitan\''
+        installType = '\'mac.binary\''
     else if (process.platform === 'win32')
         installType = '\'win.binary\''
 
@@ -262,26 +400,26 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
         let installed = fs.readdirSync(buildDir);
 
         const subs = {
-            '/Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libR.dylib':
-                '@executable_path/../Frameworks/R.framework/Versions/3.6/Resources/lib/libR.dylib',
-            '/Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRlapack.dylib':
-                '@executable_path/../Frameworks/R.framework/Versions/3.6/Resources/lib/libRlapack.dylib',
-            '/Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRblas.dylib':
-                '@executable_path/../Frameworks/R.framework/Versions/3.6/Resources/lib/libRblas.dylib',
+            '/Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libR.dylib':
+                '@executable_path/../Frameworks/R.framework/Versions/4.0/Resources/lib/libR.dylib',
+            '/Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib':
+                '@executable_path/../Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib',
+            '/Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRblas.dylib':
+                '@executable_path/../Frameworks/R.framework/Versions/4.0/Resources/lib/libRblas.dylib',
             '/usr/local/lib/libgfortran.3.dylib':
-                '@executable_path/../Frameworks/R.framework/Versions/3.6/Resources/lib/libgfortran.3.dylib',
-            '/Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libgfortran.3.dylib':
-                '@executable_path/../Frameworks/R.framework/Versions/3.6/Resources/lib/libgfortran.3.dylib',
+                '@executable_path/../Frameworks/R.framework/Versions/4.0/Resources/lib/libgfortran.3.dylib',
+            '/Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libgfortran.3.dylib':
+                '@executable_path/../Frameworks/R.framework/Versions/4.0/Resources/lib/libgfortran.3.dylib',
             '/usr/local/lib/libquadmath.0.dylib':
-                '@executable_path/../Frameworks/R.framework/Versions/3.6/Resources/lib/libquadmath.0.dylib',
-            '/Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libquadmath.0.dylib':
-                '@executable_path/../Frameworks/R.framework/Versions/3.6/Resources/lib/libquadmath.0.dylib',
-            '/Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libomp.dylib':
-                '@executable_path/../Frameworks/R.framework/Versions/3.6/Resources/lib/libomp.dylib',
-            '/Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libc++.1.dylib':
-                '@executable_path/../Frameworks/R.framework/Versions/3.6/Resources/lib/libc++.1.dylib',
-            '/Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libc++abi.1.dylib':
-                '@executable_path/../Frameworks/R.framework/Versions/3.6/Resources/lib/libc++abi.1.dylib',
+                '@executable_path/../Frameworks/R.framework/Versions/4.0/Resources/lib/libquadmath.0.dylib',
+            '/Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libquadmath.0.dylib':
+                '@executable_path/../Frameworks/R.framework/Versions/4.0/Resources/lib/libquadmath.0.dylib',
+            '/Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libomp.dylib':
+                '@executable_path/../Frameworks/R.framework/Versions/4.0/Resources/lib/libomp.dylib',
+            '/Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libc++.1.dylib':
+                '@executable_path/../Frameworks/R.framework/Versions/4.0/Resources/lib/libc++.1.dylib',
+            '/Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libc++abi.1.dylib':
+                '@executable_path/../Frameworks/R.framework/Versions/4.0/Resources/lib/libc++abi.1.dylib',
         }
 
         for (let pkg of installed) {

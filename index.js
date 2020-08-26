@@ -118,7 +118,7 @@ try {
         let home = path.dirname(bin);
         let rHome = path.join(home, 'Frameworks', 'R');
         let rExe  = path.join(rHome, 'bin', 'x64', 'R.exe');
-        let rLibs = path.join(home, 'Resources', 'modules', 'base', 'R');
+        let rLibs = `${ path.join(home, 'Resources', 'modules', 'base', 'R')};${ path.join(home, 'Resources', 'modules', 'jmv', 'R')}`;
         paths = { home, rHome, rExe, rLibs };
         platName = 'win64';
     }
@@ -128,14 +128,14 @@ try {
         let home = path.dirname(bin);
         let rHome = path.join(home, 'Frameworks', 'R.framework', 'Versions', 'Current', 'Resources');
         let rExe  = path.join(bin, 'R');
-        let rLibs = path.join(home, 'Resources', 'modules', 'base', 'R');
+        let rLibs = `${ path.join(home, 'Resources', 'modules', 'base', 'R')}:${ path.join(home, 'Resources', 'modules', 'jmv', 'R')}`;
         paths = { home, rHome, rExe, rLibs };
         platName = 'macos';
     }
     else if (args.home === 'flatpak') {
         let home = 'flatpak';
         let rHome = '/app/lib/R';
-        let rLibs = rHome + 'library';
+        let rLibs = '/app/lib/R/library:/app/lib/jamovi/modules/jmv/R';
         let rExe = 'flatpak" run --devel org.jamovi.jamovi "-R';
         paths = { home, rHome, rExe, rLibs };
         platName = 'linux';
@@ -150,7 +150,7 @@ try {
         else
             rHome = path.join(home, 'lib/R');
         let rExe = path.join(rHome, 'bin', 'R');
-        let rLibs = path.join(home, 'Resources', 'modules', 'base', 'R');
+        let rLibs = `${ path.join(home, 'Resources', 'modules', 'base', 'R')}:${ path.join(home, 'Resources', 'modules', 'jmv', 'R')}`;
         paths = { home, rHome, rExe, rLibs };
         platName = 'linux';
     }
@@ -188,8 +188,10 @@ try {
     else {
         if (rVersion == '3.6.1')
             mirror = 'https://cran.microsoft.com/snapshot/2020-01-01'
-        else
+        else if (rVersion == '3.6.3')
             mirror = 'https://cran.microsoft.com/snapshot/2020-05-01'
+        else
+            mirror = 'https://cran.microsoft.com/snapshot/2020-08-24'
     }
 
     srcDir = path.resolve(srcDir);
