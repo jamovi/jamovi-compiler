@@ -47,6 +47,73 @@ let included = [
     'rpart',
     'spatial',
     'survival',
+]
+
+const R3included = [
+
+    // jmvcore
+
+    'jmvcore',
+    'curl',
+    'remotes',
+    'R6',
+    'RColorBrewer',
+    'base64enc',
+    'bitops',
+    'fansi',
+    'farver',
+    'highr',
+    'labeling',
+    'magrittr',
+    'praise',
+    'prettyunits',
+    'rlang',
+    'rstudioapi',
+    'utf8',
+    'viridisLite',
+    'yaml',
+    'RCurl',
+    'Rcpp',
+    'assertthat',
+    'backports',
+    'colorspace',
+    'crayon',
+    'digest',
+    'ellipsis',
+    'evaluate',
+    'glue',
+    'gtable',
+    'jsonlite',
+    'mime',
+    'pkgconfig',
+    'ps',
+    'stringi',
+    'withr',
+    'xfun',
+    'RInside',
+    'RProtoBuf',
+    'cli',
+    'lifecycle',
+    'markdown',
+    'munsell',
+    'processx',
+    'rprojroot',
+    'stringr',
+    'vctrs',
+    'callr',
+    'desc',
+    'knitr',
+    'pillar',
+    'scales',
+    'pkgbuild',
+    'tibble',
+    'pkgload',
+    'testthat',
+    'isoband',
+    'ggplot2',
+];
+
+const R4included = [
 
     // jmvcore
 
@@ -115,8 +182,10 @@ let included = [
     'ggplot2',
 ];
 
-const jmv = [
-    'BH',
+const R4jmvIncluded = [
+
+    // jmv
+
     'GPArotation',
     'RcppParallel',
     'ca',
@@ -249,9 +318,6 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
 
     options = options || {};
 
-    if (packageInfo.name !== 'jmv')
-        included = included.concat(jmv)
-
     let rDir = path.join(moduleDir, 'R');
     let buildDir = path.join(srcDir, 'build', 'R');
     let tempPath = path.join(srcDir, 'temp');
@@ -270,6 +336,15 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
     }
 
     let rVersion = packageInfo.rVersion;
+
+    if (rVersion.startsWith('3.')) {
+        included = included.concat(R3included)
+    }
+    else {
+        included = included.concat(R4included)
+        if (packageInfo.name !== 'jmv')
+            included = included.concat(R4jmvIncluded)
+    }
 
     if ((platform === 'win64' && rVersion !== '3.4.1')
             || (platform === 'macos' && rVersion !== '3.3.0')
@@ -371,8 +446,12 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
     }
 
     let installType = 'getOption(\'pkgType\')'
-    if (process.platform === 'darwin')
-        installType = '\'mac.binary\''
+    if (process.platform === 'darwin') {
+        if (rVersion.startsWith('3.'))
+            installType = '\'mac.binary.el-capitan\''
+        else
+            installType = '\'mac.binary\''
+    }
     else if (process.platform === 'win32')
         installType = '\'win.binary\''
 
@@ -399,28 +478,30 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
 
         let installed = fs.readdirSync(buildDir);
 
-        const subs = {
-            '/Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libR.dylib':
-                '@executable_path/../Frameworks/R.framework/Versions/4.0/Resources/lib/libR.dylib',
-            '/Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib':
-                '@executable_path/../Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib',
-            '/Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRblas.dylib':
-                '@executable_path/../Frameworks/R.framework/Versions/4.0/Resources/lib/libRblas.dylib',
-            '/usr/local/lib/libgfortran.3.dylib':
-                '@executable_path/../Frameworks/R.framework/Versions/4.0/Resources/lib/libgfortran.3.dylib',
-            '/Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libgfortran.3.dylib':
-                '@executable_path/../Frameworks/R.framework/Versions/4.0/Resources/lib/libgfortran.3.dylib',
-            '/usr/local/lib/libquadmath.0.dylib':
-                '@executable_path/../Frameworks/R.framework/Versions/4.0/Resources/lib/libquadmath.0.dylib',
-            '/Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libquadmath.0.dylib':
-                '@executable_path/../Frameworks/R.framework/Versions/4.0/Resources/lib/libquadmath.0.dylib',
-            '/Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libomp.dylib':
-                '@executable_path/../Frameworks/R.framework/Versions/4.0/Resources/lib/libomp.dylib',
-            '/Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libc++.1.dylib':
-                '@executable_path/../Frameworks/R.framework/Versions/4.0/Resources/lib/libc++.1.dylib',
-            '/Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libc++abi.1.dylib':
-                '@executable_path/../Frameworks/R.framework/Versions/4.0/Resources/lib/libc++abi.1.dylib',
-        }
+        let rv = rVersion.substring(0,3)
+
+        const subs = [
+            [`/Library/Frameworks/R.framework/Versions/${ rv }/Resources/lib/libR.dylib`,
+                `@executable_path/../Frameworks/R.framework/Versions/${ rv }/Resources/lib/libR.dylib`],
+            [`/Library/Frameworks/R.framework/Versions/${ rv }/Resources/lib/libRlapack.dylib`,
+                `@executable_path/../Frameworks/R.framework/Versions/${ rv }/Resources/lib/libRlapack.dylib`],
+            [`/Library/Frameworks/R.framework/Versions/${ rv }/Resources/lib/libRblas.dylib`,
+                `@executable_path/../Frameworks/R.framework/Versions/${ rv }/Resources/lib/libRblas.dylib`],
+            [`/usr/local/lib/libgfortran.3.dylib`,
+                `@executable_path/../Frameworks/R.framework/Versions/${ rv }/Resources/lib/libgfortran.3.dylib`],
+            [`/Library/Frameworks/R.framework/Versions/${ rv }/Resources/lib/libgfortran.3.dylib`,
+                `@executable_path/../Frameworks/R.framework/Versions/${ rv }/Resources/lib/libgfortran.3.dylib`],
+            [`/usr/local/lib/libquadmath.0.dylib`,
+                `@executable_path/../Frameworks/R.framework/Versions/${ rv }/Resources/lib/libquadmath.0.dylib`],
+            [`/Library/Frameworks/R.framework/Versions/${ rv }/Resources/lib/libquadmath.0.dylib`,
+                `@executable_path/../Frameworks/R.framework/Versions/${ rv }/Resources/lib/libquadmath.0.dylib`],
+            [`/Library/Frameworks/R.framework/Versions/${ rv }/Resources/lib/libomp.dylib`,
+                `@executable_path/../Frameworks/R.framework/Versions/${ rv }/Resources/lib/libomp.dylib`],
+            [`/Library/Frameworks/R.framework/Versions/${ rv }/Resources/lib/libc++.1.dylib`,
+                `@executable_path/../Frameworks/R.framework/Versions/${ rv }/Resources/lib/libc++.1.dylib`],
+            [`/Library/Frameworks/R.framework/Versions/${ rv }/Resources/lib/libc++abi.1.dylib`,
+                `@executable_path/../Frameworks/R.framework/Versions/${ rv }/Resources/lib/libc++abi.1.dylib`],
+        ]
 
         for (let pkg of installed) {
             let so1 = pkg + '.so';
@@ -437,8 +518,8 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
 
                 log.debug('patching ' + pkgPath);
 
-                for (let sub in subs) {
-                    cmd = util.format('/usr/bin/install_name_tool -change %s %s "%s"', sub, subs[sub], pkgPath);
+                for (let sub of subs) {
+                    cmd = util.format('/usr/bin/install_name_tool -change %s %s "%s"', sub[0], sub[1], pkgPath);
                     sh(cmd, { stdio: [0, 1, 1], encoding: 'utf-8', env: env } );
                 }
 
