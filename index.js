@@ -118,7 +118,7 @@ try {
         let home = path.dirname(bin);
         let rHome = path.join(home, 'Frameworks', 'R');
         let rExe  = path.join(rHome, 'bin', 'x64', 'R.exe');
-        let rLibs = `${ path.join(home, 'Resources', 'modules', 'base', 'R')};${ path.join(home, 'Resources', 'modules', 'jmv', 'R')}`;
+        let rLibs = `${ path.join(home, 'Resources', 'modules', 'base', 'R')}`;
         paths = { home, rHome, rExe, rLibs };
         platName = 'win64';
     }
@@ -128,7 +128,7 @@ try {
         let home = path.dirname(bin);
         let rHome = path.join(home, 'Frameworks', 'R.framework', 'Versions', 'Current', 'Resources');
         let rExe  = path.join(bin, 'R');
-        let rLibs = `${ path.join(home, 'Resources', 'modules', 'base', 'R')}:${ path.join(home, 'Resources', 'modules', 'jmv', 'R')}`;
+        let rLibs = `${ path.join(home, 'Resources', 'modules', 'base', 'R')}`;
         paths = { home, rHome, rExe, rLibs };
         platName = 'macos';
     }
@@ -150,7 +150,7 @@ try {
         else
             rHome = path.join(home, 'lib/R');
         let rExe = path.join(rHome, 'bin', 'R');
-        let rLibs = `${ path.join(home, 'Resources', 'modules', 'base', 'R')}:${ path.join(home, 'Resources', 'modules', 'jmv', 'R')}`;
+        let rLibs = `${ path.join(home, 'Resources', 'modules', 'base', 'R')}`
         paths = { home, rHome, rExe, rLibs };
         platName = 'linux';
     }
@@ -193,6 +193,9 @@ try {
         else
             mirror = 'https://cran.microsoft.com/snapshot/2020-08-24'
     }
+
+    if ( ! rVersion.startsWith('3.'))
+        paths.rLibs += `${ path.sep }${ path.join(paths.home, 'Resources', 'modules', 'jmv', 'R')}`;
 
     srcDir = path.resolve(srcDir);
 
