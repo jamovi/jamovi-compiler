@@ -195,7 +195,7 @@ try {
     }
 
     if ( ! rVersion.startsWith('3.'))
-        paths.rLibs += `${ path.sep }${ path.join(paths.home, 'Resources', 'modules', 'jmv', 'R')}`;
+        paths.rLibs += `${ path.delimiter }${ path.join(paths.home, 'Resources', 'modules', 'jmv', 'R')}`;
 
     srcDir = path.resolve(srcDir);
 
