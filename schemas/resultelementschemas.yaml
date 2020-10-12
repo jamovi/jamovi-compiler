@@ -76,7 +76,7 @@ Table:
         clearWith:
             type:
               - array
-              - null
+              - 'null'
             items:
                 type: string
         swapRowsColumns:
@@ -113,7 +113,7 @@ Image:
         clearWith:
             type:
               - array
-              - null
+              - 'null'
             items:
                 type: string
         refs:
@@ -151,7 +151,7 @@ Group:
         clearWith:
             type:
               - array
-              - null
+              - 'null'
             items:
                 type: string
         refs:
@@ -204,7 +204,7 @@ Array:
         clearWith:
             type:
               - array
-              - null
+              - 'null'
             items:
                 type: string
 
@@ -229,7 +229,7 @@ Preformatted:
         clearWith:
             type:
               - array
-              - null
+              - 'null'
             items:
                 type: string
         refs:
@@ -259,7 +259,7 @@ Html:
         clearWith:
             type:
               - array
-              - null
+              - 'null'
             items:
                 type: string
         refs:

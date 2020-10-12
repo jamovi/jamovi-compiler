@@ -47,7 +47,7 @@ properties:
                 clearWith:
                     type:
                       - array
-                      - null
+                      - 'null'
                     items:
                         type: string
                 refs:

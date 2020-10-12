@@ -39,7 +39,7 @@ Variables:
             type: boolean
         default:
             type:
-              - null
+              - 'null'
               - array
         required:
             type: boolean
@@ -102,7 +102,7 @@ Variable:
         hidden:
             type: boolean
         default:
-            type: null
+            type: 'null'
         required:
             type: boolean
         rejectUnusedLevels:
@@ -262,7 +262,7 @@ NMXList:
                             type: string
         default:
             type:
-              - null
+              - 'null'
               - array
             items:
                 type: string
@@ -284,7 +284,7 @@ Array:
             type: string
         default:
             type:
-              - null
+              - 'null'
               - array
         template:
             type: object
@@ -337,7 +337,7 @@ Terms:
             type: boolean
         default:
             type:
-              - null
+              - 'null'
               - array
         description: *Description
 
@@ -364,7 +364,7 @@ Group:
                     - type
         default:
             type:
-              - null
+              - 'null'
               - array
         description: *Description
 

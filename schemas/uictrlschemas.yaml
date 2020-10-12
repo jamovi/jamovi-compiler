@@ -103,7 +103,7 @@ OptionControl:
         label:
             type:
                 - string
-                - null
+                - 'null'
         valueKey:
             type: array
         optionPart:
@@ -191,7 +191,7 @@ OptionListControl:
                     label:
                         type:
                             - string
-                            - null
+                            - 'null'
                     selectable:
                         type: bool
                     stretchfactor:
