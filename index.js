@@ -20,7 +20,6 @@ const ARGS = [
     { name: 'build',   alias: 'b', type: String },
     { name: 'prepare', alias: 'p', type: String },
     { name: 'install', alias: 'i', type: String },
-    { name: 'submit', type: String },
     { name: 'check',   alias: 'c', type: Boolean },
     { name: 'home',  type: String },
     { name: 'rhome', type: String },
@@ -48,13 +47,11 @@ try {
     usage += '    jmc --build path\n';
     usage += '    jmc --prepare path\n';
     usage += '    jmc --install path [--home path]\n';
-    usage += '    jmc --submit path\n';
     usage += '    jmc --check        [--home path]\n';
 
     let isBuilding = true;
     let isInstalling = false;
     let isInstallingTo = false;
-    let isSubmitting = false;
 
     const args = CLA(ARGS);
 
@@ -96,11 +93,6 @@ try {
         isBuilding = false;
         isInstallingTo = false;
         srcDir = args.prepare;
-    }
-    else if (args.submit) {
-        isBuilding = true;
-        isSubmitting = true;
-        srcDir = args.submit;
     }
     else {
         console.log(usage);
@@ -475,22 +467,6 @@ try {
 
         if (isInstalling)
             installer.install(path, args.home);
-
-        if (isSubmitting) {
-            return new Promise((resolve, reject) => {
-                let path = packageInfo.name + '.jmo';
-                console.log('Submitting: ' + path);
-                let data = { module: { file: path, content_type: 'application/zip' } };
-                needle.post('https://store.jamovi.org/submit/', data, { multipart: true, open_timeout: 0 }, (err, resp, body) => {
-                    if (err)
-                        reject('Unable to submit module:\n    ' + err.message);
-                    else {
-                        console.log("Module '" + packageInfo.name + "' succesfully submitted");
-                        resolve();
-                    }
-                });
-            });
-        }
 
     }).catch(e => {
         fs.writeSync(2, '\n');
