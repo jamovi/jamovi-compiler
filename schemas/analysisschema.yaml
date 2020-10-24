@@ -107,6 +107,7 @@ properties:
                         - Array
                         - Pairs
                         - Sort
+                        - Output
             required:
                 - name
                 - type

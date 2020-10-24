@@ -274,7 +274,8 @@ const sourcifyResults = function(object, indent) {
                 object.type === 'Group' ||
                 object.type === 'Preformatted' ||
                 object.type === 'Html' ||
-                object.type === 'State')) {
+                object.type === 'State' ||
+                object.type === 'Output')) {
             str = resultsify(object, indent + '    ')
         }
         else {

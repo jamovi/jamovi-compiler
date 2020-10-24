@@ -89,7 +89,7 @@ Level:
             type: boolean
         description: *Description
 
-Variable:
+Variable: &Variable
     "$schema": http://json-schema.org/draft-04/schema#
     additionalProperties: false
     properties:
@@ -131,6 +131,8 @@ Variable:
         content:
             type: string
         description: *Description
+
+Output: *Variable
 
 Bool:
     "$schema": http://json-schema.org/draft-04/schema#
