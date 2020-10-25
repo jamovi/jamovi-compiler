@@ -206,7 +206,7 @@ const removeMissingOptions = function(options, parent) {
 
         var optionName = isOptionControl(ctrl);
         if (optionName === false) {
-            if (ctrl.children.length === 0) {
+            if (uiOptionControl[ctrl.type].isContainerControl(ctrl) && ctrl.children.length === 0) {
                 parent.children.splice(i, 1);
                 removed = true;
             }
@@ -421,7 +421,7 @@ const addOptionAsControl = function(option, focusValue, sibblingData) {
 };
 
 const addChild = function(newCtrl, parentCtrl, index) {
-    if (parentCtrl.type === "Supplier" || parentCtrl.type === "VariableSupplier") {
+    if (parentCtrl.type === "Supplier" || parentCtrl.type === "VariableSupplier" || parentCtrl.type === "OutputSupplier") {
         let label = newCtrl.name;
         if (newCtrl._target_label !== undefined) {
             label = newCtrl._target_label;
@@ -628,6 +628,9 @@ const ff = function(item) {
         case "Terms":
         case "Term":
             return "Supplier";
+        case 'Output':
+        case 'Outputs':
+            return "VariableSupplier";
     }
 
     if (item.template !== undefined) {
@@ -663,6 +666,9 @@ const groupConstructors = {
             case "Variable":
             case "Pairs":
             case "Pair":
+                return "VariableSupplier";
+            case "Output":
+            case "Outputs":
                 return "VariableSupplier";
             case "Terms":
             case "Term":
@@ -702,6 +708,15 @@ const groupConstructors = {
     open_VariableSupplier: function() {
         var ctrl = { };
         ctrl.type = 'VariableSupplier'
+        ctrl.persistentItems = false;
+        ctrl.stretchFactor = 1;
+        ctrl.children = [ ];
+        return ctrl;
+    },
+
+    open_OutputSupplier: function() {
+        let ctrl = { };
+        ctrl.type = 'OutputSupplier'
         ctrl.persistentItems = false;
         ctrl.stretchFactor = 1;
         ctrl.children = [ ];
@@ -881,6 +896,47 @@ const constructors = {
         toRaw: function(obj, key) {
             if (key === undefined || key.length === 0)
                 return { type: "enum", template: "string", options: obj.options };
+
+            return null;
+        }
+    },
+
+    Output: {
+        create: function(item, isTemplate) {
+            let ctrl = { }
+            ctrl.type = "VariablesListBox";
+            CheckTemplateState(item, ctrl, isTemplate);
+            if (isTemplate !== true && (item.name !== undefined || item.title !== undefined))
+                ctrl._target_label = item.title !== undefined ? item.title : item.name;
+            ctrl.maxItemCount = 1;
+            ctrl.isTarget = true;
+            return ctrl;
+        },
+        toRaw: function(obj, key) {
+            if (key === undefined || key.length === 0)
+                return "string";
+
+            return null;
+        }
+    },
+
+    Outputs: {
+        create: function(item, isTemplate) {
+            let ctrl = { }
+            ctrl.type = "VariablesListBox";
+            CheckTemplateState(item, ctrl, isTemplate);
+            if (isTemplate !== true && (item.name !== undefined || item.title !== undefined))
+                ctrl._target_label = item.title !== undefined ? item.title : item.name;
+            ctrl.isTarget = true;
+            return ctrl;
+        },
+        toRaw: function(obj, key) {
+
+            if (key === undefined || key.length === 0)
+                return { type: "array", template: "string" };
+
+            if (key.length === 1)
+                return "string";
 
             return null;
         }
@@ -1151,6 +1207,10 @@ const getControlRawType = function(ctrl) {
         return 'string';
     else if (ctrl.format === 'variables')
         return { type: 'array', template: 'string' };
+    else if (ctrl.format === 'output')
+        return 'string';
+    else if (ctrl.format === 'outputs')
+        return { type: 'array', template: 'string' };
 
     return ctrl.format;
 }
@@ -1411,6 +1471,18 @@ const uiOptionControl = {
     },
 
     Supplier: {
+        usesSingleCell: function(ctrl) {
+            return true;
+        },
+        isContainerControl: function(ctrl) {
+            return true;
+        },
+        isOptionControl: function(ctrl) {
+            return false;
+        }
+    },
+
+    OutputSupplier: {
         usesSingleCell: function(ctrl) {
             return true;
         },
