@@ -17,6 +17,7 @@ ControlBase:
                   - TargetLayoutBox
                   - Supplier
                   - VariableSupplier
+                  - OutputSupplier
                   - CollapseBox
                   - Label
                   - LayoutBox
@@ -424,6 +425,13 @@ Supplier:
                 updated:
                     type: string
 
+OutputSupplier:
+    type: object
+    properties:
+        populate:
+            enum:
+                - auto
+                - manual
 
 VariableSupplier:
     type: object
