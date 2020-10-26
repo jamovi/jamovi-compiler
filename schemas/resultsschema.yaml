@@ -44,7 +44,6 @@ properties:
                         - Html
                         - State
                         - Property
-                        - Output
                 clearWith:
                     type:
                       - array

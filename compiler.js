@@ -130,6 +130,11 @@ const compile = function(packageName, analysisPath, resultsPath, templPath, outP
     for (let i = 0; i < results.items.length; i++)
         checkResultsElement(results.items[i], 'results.items[' + i + ']', resultsPath);
 
+    for (let option of analysis.options) {
+        if (option.type === 'Output')
+            results.items.push(option);
+    }
+
     if ( ! ('description' in analysis))
         analysis.description = { };
 
