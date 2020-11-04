@@ -463,7 +463,7 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
 
         let mirrors = options.mirror.split(',').map(x => `'${x}'`).join(',');
 
-        cmd = util.format('"%s" --vanilla --slave -e "utils::install.packages(c(\'%s\'), lib=\'%s\', type=%s, repos=c(%s), INSTALL_opts=c(\'--no-data\', \'--no-help\', \'--no-demo\', \'--no-html\'))"', paths.rExe, depends, buildDir, installType, mirrors);
+        cmd = util.format('"%s" --vanilla --slave -e "utils::install.packages(c(\'%s\'), lib=\'%s\', type=%s, repos=c(%s), INSTALL_opts=c(\'--no-data\', \'--no-help\', \'--no-demo\', \'--no-html\', \'--no-docs\', \'--no-multiarch\'))"', paths.rExe, depends, buildDir, installType, mirrors);
         cmd = cmd.replace(/\\/g, '/');
         try {
             sh(cmd, { stdio: [0, 1, 1], encoding: 'utf-8', env: env } );
@@ -543,7 +543,7 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
 
         for (let remote of remotes) {
 
-            cmd = util.format('"%s" --vanilla --slave -e "remotes::install_github(\'%s\', lib=\'%s\', type=%s, INSTALL_opts=c(\'--no-data\', \'--no-help\', \'--no-demo\', \'--no-html\'), dependencies=FALSE, upgrade=FALSE)"', paths.rExe, remote, buildDir, installType);
+            cmd = util.format('"%s" --vanilla --slave -e "remotes::install_github(\'%s\', lib=\'%s\', type=%s, INSTALL_opts=c(\'--no-data\', \'--no-help\', \'--no-demo\', \'--no-html\', \'--no-docs\', \'--no-multiarch\'), dependencies=FALSE, upgrade=FALSE)"', paths.rExe, remote, buildDir, installType);
             cmd = cmd.replace(/\\/g, '/');
             try {
                 sh(cmd, { stdio: [0, 1, 1], encoding: 'utf-8', env: env } );
@@ -626,11 +626,11 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
 
     try {
         if (process.platform === 'darwin')
-            cmd = util.format('"%s" "--library=%s" --no-help --no-demo --no-html "%s"', path.join(paths.rHome, 'bin', 'INSTALL'), buildDir, tempPath);
+            cmd = util.format('"%s" "--library=%s" --no-help --no-demo --no-html --no-docs --no-multiarch "%s"', path.join(paths.rHome, 'bin', 'INSTALL'), buildDir, tempPath);
         else if (paths.rHome)
-            cmd = util.format('"%s" CMD INSTALL "--library=%s" --no-help --no-demo --no-html "%s"', paths.rExe, buildDir, tempPath);
+            cmd = util.format('"%s" CMD INSTALL "--library=%s" --no-help --no-demo --no-html --no-docs --no-multiarch "%s"', paths.rExe, buildDir, tempPath);
         else
-            cmd = util.format('R CMD INSTALL "--library=%s" --no-help --no-demo --no-html "%s"', buildDir, tempPath);
+            cmd = util.format('R CMD INSTALL "--library=%s" --no-help --no-demo --no-html --no-docs --no-multiarch "%s"', buildDir, tempPath);
         log.debug('executing ' + cmd);
         sh(cmd, { stdio: [0, 1, 1], encoding: 'utf-8', env: env } );
         log.debug('executed');
@@ -640,7 +640,18 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
     }
 
     log.debug('copying to R dir');
-    fs.copySync(buildDir, rDir);
+    fs.copySync(buildDir, rDir, { filter: (src) => {
+        let rel = path.relative(buildDir, src);
+        // if (rel.startsWith('BH/'))
+        //    return false;
+        if (rel.includes('/help/'))
+            return false;
+        if (rel.includes('/html/'))
+            return false;
+        if (rel.includes('/doc/'))
+            return false;
+        return true;
+    }});
     log.debug('copied');
 
     log.debug('deleting temp');
