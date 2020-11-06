@@ -452,7 +452,7 @@ VariableSupplier:
                     - output
             minItems: 1
             uniqueItems: true
-        showRestricted:
+        hideNotPermitted:
             type: boolean
 
 Columns:
