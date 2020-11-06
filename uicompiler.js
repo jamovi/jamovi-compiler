@@ -168,7 +168,7 @@ const checkControl = function(ctrl, uifilename) {
     if (ctrl.inputPattern !== undefined)
         reject(uifilename, 'The property "inputPattern" is no longer supported and should be removed. Option: ' + (ctrl.name === undefined ? ctrl.type : ctrl.name));
 
-    if ((ctrl.type === 'Supplier' || (ctrl.type === 'VariableSupplier' && ctrl.populate === 'manual')) && checkForEventHandle('update', ctrl) === false && checkForEventHandle('updated', ctrl) === false) {
+    if ((ctrl.type === 'Supplier' || (ctrl.type === 'VariableSupplier' && ctrl.populate === 'manual')  || (ctrl.type === 'OutputSupplier' && ctrl.populate === 'manual')) && checkForEventHandle('update', ctrl) === false && checkForEventHandle('updated', ctrl) === false) {
         if (magicHandlers === false)
             reject(uifilename, `The use of a ${ ctrl.type === 'Supplier' ? ("'" + ctrl.type + "' control") : ("'" + ctrl.type + "' control, with the property > populate: 'manual',") } requires an 'updated' event handler to be assigned. Option: ${ctrl.name === undefined ? ctrl.type : ctrl.name}`);
     }
@@ -398,7 +398,7 @@ const addOptionAsControl = function(option, focusValue, sibblingData) {
     }
 
     var parentCtrl = parentData.ctrl;
-    while (parentData.parentData !== null && (neededGroup !== parentCtrl.type || areControlsCompatibleSibblings(sibblingData.ctrl, newCtrl) === false)) {
+    while (parentData.parentData !== null && (neededGroup.parent !== parentCtrl.type || areControlsCompatibleSibblings(sibblingData.ctrl, newCtrl) === false)) {
         sibblingData = parentData;
         parentData = parentData.parentData;
         parentCtrl = parentData.ctrl;
@@ -406,8 +406,7 @@ const addOptionAsControl = function(option, focusValue, sibblingData) {
 
 
     if ((parentData.parentData === null || isPureContainerControl(sibblingData.ctrl)) && neededGroup !== null) {
-        var parentControl = groupConstructors["open_" + neededGroup]();
-        //parentControl.children.push(newCtrl);
+        var parentControl = groupConstructors["open_" + neededGroup.constructor]();
         addChild(newCtrl, parentControl, 0);
         var ii = addChild(parentControl, parentCtrl, sibblingData.index + 1);
         parentData = { ctrl: parentControl, index: ii, parentData: parentData };
@@ -624,13 +623,13 @@ const ff = function(item) {
         case "Variable":
         case "Pairs":
         case "Pair":
-            return "VariableSupplier";
+            return { parent: "VariableSupplier", constructor: 'VariableSupplier' };
         case "Terms":
         case "Term":
-            return "Supplier";
+            return { parent: "Supplier", constructor: 'Supplier' };
         case 'Output':
         case 'Outputs':
-            return "VariableSupplier";
+            return { parent: "OutputSupplier", constructor: 'OutputSupplier' };
     }
 
     if (item.template !== undefined) {
@@ -662,17 +661,6 @@ const groupConstructors = {
             return ss;
 
         switch (item.type) {
-            case "Variables":
-            case "Variable":
-            case "Pairs":
-            case "Pair":
-                return "VariableSupplier";
-            case "Output":
-            case "Outputs":
-                return "VariableSupplier";
-            case "Terms":
-            case "Term":
-                return "Supplier";
             case "Array":
                 return null;
         }
@@ -909,6 +897,7 @@ const constructors = {
             if (isTemplate !== true && (item.name !== undefined || item.title !== undefined))
                 ctrl._target_label = item.title !== undefined ? item.title : item.name;
             ctrl.maxItemCount = 1;
+            ctrl.permitted = [ 'output' ];
             ctrl.isTarget = true;
             return ctrl;
         },
@@ -928,6 +917,7 @@ const constructors = {
             if (isTemplate !== true && (item.name !== undefined || item.title !== undefined))
                 ctrl._target_label = item.title !== undefined ? item.title : item.name;
             ctrl.isTarget = true;
+            ctrl.permitted = [ 'output' ];
             return ctrl;
         },
         toRaw: function(obj, key) {

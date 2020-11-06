@@ -355,6 +355,7 @@ VariablesListBox:
                     - numeric
                     - factor
                     - id
+                    - output
             minItems: 1
             uniqueItems: true
 
@@ -425,14 +426,6 @@ Supplier:
                 updated:
                     type: string
 
-OutputSupplier:
-    type: object
-    properties:
-        populate:
-            enum:
-                - auto
-                - manual
-
 VariableSupplier:
     type: object
     properties:
@@ -456,8 +449,11 @@ VariableSupplier:
                     - numeric
                     - factor
                     - id
+                    - output
             minItems: 1
             uniqueItems: true
+        hideNotPermitted:
+            type: boolean
 
 Columns:
     type: object
@@ -559,7 +555,7 @@ ControlInheritance:
         - GridControl
         - ControlContainer
         - Supplier
-        - OutputSupplier
+        - VariableSupplier
     CollapseBox:
         - ControlBase
         - GridControl
