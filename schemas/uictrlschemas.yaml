@@ -355,6 +355,7 @@ VariablesListBox:
                     - numeric
                     - factor
                     - id
+                    - output
             minItems: 1
             uniqueItems: true
 
@@ -456,8 +457,11 @@ VariableSupplier:
                     - numeric
                     - factor
                     - id
+                    - output
             minItems: 1
             uniqueItems: true
+        showRestricted:
+            type: boolean
 
 Columns:
     type: object
