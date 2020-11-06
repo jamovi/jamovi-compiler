@@ -168,7 +168,7 @@ const checkControl = function(ctrl, uifilename) {
     if (ctrl.inputPattern !== undefined)
         reject(uifilename, 'The property "inputPattern" is no longer supported and should be removed. Option: ' + (ctrl.name === undefined ? ctrl.type : ctrl.name));
 
-    if ((ctrl.type === 'Supplier' || (ctrl.type === 'VariableSupplier' && ctrl.populate === 'manual')) && checkForEventHandle('update', ctrl) === false && checkForEventHandle('updated', ctrl) === false) {
+    if ((ctrl.type === 'Supplier' || (ctrl.type === 'VariableSupplier' && ctrl.populate === 'manual')  || (ctrl.type === 'OutputSupplier' && ctrl.populate === 'manual')) && checkForEventHandle('update', ctrl) === false && checkForEventHandle('updated', ctrl) === false) {
         if (magicHandlers === false)
             reject(uifilename, `The use of a ${ ctrl.type === 'Supplier' ? ("'" + ctrl.type + "' control") : ("'" + ctrl.type + "' control, with the property > populate: 'manual',") } requires an 'updated' event handler to be assigned. Option: ${ctrl.name === undefined ? ctrl.type : ctrl.name}`);
     }
@@ -420,7 +420,7 @@ const addOptionAsControl = function(option, focusValue, sibblingData) {
 };
 
 const addChild = function(newCtrl, parentCtrl, index) {
-    if (parentCtrl.type === "Supplier" || parentCtrl.type === "VariableSupplier") {
+    if (parentCtrl.type === "Supplier" || parentCtrl.type === "VariableSupplier" || parentCtrl.type === "OutputSupplier") {
         let label = newCtrl.name;
         if (newCtrl._target_label !== undefined) {
             label = newCtrl._target_label;
@@ -629,7 +629,7 @@ const ff = function(item) {
             return { parent: "Supplier", constructor: 'Supplier' };
         case 'Output':
         case 'Outputs':
-            return { parent: "VariableSupplier", constructor: 'OutputSupplier' };
+            return { parent: "OutputSupplier", constructor: 'OutputSupplier' };
     }
 
     if (item.template !== undefined) {
@@ -704,11 +704,9 @@ const groupConstructors = {
 
     open_OutputSupplier: function() {
         let ctrl = { };
-        ctrl.type = 'VariableSupplier'
+        ctrl.type = 'OutputSupplier'
         ctrl.persistentItems = false;
         ctrl.stretchFactor = 1;
-        ctrl.permitted = [ 'output' ];
-        ctrl.showRestricted = false;
         ctrl.children = [ ];
         return ctrl;
     },
@@ -1463,6 +1461,18 @@ const uiOptionControl = {
     },
 
     Supplier: {
+        usesSingleCell: function(ctrl) {
+            return true;
+        },
+        isContainerControl: function(ctrl) {
+            return true;
+        },
+        isOptionControl: function(ctrl) {
+            return false;
+        }
+    },
+
+    OutputSupplier: {
         usesSingleCell: function(ctrl) {
             return true;
         },

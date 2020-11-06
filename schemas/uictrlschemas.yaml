@@ -17,6 +17,7 @@ ControlBase:
                   - TargetLayoutBox
                   - Supplier
                   - VariableSupplier
+                  - OutputSupplier
                   - CollapseBox
                   - Label
                   - LayoutBox
@@ -544,6 +545,12 @@ ControlInheritance:
         - ControlContainer
         - Supplier
     VariableSupplier:
+        - ControlBase
+        - GridControl
+        - ControlContainer
+        - Supplier
+        - VariableSupplier
+    OutputSupplier:
         - ControlBase
         - GridControl
         - ControlContainer
