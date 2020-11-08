@@ -131,7 +131,7 @@ const compile = function(packageName, analysisPath, resultsPath, templPath, outP
         checkResultsElement(results.items[i], 'results.items[' + i + ']', resultsPath);
 
     for (let option of analysis.options) {
-        if (option.type === 'Output')
+        if (option.type === 'Output' || option.type === 'Outputs')
             results.items.push(option);
     }
 
@@ -280,7 +280,8 @@ const sourcifyResults = function(object, indent) {
                 object.type === 'Preformatted' ||
                 object.type === 'Html' ||
                 object.type === 'State' ||
-                object.type === 'Output')) {
+                object.type === 'Output' ||
+                object.type === 'Outputs')) {
             str = resultsify(object, indent + '    ')
         }
         else {

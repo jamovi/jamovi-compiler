@@ -108,6 +108,7 @@ properties:
                         - Pairs
                         - Sort
                         - Output
+                        - Outputs
             required:
                 - name
                 - type

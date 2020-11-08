@@ -87,7 +87,7 @@
         }
     }
 %>
-<%= analysis.options.filter(o => o.type !== 'Output').map(option => {
+<%= analysis.options.filter(o => ! o.type.startsWith('Output')).map(option => {
     var desc;
     desc = option.description;
     if (typeof desc === 'object')
@@ -186,7 +186,7 @@ if (results.items) {
     }
 }
 %>#' @export
-<%= analysis.rename ? analysis.rename : analysis.name %> <- function(<%=analysis.options.filter(o => o.type !== 'Output').map(option => {
+<%= analysis.rename ? analysis.rename : analysis.name %> <- function(<%=analysis.options.filter(o => ! o.type.startsWith('Output')).map(option => {
     if (_.isUndefined(option['default']))
         return '\n    ' + option.name;
     return '\n    ' + option.name + ' = ' + imports.sourcifyOption(option['default']);
@@ -244,7 +244,7 @@ if (results.items) {
     }).join('')
 %><% } %>
 
-    options <- <%= analysis.name %>Options$new(<%=analysis.options.filter(o => o.type !== 'Data' && o.type !== 'Output').map(option => {
+    options <- <%= analysis.name %>Options$new(<%=analysis.options.filter(o => o.type !== 'Data' && ! o.type.startsWith('Output')).map(option => {
         return '\n        ' + option.name + ' = ' + option.name;
     }).join()
     %>)
