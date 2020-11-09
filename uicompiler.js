@@ -623,13 +623,13 @@ const ff = function(item) {
         case "Variable":
         case "Pairs":
         case "Pair":
-            return { parent: "VariableSupplier", constructor: 'VariableSupplier' };
+            return { parent: 'VariableSupplier', constructor: 'VariableSupplier' };
         case "Terms":
         case "Term":
-            return { parent: "Supplier", constructor: 'Supplier' };
+            return { parent: 'Supplier', constructor: 'Supplier' };
         case 'Output':
         case 'Outputs':
-            return { parent: "OutputSupplier", constructor: 'OutputSupplier' };
+            return { parent: 'OutputSupplier', constructor: 'OutputSupplier' };
     }
 
     if (item.template !== undefined) {
@@ -665,7 +665,7 @@ const groupConstructors = {
                 return null;
         }
 
-        return "LayoutBox";
+        return { parent: 'LayoutBox', constructor: 'LayoutBox' };
     },
 
     open_TargetLayoutBox: function(label) {
