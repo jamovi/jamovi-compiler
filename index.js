@@ -41,6 +41,8 @@ const utils = require('./utils');
 const installer = require('./installer');
 const sourcify = require('./sourcify');
 
+(async function() {
+
 try {
 
     let usage = 'Usage:\n';
@@ -274,8 +276,6 @@ try {
             fs.mkdirSync(yamlOutDir);
     }
 
-    let waits = [ ]
-
     for (let file of files) {
 
         if (file.endsWith('.a.yaml')) {
@@ -287,6 +287,7 @@ try {
             let hOutPath = path.join(rDir, basename + '.h.R');
             let bOutPath = path.join(rDir, basename + '.b.R');
             let sOutPath = path.join(jsBuildDir, basename + '.src.js');
+            let uOutPath = path.join(uiOutDir, basename + '.js');
 
             let hTemplPath = path.join(__dirname, 'header.template');
             let bTemplPath = path.join(__dirname, 'body.template');
@@ -302,19 +303,15 @@ try {
 
             uicompiler(analysisPath, uiPath, jsPath, basename, sTemplPath, sOutPath);
 
-
             if (isBuilding || isInstallingTo) {
 
-                let uOutPath = path.join(uiOutDir, basename + '.js');
+                let stream = fs.createWriteStream(uOutPath);
 
-                waits.push(Promise.resolve().then(() => {
-                    let stream = fs.createWriteStream(uOutPath);
-                    return new Promise((resolve) => {
-                        browserify(sOutPath, { standalone: 'module' })
-                            .bundle().pipe(stream);
-                        stream.on('close', resolve);
-                    });
-                }));
+                await new Promise((resolve) => {
+                    browserify(sOutPath, { standalone: 'module' })
+                        .bundle().pipe(stream);
+                    stream.on('close', resolve);
+                });
 
                 let content = fs.readFileSync(analysisPath);
                 fs.writeFileSync(path.join(yamlOutDir, basename + '.a.yaml'), content);
@@ -329,11 +326,18 @@ try {
 
             let content = fs.readFileSync(analysisPath, 'utf-8');
             let analysis = yaml.safeLoad(content);
+
+            let uijs = '';
+            if (utils.exists(uOutPath))
+                uijs = fs.readFileSync(uOutPath, 'utf-8');
+
             let title = ('title' in analysis ? analysis.title : analyis.name);
             let aObj = {
                 title: title,
                 name: analysis.name,
                 ns: packageInfo.name,
+                options: analysis.options,
+                uijs: uijs,
             };
 
             if ('menuGroup' in analysis)
@@ -373,7 +377,7 @@ try {
         }
     }
 
-    Promise.all(waits).then(() => {  // wait for all the browserifies to finish
+    try {
 
         console.log('writing module meta');
 
@@ -410,17 +414,29 @@ try {
         if (packageInfo.date instanceof Date)
             packageInfo.date = packageInfo.date.toISOString().slice(0,10)
 
-        let content = '---\n' + yaml.safeDump(packageInfo) + '\n...\n';
+        let packageInfoLite = JSON.parse(JSON.stringify(packageInfo));
+        for (let analysis of packageInfoLite.analyses) {
+            delete analysis.options;
+            delete analysis.uijs;
+        }
+
+        let content = '---\n' + yaml.safeDump(packageInfoLite) + '\n...\n';
         fs.writeFileSync(indexPath, content);
         console.log('wrote: 0000.yaml');
 
         if (isBuilding || isInstallingTo) {
 
-            packageInfo.rVersion = rVersion;
-            content = '---\n' + yaml.safeDump(packageInfo) + '\n...\n';
+            packageInfoLite.rVersion = rVersion;
+            content = '---\n' + yaml.safeDump(packageInfoLite) + '\n...\n';
 
             fs.writeFileSync(path.join(modDir, 'jamovi.yaml'), content);
             console.log('wrote: jamovi.yaml');
+
+            packageInfo.rVersion = rVersion;
+            content = '---\n' + yaml.safeDump(packageInfo) + '\n...\n';
+
+            fs.writeFileSync(path.join(modDir, 'jamovi-full.yaml'), content);
+            console.log('wrote: jamovi-full.yaml');
 
             try {
                 content = fs.readFileSync(refsPath);
@@ -453,27 +469,28 @@ try {
                     zip.file(archivePath, contents);
                 }
 
-                return new Promise((resolve, reject) => {
+                zipPath = await new Promise((resolve, reject) => {
                     zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' }).then(content => {
                         fs.writeFileSync(zipPath, content);
                         console.log('wrote module: ' + path.basename(zipPath) + '\n');
                         resolve(zipPath);
                     }, err => fs.writeSync(2, err))
                 });
+
+                if (isInstalling)
+                    installer.install(zipPath, args.home);
             }
         }
 
-    }).then(path => {
-
-        if (isInstalling)
-            installer.install(path, args.home);
-
-    }).catch(e => {
+    }
+    catch (e) {
         fs.writeSync(2, '\n');
         fs.writeSync(2, e);
         fs.writeSync(2, '\n\n');
+        if (args.debug)
+            fs.writeSync(2, e.stack)
         process.exit(1);
-    });
+    }
 
 }
 catch (e) {
@@ -492,3 +509,5 @@ catch (e) {
     fs.writeSync(2, '\n\n');
     process.exit(1);
 }
+
+})();
