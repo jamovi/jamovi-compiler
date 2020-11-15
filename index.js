@@ -28,6 +28,7 @@ const ARGS = [
     { name: 'debug', type: Boolean },
     { name: 'jmo',   type: String },
     { name: 'mirror', type: String },
+    { name: 'patch-version', type: Boolean },
 ];
 
 const temp = require('temp');
@@ -101,7 +102,7 @@ try {
         process.exit(0);
     }
 
-    installer.check(args.home);
+    let appVersion = installer.check(args.home);
 
     let paths;
     let platName;
@@ -225,6 +226,9 @@ try {
     else {
         packageInfo = parseR(srcDir);
     }
+
+    if (args['patch-version'])
+        packageInfo.version = appVersion;
 
     if ( ! ('usesNative' in packageInfo))
         packageInfo.usesNative = true;

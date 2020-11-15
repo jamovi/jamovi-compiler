@@ -114,6 +114,8 @@ const check = function(jamovi_home) {
             else {
                 console.log(`jamovi ${ mas }.${ maj }.${ min } found at ${ exe }`);
             }
+
+            return `${ mas }.${ maj }.${ min }`;
         }
         else {
             console.log(response.stdout + '\n')
