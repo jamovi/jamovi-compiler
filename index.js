@@ -29,6 +29,7 @@ const ARGS = [
     { name: 'jmo',   type: String },
     { name: 'mirror', type: String },
     { name: 'patch-version', type: Boolean },
+    { name: 'skip-remotes', type: Boolean },
 ];
 
 const temp = require('temp');
@@ -177,6 +178,8 @@ try {
     rVersion = rVersion[1];
 
     let mirror;
+    let skipRemotes = args['skip-remotes'];
+
     if (args.mirror) {
         mirror = args.mirror;
     }
@@ -450,7 +453,7 @@ try {
                 // do nothing
             }
 
-            compileR(srcDir, modDir, paths, packageInfo, log, { mirror });
+            compileR(srcDir, modDir, paths, packageInfo, log, { mirror, skipRemotes });
 
             if (isBuilding) {
 

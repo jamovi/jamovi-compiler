@@ -537,7 +537,7 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
         log.debug('paths fixed')
     }
 
-    if (remotes.length > 0) {
+    if (remotes.length > 0 && options.skipRemotes !== true) {
         console.log('Installing remotes');
         console.log(remotes.join(', '));
 
