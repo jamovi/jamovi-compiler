@@ -146,7 +146,7 @@ try {
         else
             rHome = path.join(home, 'lib/R');
         let rExe = path.join(rHome, 'bin', 'R');
-        let rLibs = `${ path.join(home, 'Resources', 'modules', 'base', 'R')}`
+        let rLibs = '/usr/local/lib/R/library:/usr/lib/jamovi/modules/jmv/R';
         paths = { home, rHome, rExe, rLibs };
         platName = 'linux';
     }
