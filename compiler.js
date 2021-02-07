@@ -215,22 +215,27 @@ const optionify = function(option, optionName, optionValue, indent) {
     if (typeof indent === 'undefined')
         indent = '                ';
 
-    let str = 'jmvcore::Option' + option.type + '$new(\n' + indent + '"' + optionName + '",\n' + indent + optionValue
+    let str = `jmvcore::Option${ option.type }$new(\n${ indent }"${ optionName }"`;
 
-    for (let prop in option) {
-        if (prop === 'type' ||
-            prop === 'name' ||
-            prop === 'title' ||
-            prop === 'description')
-                continue;
+    if (option.type !== 'Output') {
 
-        let value = option[prop];
+        str += `,\n${ indent }${ optionValue }`;
 
-        if ((option.type === 'List' || option.type === 'NMXList') &&
-            prop === 'options')
-                value = value.map(v => v.name ? v.name : v);
+        for (let prop in option) {
+            if (prop === 'type' ||
+                prop === 'name' ||
+                prop === 'title' ||
+                prop === 'description')
+                    continue;
 
-        str += ',\n' + indent + prop + '=' + sourcifyOption(value, optionName, 'NULL', indent);
+            let value = option[prop];
+
+            if ((option.type === 'List' || option.type === 'NMXList') &&
+                prop === 'options')
+                    value = value.map(v => v.name ? v.name : v);
+
+            str += ',\n' + indent + prop + '=' + sourcifyOption(value, optionName, 'NULL', indent);
+        }
     }
 
     str += ')'
