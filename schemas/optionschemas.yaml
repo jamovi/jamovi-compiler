@@ -268,7 +268,7 @@ NMXList:
                 type: string
         description: *Description
 
-Array: &Array
+Array:
     "$schema": http://json-schema.org/draft-04/schema#
     additionalProperties: false
     properties:
@@ -289,8 +289,6 @@ Array: &Array
         template:
             type: object
         description: *Description
-
-Output: *Array
 
 Pairs:
     "$schema": http://json-schema.org/draft-04/schema#
