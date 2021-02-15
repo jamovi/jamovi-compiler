@@ -46,6 +46,7 @@ properties:
                     type: enum
                         - Custom
                         - CheckBox
+                        - Output
                         - RadioButton
                         - ComboBox
                         - TextBox

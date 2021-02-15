@@ -17,7 +17,6 @@ ControlBase:
                   - TargetLayoutBox
                   - Supplier
                   - VariableSupplier
-                  - OutputSupplier
                   - CollapseBox
                   - Label
                   - LayoutBox
@@ -25,6 +24,7 @@ ControlBase:
                   - TermLabel
                   - RMAnovaFactorsBox
                   - LevelSelector
+                  - Output
                   - CustomControl
         name:
             type: string
@@ -499,6 +499,11 @@ ControlInheritance:
         - CheckBox
         - EmbeddedChildSupport
         - IconSupport
+    Output:
+        - ControlBase
+        - GridControl
+        - OptionControl
+        - EmbeddedChildSupport
     RadioButton:
         - ControlBase
         - GridControl
@@ -545,12 +550,6 @@ ControlInheritance:
         - ControlContainer
         - Supplier
     VariableSupplier:
-        - ControlBase
-        - GridControl
-        - ControlContainer
-        - Supplier
-        - VariableSupplier
-    OutputSupplier:
         - ControlBase
         - GridControl
         - ControlContainer
