@@ -830,7 +830,7 @@ const constructors = {
         },
         toRaw: function(obj, key) {
             if (key === undefined || key.length === 0)
-                return "output";
+                return { type: 'group', elements: [ { name: 'value', type: 'boolean' }, { name: 'vars', type: 'array', template: 'string' } ] };;
 
             return null;
         }
@@ -1158,7 +1158,7 @@ const getControlRawType = function(ctrl) {
     else if (ctrl.format === 'variables')
         return { type: 'array', template: 'string' };
     else if (ctrl.format === 'output')
-        return { type: 'array', template: { type: 'array', template: 'string' } };
+        return { type: 'group', elements: [ { name: 'value', type: 'boolean' }, { name: 'vars', type: 'array', template: 'string' } ] };
 
     return ctrl.format;
 }
@@ -1268,7 +1268,7 @@ const uiOptionControl = {
             return ctrl.isVirtual !== true;
         },
         toRaw: function(ctrl) {
-            return "output";
+            return { type: 'group', elements: [ { name: 'value', type: 'boolean' }, { name: 'vars', type: 'array', template: 'string' } ] };;
         }
     },
 
