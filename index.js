@@ -274,14 +274,12 @@ try {
         fs.emptyDirSync(modDir);
     }
 
-    if (isBuilding || isInstallingTo) {
-        uiOutDir = path.join(modDir, 'ui');
-        if ( ! utils.exists(uiOutDir))
-            fs.mkdirSync(uiOutDir);
-        yamlOutDir = path.join(modDir, 'analyses');
-        if ( ! utils.exists(yamlOutDir))
-            fs.mkdirSync(yamlOutDir);
-    }
+    uiOutDir = path.join(modDir, 'ui');
+    if ( ! utils.exists(uiOutDir))
+        fs.mkdirSync(uiOutDir);
+    yamlOutDir = path.join(modDir, 'analyses');
+    if ( ! utils.exists(yamlOutDir))
+        fs.mkdirSync(yamlOutDir);
 
     for (let file of files) {
 
