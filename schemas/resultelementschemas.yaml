@@ -285,7 +285,17 @@ Output:
         varDescription:
             type: string
         items:
-            type: string
+            type:
+              - string
+              - integer
+        initInRun:
+            type: boolean
+        measureType:
+            type:
+                enum:
+                    - nominal
+                    - ordinal
+                    - continuous
         clearWith:
             type:
               - array
