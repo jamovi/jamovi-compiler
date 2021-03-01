@@ -101,7 +101,7 @@ const check = function(jamovi_home) {
 
             if (mas < 1 || maj < 2 || (maj === 2 && min < 1))
                 throw 'a newer version of jamovi is required, please update to the newest version';
-            if (mas > 1 || (mas === 1 && maj > 7))
+            if (mas > 1 || (mas === 1 && maj > 8))
                 throw 'a newer version of the jamovi-compiler (or jmvtools) is required';
 
             if (process.platform === 'darwin') {
