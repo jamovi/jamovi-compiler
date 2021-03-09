@@ -298,7 +298,7 @@ const sourcifyResults = function(object, indent) {
     return str;
 }
 
-const resultsify = function(item, indent, root) {
+const resultsify = function(item, indent, root, analysisName) {
 
     if (typeof indent === 'undefined')
         indent = '';
@@ -320,6 +320,8 @@ const resultsify = function(item, indent, root) {
             items = [ ];
 
         str += 'R6::R6Class(';
+        if (root)
+            str += '\n    ' + indent + '"' + analysisName + 'Results",';
         str += '\n    ' + indent + 'inherit = jmvcore::Group,';
 
         str += '\n    ' + indent + 'active = list(';

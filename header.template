@@ -36,7 +36,7 @@
     %>)
 )
 
-<%= analysis.name %>Results <- if (requireNamespace("jmvcore", quietly=TRUE)) <%= imports.resultsify(results, '', true) %>
+<%= analysis.name %>Results <- if (requireNamespace("jmvcore", quietly=TRUE)) <%= imports.resultsify(results, '', true, analysis.name) %>
 
 <%= analysis.name %>Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "<%= analysis.name %>Base",
