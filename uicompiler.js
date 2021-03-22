@@ -1104,6 +1104,57 @@ const constructors = {
         }
     },
 
+    Pair: {
+        create: function(item, isTemplate) {
+            var ctrl = { };
+            ctrl.type = "VariablesListBox";
+            CheckTemplateState(item, ctrl, isTemplate);
+            if (isTemplate !== true && (item.name !== undefined || item.title !== undefined))
+                ctrl._target_label = item.title !== undefined ? item.title : item.name;
+            ctrl.fullRowSelect = true;
+            ctrl.isTarget = true;
+            ctrl.maxItemCount = 1;
+            ctrl.columns = [
+                {
+                    name: "i1",
+                    stretchFactor: 1,
+                    template: {
+                        type: "VariableLabel"
+                    }
+                },
+                {
+                    name: "i2",
+                    stretchFactor: 1,
+                    template: {
+                        type: "VariableLabel"
+                    }
+                }
+            ];
+            return ctrl;
+        },
+        toRaw: function(obj, key) {
+            if (key === undefined || key.length === 0)
+                return {
+                    type: "object",
+                    elements: [
+                        {
+                            key: "i1",
+                            type: "string"
+                        },
+                        {
+                            key: "i2",
+                            type: "string"
+                        }
+                    ]
+                };
+
+            if (key.length === 1)
+                return "string";
+
+            return null;
+        }
+    },
+
     Group: {
         create: function(item, isTemplate) {
             let ctrl = { }
