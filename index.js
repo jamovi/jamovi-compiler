@@ -266,12 +266,12 @@ try {
     let uiOutDir;
     let yamlOutDir;
 
-    if (isBuilding) {
-        modDir = temp.mkdirSync(packageInfo.name);
-    }
-    else if (isInstallingTo) {
+    if (isInstallingTo) {
         modDir = path.join(installDir, packageInfo.name);
         fs.emptyDirSync(modDir);
+    }
+    else {
+        modDir = temp.mkdirSync(packageInfo.name);
     }
 
     uiOutDir = path.join(modDir, 'ui');
