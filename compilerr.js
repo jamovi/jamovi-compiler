@@ -7,319 +7,16 @@ const util = require('util');
 const sh = require('child_process').execSync;
 const process = require('process');
 
+const snapshots = require('./snapshots');
+
 const temp = require('temp');
 temp.track();
-
-let included = [
-
-    // base
-
-    'R',
-    'base',
-    'compiler',
-    'datasets',
-    'graphics',
-    'grDevices',
-    'grid',
-    'methods',
-    'parallel',
-    'splines',
-    'stats',
-    'stats4',
-    'tcltk',
-    'utils',
-    'tools',
-
-    // recommended
-
-    'KernSmooth',
-    'MASS',
-    'Matrix',
-    'boot',
-    'class',
-    'cluster',
-    'codetools',
-    'foreign',
-    'lattice',
-    'mgcv',
-    'nlme',
-    'nnet',
-    'rpart',
-    'spatial',
-    'survival',
-]
-
-const R3included = [
-
-    // jmvcore
-
-    'jmvcore',
-    'curl',
-    'remotes',
-    'R6',
-    'RColorBrewer',
-    'base64enc',
-    'bitops',
-    'fansi',
-    'farver',
-    'highr',
-    'labeling',
-    'magrittr',
-    'praise',
-    'prettyunits',
-    'rlang',
-    'rstudioapi',
-    'utf8',
-    'viridisLite',
-    'yaml',
-    'RCurl',
-    'Rcpp',
-    'assertthat',
-    'backports',
-    'colorspace',
-    'crayon',
-    'digest',
-    'ellipsis',
-    'evaluate',
-    'glue',
-    'gtable',
-    'jsonlite',
-    'mime',
-    'pkgconfig',
-    'ps',
-    'stringi',
-    'withr',
-    'xfun',
-    'RInside',
-    'RProtoBuf',
-    'cli',
-    'lifecycle',
-    'markdown',
-    'munsell',
-    'processx',
-    'rprojroot',
-    'stringr',
-    'vctrs',
-    'callr',
-    'desc',
-    'knitr',
-    'pillar',
-    'scales',
-    'pkgbuild',
-    'tibble',
-    'pkgload',
-    'testthat',
-    'isoband',
-    'ggplot2',
-];
-
-const R4included = [
-
-    // jmvcore
-
-    'jmvcore',
-    'R6',
-    'RColorBrewer',
-    'base64enc',
-    'bitops',
-    'curl',
-    'fansi',
-    'farver',
-    'highr',
-    'labeling',
-    'magrittr',
-    'praise',
-    'prettyunits',
-    'rlang',
-    'rstudioapi',
-    'systemfonts',
-    'utf8',
-    'viridisLite',
-    'yaml',
-    'RCurl',
-    'Rcpp',
-    'assertthat',
-    'backports',
-    'colorspace',
-    'crayon',
-    'digest',
-    'ellipsis',
-    'evaluate',
-    'glue',
-    'gtable',
-    'jsonlite',
-    'mime',
-    'pkgconfig',
-    'ps',
-    'ragg',
-    'remotes',
-    'stringi',
-    'withr',
-    'xfun',
-    'RInside',
-    'RProtoBuf',
-    'cli',
-    'htmltools',
-    'lifecycle',
-    'markdown',
-    'munsell',
-    'processx',
-    'rprojroot',
-    'stringr',
-    'tinytex',
-    'vctrs',
-    'callr',
-    'desc',
-    'knitr',
-    'pillar',
-    'scales',
-    'pkgbuild',
-    'rmarkdown',
-    'tibble',
-    'pkgload',
-    'testthat',
-    'isoband',
-    'ggplot2',
-];
-
-const R4jmvIncluded = [
-
-    // jmv
-
-    'GPArotation',
-    'RcppParallel',
-    'ca',
-    'carData',
-    'contfrac',
-    'cpp11',
-    'glasso',
-    'jpeg',
-    'lisrelToR',
-    'matrixStats',
-    'matrixcalc',
-    'nloptr',
-    'numDeriv',
-    'pbivnorm',
-    'png',
-    'polyclip',
-    'qvcalc',
-    'rematch',
-    'rjson',
-    'tmvnsim',
-    'truncnorm',
-    'whisker',
-    'zip',
-    'Formula',
-    'MatrixModels',
-    'PMCMR',
-    'RUnit',
-    'RcppArmadillo',
-    'RcppEigen',
-    'Rsolnp',
-    'SparseM',
-    'TH.data',
-    'XML',
-    'abind',
-    'caTools',
-    'cellranger',
-    'checkmate',
-    'clipr',
-    'coda',
-    'corpcor',
-    'data.table',
-    'deSolve',
-    'elliptic',
-    'estimability',
-    'fdrtool',
-    'forcats',
-    'generics',
-    'ggrepel',
-    'gridExtra',
-    'gtools',
-    'hms',
-    'htmlwidgets',
-    'igraph',
-    'latticeExtra',
-    'minqa',
-    'mnormt',
-    'mvnormtest',
-    'mvtnorm',
-    'openxlsx',
-    'pbapply',
-    'plyr',
-    'purrr',
-    'relimp',
-    'sp',
-    'ssanv',
-    'statmod',
-    'tweenr',
-    'xtable',
-    'zoo',
-    'BDgraph',
-    'StanHeaders',
-    'conquer',
-    'd3Network',
-    'emmeans',
-    'exactci',
-    'gdata',
-    'ggridges',
-    'gnm',
-    'graphlayouts',
-    'htmlTable',
-    'huge',
-    'hypergeo',
-    'kutils',
-    'lavaan',
-    'lme4',
-    'lmtest',
-    'maptools',
-    'progress',
-    'psych',
-    'readr',
-    'reshape',
-    'reshape2',
-    'rpf',
-    'sandwich',
-    'tidyselect',
-    'viridis',
-    'BayesFactor',
-    'GGally',
-    'Hmisc',
-    'OpenMx',
-    'dplyr',
-    'exact2x2',
-    'ggforce',
-    'gplots',
-    'haven',
-    'lmerTest',
-    'multcomp',
-    'pbkrtest',
-    'quantreg',
-    'readxl',
-    'regsem',
-    'rockchalk',
-    'vcd',
-    'ROCR',
-    'arm',
-    'rio',
-    'tidyr',
-    'vcdExtra',
-    'car',
-    'mi',
-    'tidygraph',
-    'afex',
-    'ggraph',
-    'sem',
-    'qgraph',
-    'semPlot',
-];
 
 const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
 
     options = options || {};
 
     let rDir = path.join(moduleDir, 'R');
-    let buildDir = path.join(srcDir, 'build', 'R');
     let tempPath = path.join(srcDir, 'temp');
 
     let platform;
@@ -336,20 +33,10 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
     }
 
     let rVersion = packageInfo.rVersion;
-
-    if (rVersion.startsWith('3.')) {
-        included = included.concat(R3included)
-    }
-    else {
-        included = included.concat(R4included)
-        if (packageInfo.name !== 'jmv')
-            included = included.concat(R4jmvIncluded)
-    }
-
-    if ((platform === 'win64' && rVersion !== '3.4.1')
-            || (platform === 'macos' && rVersion !== '3.3.0')
-            || (platform === 'linux' && rVersion !== '3.5.1'))
-        buildDir = path.join(srcDir, 'build', `R${ rVersion }-${ platform }`);
+    let snapshot = snapshots[rVersion];
+    let included = (packageInfo.name === 'jmv' ? snapshot.base_packages : snapshot.jmv_packages);
+    let buildDir = path.join(srcDir, 'build', `R${ rVersion }-${ platform }`);
+    let mirror = options.mirror || snapshot.mran_url;
 
     try {
         log.debug('checking existence of ' + buildDir);
@@ -461,7 +148,7 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
 
         depends = depends.join("','");
 
-        let mirrors = options.mirror.split(',').map(x => `'${x}'`).join(',');
+        let mirrors = mirror.split(',').map(x => `'${x}'`).join(',');
 
         cmd = util.format('"%s" --vanilla --slave -e "utils::install.packages(c(\'%s\'), lib=\'%s\', type=%s, repos=c(%s), INSTALL_opts=c(\'--no-data\', \'--no-help\', \'--no-demo\', \'--no-html\', \'--no-docs\', \'--no-multiarch\'))"', paths.rExe, depends, buildDir, installType, mirrors);
         cmd = cmd.replace(/\\/g, '/');

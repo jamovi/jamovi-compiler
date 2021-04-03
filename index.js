@@ -183,14 +183,6 @@ try {
     if (args.mirror) {
         mirror = args.mirror;
     }
-    else {
-        if (rVersion == '3.6.1')
-            mirror = 'https://cran.microsoft.com/snapshot/2020-01-01'
-        else if (rVersion == '3.6.3')
-            mirror = 'https://cran.microsoft.com/snapshot/2020-05-01'
-        else
-            mirror = 'https://cran.microsoft.com/snapshot/2020-08-24'
-    }
 
     if ( ! rVersion.startsWith('3.'))
         paths.rLibs += `${ path.delimiter }${ path.join(paths.home, 'Resources', 'modules', 'jmv', 'R')}`;
