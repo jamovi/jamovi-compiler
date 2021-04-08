@@ -23,6 +23,7 @@ const ARGS = [
     { name: 'check',   alias: 'c', type: Boolean },
     { name: 'home',  type: String },
     { name: 'rhome', type: String },
+    { name: 'rlibs', type: String },
     { name: 'to',    type: String },
     { name: 'rpath', type: String },
     { name: 'debug', type: Boolean },
@@ -151,6 +152,11 @@ try {
         platName = 'linux';
     }
 
+    paths.rLibs += `${ path.delimiter }${ path.join(paths.home, 'Resources', 'modules', 'jmv', 'R')}`;
+
+    if (args.rlibs)
+        paths.rLibs = `${ args.rlibs }${ path.delimiter }${ paths.rLibs }`;
+
     let env = Object.assign({}, process.env);
     env['R_HOME'] = paths.rHome;
 
@@ -183,9 +189,6 @@ try {
     if (args.mirror) {
         mirror = args.mirror;
     }
-
-    if ( ! rVersion.startsWith('3.'))
-        paths.rLibs += `${ path.delimiter }${ path.join(paths.home, 'Resources', 'modules', 'jmv', 'R')}`;
 
     srcDir = path.resolve(srcDir);
 
