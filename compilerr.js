@@ -132,6 +132,8 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
         }
     }
 
+    log.debug('setting up environment', env);
+
     let installType = 'getOption(\'pkgType\')'
     if (process.platform === 'darwin') {
         if (rVersion.startsWith('3.'))
