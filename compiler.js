@@ -65,7 +65,7 @@ const checkResultsElement = function(element, name, from) {
     }
 }
 
-const compile = function(packageName, analysisPath, resultsPath, templPath, outPath) {
+const compile = function(packageName, analysisPath, resultsPath, paramsPath, templPath, outPath) {
 
     let content;
     content = fs.readFileSync(analysisPath, 'utf-8');
@@ -132,6 +132,34 @@ const compile = function(packageName, analysisPath, resultsPath, templPath, outP
 
     if ( ! ('description' in analysis))
         analysis.description = { };
+
+    try {
+        let content = fs.readFileSync(paramsPath, 'utf-8');
+        let params = yaml.safeLoad(content);
+
+        // TODO check the params against a schema
+
+        for (let name in params) {
+            let found;
+            for (let item of results.items) {
+                if (item.name === name) {
+                    found = item;
+                    break;
+                }
+            }
+
+            if (found)
+                found.params = params[name];
+        }
+    }
+    catch (e) {
+        if (e.code === 'ENOENT') {
+            // do nothing
+        }
+        else {
+            reject(resultsPath, e.message);
+        }
+    }
 
     let template = fs.readFileSync(templPath, 'utf-8');
     let compiler = _.template(template);

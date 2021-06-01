@@ -282,6 +282,7 @@ try {
             let analysisPath = path.join(defDir, file);
             let basename = path.basename(analysisPath, '.a.yaml');
             let resultsPath = path.join(defDir, basename + '.r.yaml');
+            let paramsPath = path.join(defDir, basename + '.p.yaml');
             let uiPath = path.join(defDir, basename + '.u.yaml');
             let jsPath = path.join(jsSrcDir, basename + '.js');
             let hOutPath = path.join(rDir, basename + '.h.R');
@@ -293,11 +294,11 @@ try {
             let bTemplPath = path.join(__dirname, 'body.template');
             let sTemplPath = path.join(__dirname, 'src.template');
 
-            compiler(packageInfo.name, analysisPath, resultsPath, hTemplPath, hOutPath, refs);
+            compiler(packageInfo.name, analysisPath, resultsPath, paramsPath, hTemplPath, hOutPath, refs);
             console.log('wrote: ' + path.basename(hOutPath));
 
             if ( ! utils.exists(bOutPath)) {
-                compiler(packageInfo.name, analysisPath, resultsPath, bTemplPath, bOutPath, refs);
+                compiler(packageInfo.name, analysisPath, resultsPath, paramsPath, bTemplPath, bOutPath, refs);
                 console.log('wrote: ' + path.basename(bOutPath));
             }
 
