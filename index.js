@@ -31,6 +31,10 @@ const ARGS = [
     { name: 'mirror', type: String },
     { name: 'patch-version', type: Boolean },
     { name: 'skip-remotes', type: Boolean },
+    { name: 'i18n', type: String },
+    { name: 'create', type: String },
+    { name: 'update', type: String },
+    { name: 'verbose', type: Boolean },
 ];
 
 const temp = require('temp');
@@ -43,6 +47,7 @@ const parseR = require('./parser');
 const utils = require('./utils');
 const installer = require('./installer');
 const sourcify = require('./sourcify');
+const i18n = require('./i18n');
 
 (async function() {
 
@@ -51,8 +56,11 @@ try {
     let usage = 'Usage:\n';
     usage += '    jmc --build path\n';
     usage += '    jmc --prepare path\n';
-    usage += '    jmc --install path [--home path]\n';
-    usage += '    jmc --check        [--home path]\n';
+    usage += '    jmc --install path     [--home path]\n';
+    usage += '    jmc --check            [--home path]\n';
+    usage += '\n';
+    usage += '    jmc --i18n path  --create code     [--verbose]\n';
+    usage += '                     --update [code]   [--verbose]\n';
 
     let isBuilding = true;
     let isInstalling = false;
@@ -98,6 +106,27 @@ try {
         isBuilding = false;
         isInstallingTo = false;
         srcDir = args.prepare;
+    }
+    else if (args.i18n) {
+        srcDir = args.i18n;
+        srcDir = path.resolve(srcDir);
+        if ( ! utils.exists(srcDir))
+            throw "path '%s' does not exist\n".replace('%s', srcDir);
+
+        let defDir = path.join(srcDir, 'jamovi');
+
+        if (args.create === null) {
+            throw `A language code has not been specified.
+            Usage: jmc --i18n path  --create code`;
+        }
+        else if (args.create)
+            i18n.create(args.create, defDir, args.verbose);
+        else if (args.update === null || args.update)
+            i18n.update(args.update, defDir, args.verbose);
+        else
+            i18n.list(defDir);
+
+        process.exit(0);
     }
     else {
         console.log(usage);
@@ -260,6 +289,7 @@ try {
     let modDir;
     let uiOutDir;
     let yamlOutDir;
+    let i18nOutDir;
 
     if (isInstallingTo) {
         modDir = path.join(installDir, packageInfo.name);
@@ -275,6 +305,27 @@ try {
     yamlOutDir = path.join(modDir, 'analyses');
     if ( ! utils.exists(yamlOutDir))
         fs.mkdirSync(yamlOutDir);
+    i18nOutDir = path.join(modDir, 'i18n');
+    if ( ! utils.exists(i18nOutDir))
+        fs.mkdirSync(i18nOutDir);
+
+    if (isBuilding || isInstallingTo) {
+        let i18nDir = path.join(defDir, 'i18n');
+        if (utils.exists(i18nDir)) {
+            i18n.load(i18nDir);
+            let codes = [ ];
+            for (let code in i18n.translations) {
+                let data = i18n.translations[code];
+                codes.push(code);
+                let i18nFile = code + '.json';
+                fs.writeFileSync(path.join(i18nOutDir, i18nFile), JSON.stringify(data, null, 4));
+                console.log(`wrote: ${i18nFile}`);
+
+            }
+            fs.writeFileSync(path.join(i18nOutDir, 'manifest.json'), JSON.stringify(codes, null, 4));
+            console.log('wrote: manifest.json');
+        }
+    }
 
     for (let file of files) {
 
@@ -481,7 +532,6 @@ try {
                     installer.install(zipPath, args.home);
             }
         }
-
     }
     catch (e) {
         fs.writeSync(2, '\n');

@@ -1,0 +1,416 @@
+
+'use strict';
+
+const path = require('path');
+const fs = require('fs');
+const yaml = require('js-yaml');
+const utils = require('./utils');
+const po2json = require('po2json');
+const { GettextExtractor, JsExtractors } = require('gettext-extractor');
+
+
+const translations = { };
+
+const getTranslation = function(key, code, source) {
+    let value = translations[code].locale_data.messages[key];
+    if (translations[code]._data === undefined)
+        translations[code]._data = { };
+
+    if (value === undefined) {
+        translations[code].locale_data.messages[key] = [''];
+        translations[code]._data[key] = { source: [ source ], _clash: [] };
+    }
+
+    let data = translations[code]._data[key];
+    if (data === undefined) {
+        data = { };
+        translations[code]._data[key] = data;
+    }
+    if (data.source === undefined)
+        data.source = [];
+    if (data.source.includes(source) === false)
+        data.source.push(source);
+
+    for (let k in translations[code]._data) {
+        let d = translations[code]._data[k];
+        if (k === key) {
+            if (d.source === undefined)
+                d.source = [];
+            if (d.source.includes(source) === false)
+                d.source.push(source);
+            return d;
+        }
+        else if (k.toLowerCase() === key.toLowerCase()) {
+            let found = false;
+            if (d._clash === undefined)
+                d._clash = [];
+            else {
+                for (let clash of d._clash) {
+                    if (clash === key) {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            if ( ! found)
+                d._clash.push(key);
+        }
+    }
+
+
+    return data;
+};
+
+const updateEntry = function(key, source) {
+    for (let code in translations) {
+        let pair = getTranslation(key, code, source);
+        pair._inUse = true;
+    }
+};
+
+const finalise = function(verbose) {
+    for (let code in translations) {
+        for (let k in translations[code].locale_data.messages) {
+            let data = translations[code]._data[k];
+            if (data && data._inUse) {
+                if (verbose && data._clash && data._clash.length > 0)
+                    console.log(` !! TRANSLATION WARNING: '${data._clash.join(', ')}' and '${ k }' have been added as seperate strings.`)
+                data._inUse = false;
+            }
+            else {
+                if (k !== '')
+                    delete translations[code].locale_data.messages[k];
+            }
+        }
+    }
+};
+
+const extract = function(obj, address, filter) {
+
+    for (let property in obj) {
+        let include = !filter || filter.includes(property);
+        if (include) {
+            let value = obj[property];
+            if (typeof value === 'string') {
+                value = value.trim();
+                if (value !== '') {
+                    if (Array.isArray(obj))
+                        updateEntry(value, `${address}[${property}]`);
+                    else
+                        updateEntry(value, `${address}.${property}`);
+                }
+            }
+            else if (Array.isArray(value) || typeof value === 'object')
+                extract(value, `${address}.${property}`);
+        }
+    }
+}
+
+const extractDefaultValueStrings = function(item, itemAddress, defaultValue, basePath) {
+    if ( ! defaultValue)
+        return;
+
+    switch (item.type) {
+        case 'String':
+                updateEntry(defaultValue, `${itemAddress}.${basePath}`);
+            break;
+        case 'Group':
+                for (let element of item.elements)
+                    extractDefaultValueStrings(element, itemAddress, defaultValue[element.name], `${basePath}.${element.name}`);
+            break;
+        case 'Array':
+            for (let i = 0; i  < defaultValue.length; i++)
+                extractDefaultValueStrings(item.template, itemAddress, defaultValue[i], `${basePath}[${i}]`);
+            break;
+    }
+}
+
+const checkItem = function(item, address, customFilter) {
+
+    if (customFilter === undefined)
+        customFilter = [];
+
+    if (Array.isArray(item)) {
+        for (let i = 0; i < item.length; i++) {
+            let child = item[i];
+            let childAddress = '';
+            if (child.name)
+                childAddress = `${address}/${child.name}`;
+            else
+                childAddress = `${address}[${i}]`;
+
+            checkItem(child, childAddress, customFilter);
+        }
+    }
+    else if (typeof item === 'object') {
+        let filter = ['label', 'title', 'description', 'addButton', 'ghostText', 'suffix', 'menuTitle', 'menuGroup', 'menuSubgroup', 'menuSubtitle', ...customFilter];
+
+        extract(item, address, filter);
+
+        extractDefaultValueStrings(item, address, item.default, 'default');
+
+        if (item.template)
+            checkItem(item.template, `${address}.template`);
+
+        if (item.columns) {
+            for (let column of item.columns)
+                checkItem(column, `${address}.columns`);
+        }
+
+        if (item.children)
+            checkItem(item.children, address);
+
+        if (item.items)
+            checkItem(item.items, address);
+
+        if (item.elements)
+            checkItem(item.elements, address);
+
+        if (item.options)
+            checkItem(item.options, address);
+
+        if (item.analyses)
+            checkItem(item.analyses, `${address}/analyses`);
+
+        if (item.datasets)
+            checkItem(item.datasets, `${address}/datasets`, ['name']);
+    }
+
+}
+
+const load = function(defDir, code, create) {
+    let transDir = path.join(defDir, 'i18n');
+    if (defDir.endsWith('i18n'))
+        transDir = defDir;
+
+    if ( ! utils.exists(transDir)) {
+        if (create)
+            fs.mkdirSync(transDir);
+        else
+            throw 'No translation files found.';
+    }
+
+    //if (code && create)
+    //    translations[code] = { code: code, name: '', label: '', pluralForms: 'nplurals=2; plural=(n != 1)', _list: [], list: [] };
+
+    if (code && create) {
+        translations[code] = {
+            "domain": "messages",
+            "locale_data": {
+                "messages": {
+                    "": {
+                        "domain": "messages",
+                        "plural_forms": 'nplurals=2; plural=(n != 1)',
+                        "lang": code
+                    }
+                }
+            },
+            _data: { },
+            code: code
+        }
+    }
+
+    let transfiles = fs.readdirSync(transDir);
+    if (create === false && transfiles.length === 0)
+        throw 'No translation files found.';
+
+    let translationLoaded = false;
+    for (let file of transfiles) {
+
+        if (file.endsWith('.po') === false)
+            continue;
+
+        if (code) {
+            if (translationLoaded)
+                break;
+            if (file.startsWith(code.toLowerCase()) === false)
+                continue;
+            else if (create) {
+                throw `Translation for language code ${code} already exists.`;
+            }
+        }
+
+        let langPath = path.join(transDir, file);
+
+        let translation = po2json.parseFileSync(langPath, { format: 'jed1.x' });
+
+        if (translation.locale_data.messages[""].lang !== '') {
+            if (! code || code === translation.locale_data.messages[""].lang) {
+                code = translation.locale_data.messages[""].lang;
+                translation.code = code;
+
+                translations[code] = translation;
+                translationLoaded = true;
+            }
+        }
+    }
+
+    if (create === false && code && translationLoaded === false)
+        throw `No translation for language code ${code} found.
+Try using:    jmc --i18n path  --create ${code}`;
+
+    return transDir;
+}
+
+const scanAnalyses = function(defDir) {
+
+    console.log('Extracting strings from js files...');
+    let extractor = new GettextExtractor();
+
+    extractor.createJsParser([
+            JsExtractors.callExpression('_', {
+                arguments: {
+                    text: 0
+                }
+            }),
+            JsExtractors.callExpression('n_', {
+                arguments: {
+                    text: 0,
+                    textPlural: 1
+                }
+            }),
+            JsExtractors.callExpression('_p', {
+                arguments: {
+                    context: 0,
+                    text: 1
+                }
+            })
+        ])
+        .parseFilesGlob(`${defDir}/js/**/*.@(ts|js|tsx|jsx)`);
+
+    let items = extractor.getPofileItems();
+
+    for (let item of items) {
+        if (item.obsolete === false) {
+            for (let ref of item.references)
+                updateEntry(item.msgid, ref);
+        }
+    }
+    extractor.printStats();
+
+    console.log('Extracting strings from yaml files...');
+    let files = fs.readdirSync(defDir);
+    for (let file of files) {
+        if (file === '0000.yaml') {
+            let packageInfoPath = path.join(defDir, '0000.yaml');
+            //let refsPath = path.join(defDir, '00refs.yaml');
+
+            let content = fs.readFileSync(packageInfoPath);
+            let packageInfo = yaml.safeLoad(content);
+            checkItem(packageInfo, `package`);
+
+        }
+        else if (file.endsWith('.a.yaml')) {
+            let analysisPath = path.join(defDir, file);
+            let basename = path.basename(analysisPath, '.a.yaml');
+            let resultsPath = path.join(defDir, basename + '.r.yaml');
+            let uiPath = path.join(defDir, basename + '.u.yaml');
+
+            let content = fs.readFileSync(analysisPath, 'utf-8');
+            let analysis = yaml.safeLoad(content);
+
+            checkItem(analysis, `${analysis.name}/options`);
+
+            if (utils.exists(uiPath)) {
+                let uiData = yaml.safeLoad(fs.readFileSync(uiPath));
+                checkItem(uiData, `${analysis.name}/ui`);
+            }
+
+            if (utils.exists(resultsPath)) {
+                let results = yaml.safeLoad(fs.readFileSync(resultsPath));
+                checkItem(results, `${analysis.name}/results`);
+            }
+        }
+    }
+}
+
+const escStr = function(str) {
+    if (typeof str !== 'string')
+        return str;
+
+    return str.replace('"', '\\"').replace(/(\r\n|\n|\r)/gm, '\\n"\n"');
+}
+
+const saveAsPO = function(transDir) {
+    finalise(true);
+    for (let code in translations) {
+        let transOutPath = path.join(transDir, `${code.toLowerCase()}.po`);
+        let poText = `msgid ""
+msgstr ""
+"MIME-Version: 1.0\\n"
+"Content-Type: text/plain; charset=utf-8\\n"
+"Content-Transfer-Encoding: 8bit\\n"
+"POT-Creation-Date: 2021-07-26 12:08:06+01000\\n"
+"PO-Revision-Date: 2021-07-29 16:59:59+01000\\n"
+"Language: ${code}\\n"
+"Plural-Forms: ${translations[code].locale_data.messages[""].plural_forms}\\n"\n`;
+
+        let count = 0;
+        for (let key in translations[code].locale_data.messages) {
+            if (key === '')
+                continue;
+            let val =   translations[code].locale_data.messages[key];
+            let data = translations[code]._data[key];
+            let poEntry = `\n`;
+            for (let source of data.source)
+                poEntry = `${poEntry}#: ${source}\n`;
+            poEntry = `${poEntry}msgid "${escStr(key)}"\nmsgstr "${val === null ? '' : escStr(val[0]) }"\n`;
+            poText = poText + poEntry;
+            count += 1;
+        }
+
+
+        fs.writeFileSync(transOutPath,  poText);
+
+        console.log('wrote: ' + `${count} unique strings found`);
+        console.log('wrote: ' + path.basename(transOutPath));
+    }
+}
+
+const create = function(code, defDir, verbose, list) {
+    let transDir = load(defDir, code, true);
+    scanAnalyses(defDir);
+    saveAsPO(transDir, verbose);
+}
+
+const update = function(code, defDir, verbose, list) {
+    let transDir = load(defDir, code, false);
+    scanAnalyses(defDir);
+    saveAsPO(transDir, verbose);
+};
+
+const list = function(defDir) {
+    let transDir = path.join(defDir, 'i18n');
+    if ( ! utils.exists(transDir)) {
+        console.log('No translation files found.');
+        return;
+    }
+
+    let transfiles = fs.readdirSync(transDir);
+    if (create === false && transfiles.length === 0) {
+        console.log('No translation files found.');
+        return;
+    }
+
+    if (transfiles.length === 1)
+        console.log(`    ${transfiles.length} language code file was found:`);
+    else
+        console.log(`    ${transfiles.length} language code files were found:`);
+        console.log('');
+
+    for (let file of transfiles)
+        console.log(`      ${file}`);
+    console.log('');
+    console.log('');
+
+    console.log(`To update a specific language code file use:
+     jmc --i18n path  --update code
+
+To update all language code files use:
+     jmc --i18n path  --update
+
+To create a new language code file use:
+    jmc --i18n path  --create code`);
+}
+
+module.exports = { create, update, load, finalise, list, translations };

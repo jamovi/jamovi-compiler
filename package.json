@@ -33,7 +33,9 @@
     "temp": "^0.8.3",
     "underscore": "^1.8.3",
     "walk-sync": "^0.3.2",
-    "word-wrap": "^1.2.3"
+    "word-wrap": "^1.2.3",
+    "po2json": "^0.4.5",
+    "gettext-extractor": "^3.5.3"
   },
   "devDependencies": {
     "mocha": "^3.5.3"
