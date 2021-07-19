@@ -289,6 +289,7 @@ try {
     let modDir;
     let uiOutDir;
     let yamlOutDir;
+    let i18nOutDir;
 
     if (isInstallingTo) {
         modDir = path.join(installDir, packageInfo.name);
@@ -304,6 +305,24 @@ try {
     yamlOutDir = path.join(modDir, 'analyses');
     if ( ! utils.exists(yamlOutDir))
         fs.mkdirSync(yamlOutDir);
+    i18nOutDir = path.join(modDir, 'i18n');
+    if ( ! utils.exists(i18nOutDir))
+        fs.mkdirSync(i18nOutDir);
+
+    if (isBuilding || isInstallingTo) {
+        let i18nDir = path.join(defDir, 'i18n');
+        if (utils.exists(i18nDir)) {
+            let i18nFiles = fs.readdirSync(i18nDir);
+            for (let i18nFile of i18nFiles) {
+                if (i18nFile.endsWith('.yaml')) {
+                    let i18nPath = path.join(i18nDir, i18nFile);
+                    console.log(i18nPath)
+                    let content = fs.readFileSync(i18nPath);
+                    fs.writeFileSync(path.join(i18nOutDir, i18nFile), content);
+                }
+            }
+        }
+    }
 
     for (let file of files) {
 
