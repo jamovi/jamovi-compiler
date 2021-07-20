@@ -316,9 +316,20 @@ try {
             for (let i18nFile of i18nFiles) {
                 if (i18nFile.endsWith('.yaml')) {
                     let i18nPath = path.join(i18nDir, i18nFile);
-                    console.log(i18nPath)
-                    let content = fs.readFileSync(i18nPath);
-                    fs.writeFileSync(path.join(i18nOutDir, i18nFile), content);
+                    let content =  yaml.safeLoad(fs.readFileSync(i18nPath));
+                    content.data = { };
+
+                    for (let pair of content.list) {
+                        let value = pair.val;
+                        if (content.code === 'en' && value === '')
+                            value = pair.key;
+                        content.data[pair.key] = value;
+                    }
+
+                    delete content.list;
+
+                    fs.writeFileSync(path.join(i18nOutDir, i18nFile), yaml.safeDump(content));
+                    console.log(`wrote: ${i18nFile}`);
                 }
             }
         }
