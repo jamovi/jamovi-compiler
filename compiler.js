@@ -420,6 +420,38 @@ const resultsify = function(item, indent, root, analysisName) {
         if ( ! root)
             str += '$new(options=options)';
     }
+    else if (item.type === 'Image') {
+
+        let name = item.name;
+
+        let items = item.params;
+        if (items === undefined)
+            items = [ ];
+
+        str += 'R6::R6Class(';
+        str += '\n    ' + indent + 'inherit = jmvcore::Image,';
+        str += '\n    ' + indent + 'active = list(';
+
+        let sep = '';
+        for (let child of items) {
+            str += sep + '\n        ' + indent + child.name + ' = function() private$..' + child.name
+            sep = ',';
+        }
+        str += ')'
+        str += ')$new(';
+        str += '\n' + indent + '    options=options';
+
+        for (let prop in item) {
+            if (prop === 'type' ||
+                prop === 'description' ||
+                prop === 'params')
+                    continue;
+
+            str += ',\n    ' + indent + prop + '=' + sourcifyResults(item[prop], indent + '');
+        }
+
+        str += ')';
+    }
     else if (item.type === 'Property') {
         // do nothing
     }
