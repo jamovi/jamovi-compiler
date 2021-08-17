@@ -434,8 +434,22 @@ const resultsify = function(item, indent, root, analysisName) {
 
         let sep = '';
         for (let child of items) {
-            str += sep + '\n        ' + indent + child.name + ' = function() private$..' + child.name
-            sep = ',';
+            if (child.type === 'group') {
+                for (let childschild of child.children) {
+                    let paramName = child.name + '.' + childschild.name;
+                    str += sep + '\n        ' + indent + paramName + ' = function() {';
+                    str += '\n            ' + indent + "self$options$get(paste('results', self$path, ";
+                    str += "'" + child.name + "', '" + childschild.name + "'" + ", sep='/'))";
+                    str += '\n        ' + indent + "}";
+                    sep = ',';
+                }
+            } 
+            else {
+                str += sep + '\n        ' + indent + paramName + ' = function() {';
+                str += '\n            ' + indent + "self$options$get(paste('results', self$path, " + "'" + child.name + "', sep='/'))";
+                str += '\n        ' + indent + "}";
+                sep = ',';
+            }
         }
         str += ')'
         str += ')$new(';
