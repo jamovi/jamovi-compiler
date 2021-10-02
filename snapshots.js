@@ -432,4 +432,9 @@ module.exports = {
         base_packages: R405base,
         jmv_packages: R405jmv,
     },
+    '4.1.1': {  // same as 405 (as you can see)
+        mran_url: 'https://cran.microsoft.com/snapshot/2021-04-01',
+        base_packages: R405base,
+        jmv_packages: R405jmv,
+    },
 };
