@@ -119,10 +119,21 @@ try {
             throw `A language code has not been specified.
             Usage: jmc --i18n path  --create code`;
         }
-        else if (args.create)
-            i18n.create(args.create, defDir, args.verbose);
-        else if (args.update === null || args.update)
-            i18n.update(args.update, defDir, args.verbose);
+        else if (args.create) {
+            let code = args.create.toLowerCase();
+            if (code === 'catalog')
+                code = 'c';
+            i18n.create(code, defDir, args.verbose);
+        }
+        else if (args.update === null || args.update) {
+            let code = null;
+            if (args.update) {
+                code = args.update.toLowerCase();
+                if (code === 'catalog')
+                    code = 'c';
+            }
+            i18n.update(code, defDir, args.verbose);
+        }
         else
             i18n.list(defDir);
 
@@ -322,8 +333,7 @@ try {
                 console.log(`wrote: ${i18nFile}`);
 
             }
-            fs.writeFileSync(path.join(i18nOutDir, 'manifest.json'), JSON.stringify(codes, null, 4));
-            console.log('wrote: manifest.json');
+            packageInfo.languages = codes;
         }
     }
 

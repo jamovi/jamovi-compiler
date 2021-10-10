@@ -217,7 +217,7 @@ const load = function(defDir, code, create) {
     let translationLoaded = false;
     for (let file of transfiles) {
 
-        if (file.endsWith('.po') === false)
+        if (file.endsWith('.po') === false && file.endsWith('.pot') === false)
             continue;
 
         if (code) {
@@ -236,10 +236,9 @@ const load = function(defDir, code, create) {
 
         if (translation.locale_data.messages[""].lang !== '') {
             if (! code || code === translation.locale_data.messages[""].lang) {
-                code = translation.locale_data.messages[""].lang;
-                translation.code = code;
+                translation.code = translation.locale_data.messages[""].lang.toLowerCase();
 
-                translations[code] = translation;
+                translations[translation.code] = translation;
                 translationLoaded = true;
             }
         }
@@ -334,7 +333,18 @@ const escStr = function(str) {
 const saveAsPO = function(transDir) {
     finalise(true);
     for (let code in translations) {
-        let transOutPath = path.join(transDir, `${code.toLowerCase()}.po`);
+
+        let filename = code;
+        if (filename === 'c')
+            filename = 'catalog';
+
+        let transOutPath = null;
+        if (filename === 'catalog' )
+            transOutPath = path.join(transDir, `${filename}.pot`);
+        else
+            transOutPath = path.join(transDir, `${filename}.po`);
+
+
         let poText = `msgid ""
 msgstr ""
 "MIME-Version: 1.0\\n"
@@ -358,7 +368,6 @@ msgstr ""
             poText = poText + poEntry;
             count += 1;
         }
-
 
         fs.writeFileSync(transOutPath,  poText);
 
