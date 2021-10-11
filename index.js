@@ -326,6 +326,9 @@ try {
             i18n.load(i18nDir);
             let codes = [ ];
             for (let code in i18n.translations) {
+                if (code === 'c') //don't create json file of catalog
+                    continue;
+
                 let data = i18n.translations[code];
                 codes.push(code);
                 let i18nFile = code + '.json';
