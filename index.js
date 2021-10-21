@@ -479,6 +479,10 @@ try {
             packageInfo.date = packageInfo.date.toISOString().slice(0,10)
 
         let packageInfoLite = JSON.parse(JSON.stringify(packageInfo));
+
+        if ('languages' in packageInfoLite)
+            delete packageInfoLite.languages;
+
         for (let analysis of packageInfoLite.analyses) {
             delete analysis.options;
             delete analysis.uijs;
