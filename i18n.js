@@ -281,8 +281,10 @@ const scanAnalyses = function(defDir, srcDir) {
 
     for (let item of items) {
         if (item.obsolete === false) {
-            for (let ref of item.references)
+            for (let ref of item.references) {
+                ref = path.relative(srcDir, ref);
                 updateEntry(item.msgid, ref);
+            }
         }
     }
     extractor.printStats();
