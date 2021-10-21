@@ -123,7 +123,7 @@ try {
             let code = args.create.toLowerCase();
             if (code === 'catalog')
                 code = 'c';
-            i18n.create(code, defDir, args.verbose);
+            i18n.create(code, defDir, srcDir, args.verbose);
         }
         else if (args.update === null || args.update) {
             let code = null;
@@ -132,10 +132,11 @@ try {
                 if (code === 'catalog')
                     code = 'c';
             }
-            i18n.update(code, defDir, args.verbose);
+            i18n.update(code, defDir, srcDir, args.verbose);
         }
-        else
+        else {
             i18n.list(defDir);
+        }
 
         process.exit(0);
     }

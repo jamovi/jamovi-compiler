@@ -251,7 +251,7 @@ Try using:    jmc --i18n path  --create ${code}`;
     return transDir;
 }
 
-const scanAnalyses = function(defDir) {
+const scanAnalyses = function(defDir, srcDir) {
 
     console.log('Extracting strings from js files...');
     let extractor = new GettextExtractor();
@@ -286,6 +286,23 @@ const scanAnalyses = function(defDir) {
         }
     }
     extractor.printStats();
+
+    console.log('Extracting strings from R files...');
+    let rDir = path.join(srcDir, 'R')
+    let rFiles = fs.readdirSync(rDir);
+    let re = /[^a-zA-Z._]\.\('([^'\\]*(\\.[^'\\]*)*)'|[^a-zA-Z._]\.\("([^"\\]*(\\.[^"\\]*)*)"/g;
+
+    for (let fileName of rFiles) {
+        if ( ! fileName.endsWith('.b.R'))
+            continue;
+        let filePath = path.join(rDir, fileName);
+        let content = fs.readFileSync(filePath, 'UTF-8');
+        for (let match of content.matchAll(re)) {
+            let key = match.slice(1).join('');
+            let rel = path.relative(srcDir, filePath);
+            updateEntry(key, rel);
+        }
+    }
 
     console.log('Extracting strings from yaml files...');
     let files = fs.readdirSync(defDir);
@@ -376,15 +393,15 @@ msgstr ""
     }
 }
 
-const create = function(code, defDir, verbose, list) {
+const create = function(code, defDir, srcDir, verbose, list) {
     let transDir = load(defDir, code, true);
-    scanAnalyses(defDir);
+    scanAnalyses(defDir, srcDir);
     saveAsPO(transDir, verbose);
 }
 
-const update = function(code, defDir, verbose, list) {
+const update = function(code, defDir, srcDir, verbose, list) {
     let transDir = load(defDir, code, false);
-    scanAnalyses(defDir);
+    scanAnalyses(defDir, srcDir);
     saveAsPO(transDir, verbose);
 };
 
