@@ -316,9 +316,8 @@ try {
     yamlOutDir = path.join(modDir, 'analyses');
     if ( ! utils.exists(yamlOutDir))
         fs.mkdirSync(yamlOutDir);
-    i18nOutDir = path.join(modDir, 'i18n');
-    if ( ! utils.exists(i18nOutDir))
-        fs.mkdirSync(i18nOutDir);
+    i18nOutDir = path.join(srcDir, 'inst/i18n');
+    fs.emptyDirSync(i18nOutDir);
 
     if (isBuilding || isInstallingTo) {
         let i18nDir = path.join(defDir, 'i18n');
