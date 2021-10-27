@@ -298,7 +298,7 @@ const scanAnalyses = function(defDir, srcDir) {
         if ( ! fileName.endsWith('.b.R'))
             continue;
         let filePath = path.join(rDir, fileName);
-        let content = fs.readFileSync(filePath, 'UTF-8');
+        let content = fs.readFileSync(filePath, 'UTF-8').replace(/\\u[0-9A-Fa-f]{4}/g, (x) => JSON.parse(`"${ x }"`));
         for (let match of content.matchAll(re)) {
             let key = match.slice(1).join('');
             let rel = path.relative(srcDir, filePath);
@@ -346,7 +346,7 @@ const escStr = function(str) {
     if (typeof str !== 'string')
         return str;
 
-    return str.replace('"', '\\"').replace(/(\r\n|\n|\r)/gm, '\\n"\n"');
+    return str.replace(/"/g, '\\"').replace(/(\r\n|\n|\r)/gm, '\\n"\n"');
 }
 
 const saveAsPO = function(transDir) {
