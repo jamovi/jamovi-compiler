@@ -85,6 +85,28 @@ const finalise = function(verbose) {
     }
 };
 
+const canBeTranslated = function(value) {
+    if (value === '')
+        return false;
+
+    if (value === '.')
+        return false;
+
+    if (value === '-')
+        return false;
+
+    if (value === '$key')
+        return false;
+
+    if ( /^\([^\)]*\)$/g.test(value))
+        return false;
+
+    if (/^\$\{[^\}]*\}$/g.test(value))
+        return false;
+
+    return true;
+}
+
 const extract = function(obj, address, filter) {
 
     for (let property in obj) {
@@ -93,7 +115,7 @@ const extract = function(obj, address, filter) {
             let value = obj[property];
             if (typeof value === 'string') {
                 value = value.trim();
-                if (value !== '') {
+                if (canBeTranslated(value)) {
                     if (Array.isArray(obj))
                         updateEntry(value, `${address}[${property}]`);
                     else
@@ -143,7 +165,9 @@ const checkItem = function(item, address, customFilter) {
         }
     }
     else if (typeof item === 'object') {
-        let filter = ['label', 'title', 'description', 'addButton', 'ghostText', 'suffix', 'menuTitle', 'menuGroup', 'menuSubgroup', 'menuSubtitle', ...customFilter];
+        let filter = ['label', 'title', 'description', 'addButton',
+            'ghostText', 'suffix', 'menuTitle', 'menuGroup',
+            'menuSubgroup', 'menuSubtitle', 'superTitle', 'content', 'notes', ...customFilter];
 
         extract(item, address, filter);
 
