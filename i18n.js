@@ -11,15 +11,20 @@ const { GettextExtractor, JsExtractors } = require('gettext-extractor');
 
 const translations = { };
 
-const getTranslation = function(key, code, source) {
+const getTranslation = function(msg, context, code, source) {
+    let key = msg;
+    if (context)
+        key = context + '\u0004' + msg;
+
     let value = translations[code].locale_data.messages[key];
     if (translations[code]._data === undefined)
         translations[code]._data = { };
 
-    if (value === undefined) {
+    if (value === undefined)
         translations[code].locale_data.messages[key] = [''];
-        translations[code]._data[key] = { source: [ source ], _clash: [] };
-    }
+
+    if (translations[code]._data[key] === undefined)
+        translations[code]._data[key] = { msg: msg, context: context, source: [ source ], _clash: [] };
 
     let data = translations[code]._data[key];
     if (data === undefined) {
@@ -61,9 +66,9 @@ const getTranslation = function(key, code, source) {
     return data;
 };
 
-const updateEntry = function(key, source) {
+const updateEntry = function(key, context, source) {
     for (let code in translations) {
-        let pair = getTranslation(key, code, source);
+        let pair = getTranslation(key, context, code, source);
         pair._inUse = true;
     }
 };
@@ -74,7 +79,7 @@ const finalise = function(verbose) {
             let data = translations[code]._data[k];
             if (data && data._inUse) {
                 if (verbose && data._clash && data._clash.length > 0)
-                    console.log(` !! TRANSLATION WARNING: '${data._clash.join(', ')}' and '${ k }' have been added as seperate strings.`)
+                    console.log(` !! TRANSLATION WARNING: '${data._clash.join(', ')}' and '${ data.msg }' have been added as seperate strings.`)
                 data._inUse = false;
             }
             else {
@@ -107,6 +112,19 @@ const canBeTranslated = function(value) {
     return true;
 }
 
+const parseContext = function(value) {
+    let data = { key: value, context: null };
+
+    let match = value.match(/(.+) \[([^\[\]]+)\]$/);
+
+    if (match !== null) {
+        data.key = match[1];
+        data.context = match[2];
+    }
+
+    return data;
+}
+
 const extract = function(obj, address, filter) {
 
     for (let property in obj) {
@@ -116,10 +134,11 @@ const extract = function(obj, address, filter) {
             if (typeof value === 'string') {
                 value = value.trim();
                 if (canBeTranslated(value)) {
+                    value = parseContext(value);
                     if (Array.isArray(obj))
-                        updateEntry(value, `${address}[${property}]`);
+                        updateEntry(value.key, value.context, `${address}[${property}]`);
                     else
-                        updateEntry(value, `${address}.${property}`);
+                        updateEntry(value.key, value.context, `${address}.${property}`);
                 }
             }
             else if (Array.isArray(value) || typeof value === 'object')
@@ -134,7 +153,8 @@ const extractDefaultValueStrings = function(item, itemAddress, defaultValue, bas
 
     switch (item.type) {
         case 'String':
-                updateEntry(defaultValue, `${itemAddress}.${basePath}`);
+                let value = parseContext(defaultValue);
+                updateEntry(value.key, value.context, `${itemAddress}.${basePath}`);
             break;
         case 'Group':
                 for (let element of item.elements)
@@ -257,7 +277,6 @@ const load = function(defDir, code, create) {
         let langPath = path.join(transDir, file);
 
         let translation = po2json.parseFileSync(langPath, { format: 'jed1.x' });
-
         if (translation.locale_data.messages[""].lang !== '') {
             if (! code || code === translation.locale_data.messages[""].lang) {
                 translation.code = translation.locale_data.messages[""].lang.toLowerCase();
@@ -307,7 +326,7 @@ const scanAnalyses = function(defDir, srcDir) {
         if (item.obsolete === false) {
             for (let ref of item.references) {
                 ref = path.relative(srcDir, ref);
-                updateEntry(item.msgid, ref);
+                updateEntry(item.msgid, item.msgctxt, ref);
             }
         }
     }
@@ -324,9 +343,9 @@ const scanAnalyses = function(defDir, srcDir) {
         let filePath = path.join(rDir, fileName);
         let content = fs.readFileSync(filePath, 'UTF-8').replace(/\\u[0-9A-Fa-f]{4}/g, (x) => JSON.parse(`"${ x }"`));
         for (let match of content.matchAll(re)) {
-            let key = match.slice(1).join('');
+            let value = parseContext(match.slice(1).join(''));
             let rel = path.relative(srcDir, filePath);
-            updateEntry(key, rel);
+            updateEntry(value.key, value.context, rel);
         }
     }
 
@@ -374,7 +393,7 @@ const escStr = function(str) {
 }
 
 const saveAsPO = function(transDir) {
-    finalise(true);
+    finalise(false);
     for (let code in translations) {
 
         let filename = code;
@@ -407,13 +426,15 @@ msgstr ""
             let poEntry = `\n`;
             for (let source of data.source)
                 poEntry = `${poEntry}#: ${source}\n`;
-            poEntry = `${poEntry}msgid "${escStr(key)}"\nmsgstr "${val === null ? '' : escStr(val[0]) }"\n`;
+            if (data.context)
+                poEntry += `msgctxt "${escStr(data.context)}"\n`;
+            poEntry = `${poEntry}msgid "${escStr(data.msg)}"\n`;
+            poEntry += `msgstr "${val === null ? '' : escStr(val[0]) }"\n`;
             poText = poText + poEntry;
             count += 1;
         }
 
         fs.writeFileSync(transOutPath,  poText);
-
         console.log('wrote: ' + `${count} unique strings found`);
         console.log('wrote: ' + path.basename(transOutPath));
     }
