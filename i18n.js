@@ -338,7 +338,7 @@ const scanAnalyses = function(defDir, srcDir) {
     let re = /[^a-zA-Z._]\.\('([^'\\]*(\\.[^'\\]*)*)'|[^a-zA-Z._]\.\("([^"\\]*(\\.[^"\\]*)*)"/g;
 
     for (let fileName of rFiles) {
-        if ( ! fileName.endsWith('.b.R'))
+        if ( ! fileName.endsWith('.R') || fileName.endsWith('.h.R'))
             continue;
         let filePath = path.join(rDir, fileName);
         let content = fs.readFileSync(filePath, 'UTF-8').replace(/\\u[0-9A-Fa-f]{4}/g, (x) => JSON.parse(`"${ x }"`));
