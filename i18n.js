@@ -417,8 +417,10 @@ msgstr ""
 "Language: ${code}\\n"
 "Plural-Forms: ${translations[code].locale_data.messages[""].plural_forms}\\n"\n`;
 
+        let keys = Object.keys(translations[code].locale_data.messages).sort();
+
         let count = 0;
-        for (let key in translations[code].locale_data.messages) {
+        for (let key of keys) {
             if (key === '')
                 continue;
             let val =   translations[code].locale_data.messages[key];
