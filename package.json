@@ -24,7 +24,7 @@
     "command-line-args": "^3.0.5",
     "fs-extra": "^1.0.0",
     "gettext-extractor": "^3.5.3",
-    "js-yaml": "^3.10.0",
+    "js-yaml": "^3.13.1",
     "jsesc": "^2.5.1",
     "jsonschema": "^1.2.2",
     "jszip": "^3.1.5",
