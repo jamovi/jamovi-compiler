@@ -23,19 +23,20 @@
     "browserify": "^13.3.0",
     "command-line-args": "^3.0.5",
     "fs-extra": "^1.0.0",
+    "gettext-extractor": "^3.5.3",
     "js-yaml": "^3.10.0",
     "jsesc": "^2.5.1",
     "jsonschema": "^1.2.2",
     "jszip": "^3.1.5",
     "log": "^1.4.0",
+    "match-all": "^1.2.6",
     "needle": "^1.6.0",
+    "po2json": "^0.4.5",
     "semver": "^5.5.0",
     "temp": "^0.8.3",
     "underscore": "^1.8.3",
     "walk-sync": "^0.3.2",
-    "word-wrap": "^1.2.3",
-    "po2json": "^0.4.5",
-    "gettext-extractor": "^3.5.3"
+    "word-wrap": "^1.2.3"
   },
   "devDependencies": {
     "mocha": "^3.5.3"

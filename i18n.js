@@ -8,6 +8,7 @@ const utils = require('./utils');
 const po2json = require('po2json');
 const { GettextExtractor, JsExtractors } = require('gettext-extractor');
 
+const matchAll = require("match-all"); // str.matchAll() not available pre node 12
 
 const translations = { };
 
@@ -342,8 +343,18 @@ const scanAnalyses = function(defDir, srcDir) {
             continue;
         let filePath = path.join(rDir, fileName);
         let content = fs.readFileSync(filePath, 'UTF-8').replace(/\\u[0-9A-Fa-f]{4}/g, (x) => JSON.parse(`"${ x }"`));
-        for (let match of content.matchAll(re)) {
-            let value = parseContext(match.slice(1).join(''));
+
+        // to support node < 12, we're using matchAll() rather than
+        // str.matchAll()
+        //
+        // for (let match of content.matchAll(re)) {
+        //     let value = parseContext(match.slice(1).join(''));
+        //     let rel = path.relative(srcDir, filePath);
+        //     updateEntry(value.key, value.context, rel);
+        // }
+
+        for (let match of matchAll(content, re).toArray()) {
+            let value = parseContext(match);
             let rel = path.relative(srcDir, filePath);
             updateEntry(value.key, value.context, rel);
         }
