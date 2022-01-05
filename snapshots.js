@@ -421,6 +421,38 @@ const R405jmv = R405base.concat([
     'afex',
 ]);
 
+const R412base = included.concat([
+    'R6', 'RColorBrewer', 'base64enc', 'brio', 'cpp11', 'curl', 'farver', 'fastmap', 'magrittr', 'praise',
+    'rprojroot', 'rstudioapi', 'utf8', 'viridisLite', 'yaml', 'Rcpp', 'colorspace', 'crayon', 'digest',
+    'evaluate', 'fansi', 'glue', 'gtable', 'isoband', 'jsonlite', 'labeling', 'pkgconfig', 'ps', 'remotes', 'rlang',
+    'stringi', 'systemfonts', 'withr', 'xfun', 'RInside', 'RProtoBuf', 'cli', 'desc', 'diffobj', 'ellipsis',
+    'highr', 'htmltools', 'lifecycle', 'munsell', 'processx', 'stringr', 'textshaping', 'tinytex', 'callr',
+    'jquerylib', 'knitr', 'pkgload', 'ragg', 'scales', 'vctrs', 'pillar', 'rmarkdown', 'tibble', 'ggplot2',
+    'rematch2', 'waldo', 'testthat'
+]);
+
+const R412jmv = R412base.concat([
+    'BH', 'GPArotation', 'RcppParallel', 'SQUAREM', 'backports', 'bitops', 'ca',
+    'carData', 'contfrac', 'glasso', 'gower', 'jpeg', 'lisrelToR', 'listenv',
+    'matrixStats', 'nloptr', 'numDeriv', 'pbivnorm', 'png', 'prettyunits', 'qvcalc',
+    'tmvnsim', 'truncnorm', 'zip', 'Formula', 'MatrixModels', 'PMCMR', 'RUnit',
+    'RcppArmadillo', 'RcppEigen', 'Rsolnp', 'SparseM', 'TH.data', 'XML', 'abind',
+    'caTools', 'checkmate', 'coda', 'corpcor', 'data.table', 'deSolve', 'elliptic',
+    'estimability', 'fdrtool', 'forcats', 'generics', 'globals', 'gridExtra',
+    'gtools', 'hms', 'htmlwidgets', 'igraph', 'iterators', 'latticeExtra', 'minqa',
+    'mnormt', 'mvnormtest', 'mvtnorm', 'openxlsx', 'parallelly', 'pbapply', 'plyr',
+    'progressr', 'proxy', 'purrr', 'relimp', 'sp', 'ssanv', 'timeDate', 'xtable',
+    'zoo', 'ModelMetrics', 'StanHeaders', 'e1071', 'emmeans', 'exactci', 'foreach',
+    'future', 'ggridges', 'gnm', 'gplots', 'htmlTable', 'hypergeo', 'kutils',
+    'lavaan', 'lme4', 'lmtest', 'lubridate', 'maptools', 'pROC', 'progress',
+    'psych', 'reshape', 'reshape2', 'rpf', 'sandwich', 'tidyselect', 'viridis',
+    'BayesFactor', 'Hmisc', 'OpenMx', 'ROCR', 'arm', 'dplyr', 'exact2x2',
+    'future.apply', 'lmerTest', 'multcomp', 'regsem', 'rockchalk', 'vcd', 'lava',
+    'mi', 'qgraph', 'tidyr', 'vcdExtra', 'GGally', 'broom', 'prodlim', 'sem',
+    'ipred', 'pbkrtest', 'semPlot', 'recipes', 'caret', 'conquer', 'quantreg',
+    'car', 'afex'
+]);
+
 module.exports = {
     '4.0.2': {
         mran_url: 'https://cran.microsoft.com/snapshot/2020-08-24',
@@ -436,5 +468,10 @@ module.exports = {
         mran_url: 'https://cran.microsoft.com/snapshot/2021-04-01',
         base_packages: R405base,
         jmv_packages: R405jmv,
+    },
+    '4.1.2': {
+        mran_url: 'https://cran.microsoft.com/snapshot/2022-01-01',
+        base_packages: R412base,
+        jmv_packages: R412jmv,
     },
 };
