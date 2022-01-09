@@ -422,6 +422,7 @@ const R405jmv = R405base.concat([
 ]);
 
 const R412base = included.concat([
+    'jmvcore',
     'R6', 'RColorBrewer', 'base64enc', 'brio', 'cpp11', 'curl', 'farver', 'fastmap', 'magrittr', 'praise',
     'rprojroot', 'rstudioapi', 'utf8', 'viridisLite', 'yaml', 'Rcpp', 'colorspace', 'crayon', 'digest',
     'evaluate', 'fansi', 'glue', 'gtable', 'isoband', 'jsonlite', 'labeling', 'pkgconfig', 'ps', 'remotes', 'rlang',
