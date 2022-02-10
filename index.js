@@ -514,15 +514,21 @@ try {
                 // do nothing
             }
 
+            log.debug('compiling R package');
             compileR(srcDir, modDir, paths, packageInfo, log, { mirror, skipRemotes });
+            log.debug('compiled');
 
             if (isBuilding) {
+
+                log.debug('building .jmo')
 
                 let zipPath;
                 if (args.jmo)
                     zipPath = args.jmo
                 else
                     zipPath = `${ packageInfo.name }_${ packageInfo.version }.jmo`;
+
+                log.debug(`building ${ zipPath }`);
 
                 let zip = new JSZip();
                 let paths = walkSync(modDir, { directories: false });
@@ -531,12 +537,15 @@ try {
                     relPath = relPath.replace(/\\/g, '/');
                     if (relPath.startsWith('R/BH'))
                         continue;
+                    log.debug(`archiving ${ relpath }`);
                     let archivePath = packageInfo.name + '/' + relPath;
                     let fullPath = path.join(modDir, relPath);
                     let contents = fs.readFileSync(fullPath);
                     zip.file(archivePath, contents);
+                    log.debug('archived');
                 }
 
+                log.debug('zipping');
                 zipPath = await new Promise((resolve, reject) => {
                     zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' }).then(content => {
                         fs.writeFileSync(zipPath, content);
@@ -544,9 +553,13 @@ try {
                         resolve(zipPath);
                     }, err => fs.writeSync(2, err))
                 });
+                log.debug('zipped');
 
-                if (isInstalling)
+                if (isInstalling) {
+                    log.debug('installing');
                     installer.install(zipPath, args.home);
+                    log.debug('installed');
+                }
             }
         }
     }
