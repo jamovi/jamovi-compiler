@@ -565,10 +565,18 @@ try {
     }
     catch (e) {
         fs.writeSync(2, '\n');
-        fs.writeSync(2, e);
+        if (typeof(e) === 'string') {
+            fs.writeSync(2, e);
+        }
+        else if ('message' in e) {
+            fs.writeSync(2, e.message);
+            if (args.debug)
+                fs.writeSync(2, e.stack)
+        }
+        else {
+            fs.writeSync(2, e);
+        }
         fs.writeSync(2, '\n\n');
-        if (args.debug)
-            fs.writeSync(2, e.stack)
         process.exit(1);
     }
 
