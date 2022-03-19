@@ -471,7 +471,7 @@ module.exports = {
         jmv_packages: R405jmv,
     },
     '4.1.2': {
-        mran_url: 'https://cran.microsoft.com/snapshot/2022-01-01',
+        mran_url: (process.platform === 'linux' ? 'https://packagemanager.rstudio.com/cran/2021-12-29' : 'https://cran.microsoft.com/snapshot/2022-01-01'),
         base_packages: R412base,
         jmv_packages: R412jmv,
     },
