@@ -537,7 +537,7 @@ try {
                     relPath = relPath.replace(/\\/g, '/');
                     if (relPath.startsWith('R/BH'))
                         continue;
-                    log.debug(`archiving ${ relpath }`);
+                    log.debug(`archiving ${ relPath }`);
                     let archivePath = packageInfo.name + '/' + relPath;
                     let fullPath = path.join(modDir, relPath);
                     let contents = fs.readFileSync(fullPath);
