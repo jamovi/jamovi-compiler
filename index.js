@@ -426,7 +426,9 @@ try {
                     aObj.description = analysis.description.main.split('\n\n')[0];
             }
             if (analysis.hidden === true)
-                aObj.hidden = analysis.hidden;
+                aObj.hidden = true;
+            if (analysis.arbitraryCode)
+                aObj.arbitraryCode = true;
 
             let found = false;
             for (let existing of packageInfo.analyses) {
