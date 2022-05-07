@@ -427,8 +427,18 @@ try {
             }
             if (analysis.hidden === true)
                 aObj.hidden = true;
-            if (analysis.arbitraryCode)
-                aObj.arbitraryCode = true;
+            if (analysis.arbitraryCode) {
+                if (rVersion === '4.1.2') {  // 2.3+
+                    // jamovi 2.3.0 -> 2.3.7 fail with arbitrary code
+                    // so i'm introducing arbitraryCode2 for 2.3.8+
+                    // once we next update R, we won't need to do this
+                    // any more.
+                    aObj.arbitraryCode2 = true;
+                }
+                else {
+                    aObj.arbitraryCode = true;
+                }
+            }
 
             let found = false;
             for (let existing of packageInfo.analyses) {
