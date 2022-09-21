@@ -35,6 +35,7 @@ const ARGS = [
     { name: 'create', type: String },
     { name: 'update', type: String },
     { name: 'verbose', type: Boolean },
+    { name: 'index', type: Number },
 ];
 
 const temp = require('temp');
@@ -274,6 +275,15 @@ try {
 
     if ( ! ('minApp' in packageInfo))
         packageInfo.minApp = '1.0.8';
+    
+    if (packageInfo.name === 'jmv')
+        packageInfo.index = 0;
+    else if (packageInfo.name === 'scatr')
+        packageInfo.index = 1;
+    else if (args.index)
+        packageInfo.index = args.index;
+    else
+        delete packageInfo.index;
 
     let refs = undefined;
     if (utils.exists(refsPath)) {
