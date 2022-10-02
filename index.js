@@ -31,6 +31,7 @@ const ARGS = [
     { name: 'mirror', type: String },
     { name: 'patch-version', type: Boolean },
     { name: 'skip-remotes', type: Boolean },
+    { name: 'skip-deps', type: Boolean },
     { name: 'i18n', type: String },
     { name: 'create', type: String },
     { name: 'update', type: String },
@@ -537,7 +538,7 @@ try {
             }
 
             log.debug('compiling R package');
-            compileR(srcDir, modDir, paths, packageInfo, log, { mirror, skipRemotes });
+            compileR(srcDir, modDir, paths, packageInfo, log, { mirror, skipRemotes, skipDeps: args['skip-deps'] });
             log.debug('compiled');
 
             if (isBuilding) {

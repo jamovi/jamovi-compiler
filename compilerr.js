@@ -144,7 +144,7 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
     else if (process.platform === 'win32')
         installType = '\'win.binary\''
 
-    if (depends.length > 0) {
+    if (depends.length > 0 && options.skipDeps !== true) {
         console.log('Installing dependencies');
         console.log(depends.join(', '));
 
