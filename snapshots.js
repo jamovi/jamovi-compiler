@@ -454,6 +454,38 @@ const R412jmv = R412base.concat([
     'car', 'afex'
 ]);
 
+const R413base = included.concat([
+    'jmvcore',
+    'R6', 'RColorBrewer', 'base64enc', 'brio', 'cpp11', 'curl', 'farver', 'fastmap',
+    'magrittr', 'praise', 'rappdirs', 'rprojroot', 'utf8', 'viridisLite', 'yaml',
+    'Rcpp', 'cli', 'colorspace', 'crayon', 'digest', 'evaluate', 'fansi', 'fs',
+    'glue', 'gtable', 'isoband', 'jsonlite', 'labeling', 'mime', 'pkgconfig', 'ps',
+    'remotes', 'rlang', 'stringi', 'systemfonts', 'withr', 'xfun', 'RInside',
+    'RProtoBuf', 'cachem', 'desc', 'diffobj', 'ellipsis', 'highr', 'lifecycle',
+    'munsell', 'processx', 'textshaping', 'tinytex', 'callr', 'htmltools', 'knitr',
+    'memoise', 'pkgload', 'ragg', 'scales', 'vctrs', 'jquerylib', 'pillar', 'sass',
+    'stringr', 'bslib', 'tibble', 'ggplot2', 'rematch2', 'rmarkdown', 'waldo',
+    'testthat',
+]);
+
+const R413jmv = R413base.concat([
+    'BH', 'RcppParallel', 'backports', 'bitops', 'ca', 'carData', 'contfrac',
+    'glasso', 'jpeg', 'lisrelToR', 'mnormt', 'numDeriv', 'pbivnorm', 'png',
+    'prettyunits', 'quadprog', 'qvcalc', 'rstudioapi', 'zip', 'Formula',
+    'GPArotation', 'MatrixModels', 'PMCMR', 'RUnit', 'RcppEigen', 'SparseM',
+    'TH.data', 'XML', 'abind', 'caTools', 'checkmate', 'coda', 'corpcor',
+    'data.table', 'deSolve', 'deldir', 'elliptic', 'estimability', 'fdrtool',
+    'forcats', 'generics', 'ggrepel', 'ggridges', 'gridExtra', 'gtools', 'hms',
+    'htmlwidgets', 'igraph', 'lavaan', 'minqa', 'mvnormtest', 'mvtnorm', 'nloptr',
+    'openxlsx', 'pbapply', 'plyr', 'psych', 'purrr', 'relimp', 'ssanv',
+    'tidyselect', 'xtable', 'zoo', 'StanHeaders', 'dplyr', 'emmeans', 'exactci',
+    'gnm', 'gplots', 'htmlTable', 'hypergeo', 'interp', 'kutils', 'lme4',
+    'lmtest', 'progress', 'quantreg', 'reshape', 'reshape2', 'rpf', 'sandwich',
+    'viridis', 'BayesFactor', 'OpenMx', 'ROCR', 'arm', 'exact2x2', 'latticeExtra',
+    'lmerTest', 'multcomp', 'rockchalk', 'tidyr', 'vcd', 'GGally', 'Hmisc',
+    'broom', 'mi', 'vcdExtra', 'pbkrtest', 'qgraph', 'sem', 'car', 'semPlot', 'afex',
+]);
+
 module.exports = {
     '4.0.2': {
         mran_url: 'https://cran.microsoft.com/snapshot/2020-08-24',
@@ -474,5 +506,10 @@ module.exports = {
         mran_url: (process.platform === 'linux' ? 'https://packagemanager.rstudio.com/cran/2021-12-29' : 'https://cran.microsoft.com/snapshot/2022-01-01'),
         base_packages: R412base,
         jmv_packages: R412jmv,
+    },
+    '4.1.3': {
+        mran_url: 'https://packagemanager.rstudio.com/cran/2023-02-27',
+        base_packages: R413base,
+        jmv_packages: R413jmv,
     },
 };
