@@ -175,8 +175,12 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
                 `@executable_path/../Frameworks/R.framework/Versions/${ rv }/Resources/lib/libgfortran.3.dylib`],
             [`/Library/Frameworks/R.framework/Versions/${ rv }/Resources/lib/libgfortran.3.dylib`,
                 `@executable_path/../Frameworks/R.framework/Versions/${ rv }/Resources/lib/libgfortran.3.dylib`],
+
             [`/usr/local/lib/libgfortran.5.dylib`,
                 `@executable_path/../Frameworks/R.framework/Versions/${ rv }/Resources/lib/libgfortran.5.dylib`],
+            [`/usr/local/gfortran/lib/libgfortran.5.dylib`,
+                `@executable_path/../Frameworks/R.framework/Versions/${ rv }/Resources/lib/libgfortran.5.dylib`],
+
             [`/Library/Frameworks/R.framework/Versions/${ rv }/Resources/lib/libgfortran.5.dylib`,
                 `@executable_path/../Frameworks/R.framework/Versions/${ rv }/Resources/lib/libgfortran.5.dylib`],
             [`/usr/local/lib/libquadmath.0.dylib`,
