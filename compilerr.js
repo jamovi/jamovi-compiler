@@ -136,13 +136,7 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
     log.debug('setting up environment', env);
 
     let installType = 'getOption(\'pkgType\')'
-    if (process.platform === 'darwin') {
-        if (rVersion.startsWith('3.'))
-            installType = '\'mac.binary.el-capitan\''
-        else
-            installType = '\'mac.binary\''
-    }
-    else if (process.platform === 'win32')
+    if (process.platform === 'win32')
         installType = '\'win.binary\''
 
     if (depends.length > 0 && options.skipDeps !== true) {
