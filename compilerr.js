@@ -143,11 +143,15 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
         console.log('Installing dependencies');
         console.log(depends.join(', '));
 
+        let dataArg = "'--no-data', "
+        if (depends.includes('rnaturalearth'))  // rnaturalearth requires data
+            dataArg = '';
+
         depends = depends.join("','");
 
         let mirrors = mirror.split(',').map(x => `'${x}'`).join(',');
 
-        cmd = util.format('"%s" --vanilla --slave -e "utils::install.packages(c(\'%s\'), lib=\'%s\', type=%s, repos=c(%s), INSTALL_opts=c(\'--no-data\', \'--no-help\', \'--no-demo\', \'--no-html\', \'--no-docs\', \'--no-multiarch\'))"', paths.rExe, depends, buildDir, installType, mirrors);
+        cmd = `"${ paths.rExe }" --vanilla --slave -e "utils::install.packages(c('${ depends }'), lib='${ buildDir }', type=${ installType }, repos=c(${ mirrors }), INSTALL_opts=c(${ dataArg }'--no-help', '--no-demo', '--no-html', '--no-docs', '--no-multiarch'))"`;
         cmd = cmd.replace(/\\/g, '/');
         try {
             sh(cmd, { stdio: [0, 1, 1], encoding: 'utf-8', env: env } );
