@@ -144,8 +144,14 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
         console.log(depends.join(', '));
 
         let dataArg = "'--no-data', "
-        if (depends.includes('rnaturalearth'))  // rnaturalearth requires data
-            dataArg = '';
+        for (let dep of depends) {
+            if (['rnaturalearth', 'rnaturalearthhires'].includes(dep)) {
+                // requires data
+                dataArg = '';
+                break;
+            }
+        }
+
 
         depends = depends.join("','");
 
