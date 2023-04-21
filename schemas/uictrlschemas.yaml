@@ -26,6 +26,8 @@ ControlBase:
                   - LevelSelector
                   - Output
                   - CustomControl
+                  - ContentSelector
+                  - Content
         name:
             type: string
         stage:
@@ -93,6 +95,46 @@ ControlContainer:
     required:
         - children
 
+Content:
+    type: object
+    properties:
+        children:
+            type: array
+    required:
+        - name
+        - children
+
+ContentSelector:
+    type: object
+    properties:
+        options:
+            type: array
+            items:
+                type: object
+                additionalProperties: false
+                properties:
+                    title:
+                        type: string
+                    name:
+                        type: string
+            minItems: 2
+        children:
+            type: array
+            items:
+                type: object
+                properties:
+                    type:
+                        type: string
+                        enum:
+                            - Content
+        form:
+            type: string
+            enum:
+                - listbox
+                - radio
+                - tabs
+    required:
+        - children
 
 OptionControl:
     type: object
@@ -516,6 +558,14 @@ ControlInheritance:
         - GridControl
         - OptionControl
         - ComboBox
+    ContentSelector:
+        - ControlBase
+        - GridControl
+        - OptionControl
+        - ContentSelector
+    Content:
+        - ControlBase
+        - Content
     LevelSelector:
         - ControlBase
         - GridControl
