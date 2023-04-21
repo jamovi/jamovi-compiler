@@ -181,22 +181,21 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
                 `@executable_path/../Frameworks/R.framework/Versions/${ rv }/Resources/lib/libRlapack.dylib`],
             [`/Library/Frameworks/R.framework/Versions/${ rv }/Resources/lib/libRblas.dylib`,
                 `@executable_path/../Frameworks/R.framework/Versions/${ rv }/Resources/lib/libRblas.dylib`],
-            [`/usr/local/lib/libgfortran.3.dylib`,
-                `@executable_path/../Frameworks/R.framework/Versions/${ rv }/Resources/lib/libgfortran.3.dylib`],
-            [`/Library/Frameworks/R.framework/Versions/${ rv }/Resources/lib/libgfortran.3.dylib`,
-                `@executable_path/../Frameworks/R.framework/Versions/${ rv }/Resources/lib/libgfortran.3.dylib`],
 
             [`/usr/local/lib/libgfortran.5.dylib`,
                 `@executable_path/../Frameworks/R.framework/Versions/${ rv }/Resources/lib/libgfortran.5.dylib`],
             [`/usr/local/gfortran/lib/libgfortran.5.dylib`,
                 `@executable_path/../Frameworks/R.framework/Versions/${ rv }/Resources/lib/libgfortran.5.dylib`],
-
             [`/Library/Frameworks/R.framework/Versions/${ rv }/Resources/lib/libgfortran.5.dylib`,
                 `@executable_path/../Frameworks/R.framework/Versions/${ rv }/Resources/lib/libgfortran.5.dylib`],
+
             [`/usr/local/lib/libquadmath.0.dylib`,
+                `@executable_path/../Frameworks/R.framework/Versions/${ rv }/Resources/lib/libquadmath.0.dylib`],
+            [`/usr/local/gfortran/lib/libquadmath.0.dylib`,
                 `@executable_path/../Frameworks/R.framework/Versions/${ rv }/Resources/lib/libquadmath.0.dylib`],
             [`/Library/Frameworks/R.framework/Versions/${ rv }/Resources/lib/libquadmath.0.dylib`,
                 `@executable_path/../Frameworks/R.framework/Versions/${ rv }/Resources/lib/libquadmath.0.dylib`],
+
             [`/Library/Frameworks/R.framework/Versions/${ rv }/Resources/lib/libomp.dylib`,
                 `@executable_path/../Frameworks/R.framework/Versions/${ rv }/Resources/lib/libomp.dylib`],
             [`/Library/Frameworks/R.framework/Versions/${ rv }/Resources/lib/libc++.1.dylib`,
