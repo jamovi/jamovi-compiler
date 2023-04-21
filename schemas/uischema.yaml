@@ -64,6 +64,8 @@ properties:
                         - ListItem.TermLabel
                         - ListItem.TextBox
                         - RMAnovaFactorsBox
+                        - ContentSelector
+                        - Content
                 customType:
                     type: string
                 events:

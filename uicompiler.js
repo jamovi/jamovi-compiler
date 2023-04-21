@@ -50,7 +50,7 @@ const uicompile = function(analysisPath, uiPath, jsPath, basename, sTemplPath, o
         reject(uiPath, "no 'jus' present");
 
     let jus = uiData.jus.match(/^([0-9]+)\.([0-9]+)$/)
-    if ((jus[1] !== '1' && jus[1] !== '2' && jus[1] !== '3') || jus[2] !== '0')
+    if ((jus[1] !== '1' && jus[1] !== '2' && jus[1] !== '3'  && jus[1] !== '4') || jus[2] !== '0')
         reject(uiPath, 'requires a newer jamovi-compiler');
 
     magicHandlers = parseInt(jus[1]) >= 3;
@@ -682,6 +682,14 @@ const groupConstructors = {
         return ctrl;
     },
 
+    open_ContentSelector: function(label) {
+        var ctrl = {};
+        ctrl.type = 'ContentSelector';
+        ctrl.label = label;
+        ctrl.children = [ ];
+        return ctrl;
+    },
+
     open_Label: function(label) {
         var ctrl = {};
         ctrl.type = 'Label';
@@ -1272,6 +1280,24 @@ const uiOptionControl = {
         }
     },
 
+    ContentSelector: {
+        usesSingleCell: function(ctrl) {
+            return true;
+        },
+        isContainerControl: function(ctrl) {
+            return true;
+        },
+        isOptionControl: function(ctrl) {
+            return ctrl.isVirtual !== true;
+        },
+        toRaw: function(ctrl) {
+            if (ctrl.format !== undefined)
+                return { type: "enum", template: getControlRawType(ctrl) };
+
+            return { type: "enum", template: "string" };
+        }
+    },
+
     LevelSelector: {
         usesSingleCell: function(ctrl) {
             return ctrl.useSingleCell === true;
@@ -1521,6 +1547,18 @@ const uiOptionControl = {
     },
 
     LayoutBox: {
+        usesSingleCell: function(ctrl) {
+            return true;
+        },
+        isContainerControl: function(ctrl) {
+            return true;
+        },
+        isOptionControl: function(ctrl) {
+            return false;
+        }
+    },
+
+    Content: {
         usesSingleCell: function(ctrl) {
             return true;
         },
