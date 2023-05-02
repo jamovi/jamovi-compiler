@@ -508,7 +508,7 @@ module.exports = {
         jmv_packages: R412jmv,
     },
     '4.1.3': {
-        mran_url: (process.platform === 'darwin' ? 'https://repo.jamovi.org/cran/2023-04-07,https://packagemanager.rstudio.com/cran/2023-04-07' : 'https://packagemanager.rstudio.com/cran/2023-04-07'),
+        mran_url: (process.platform !== 'win32' ? 'https://repo.jamovi.org/cran/2023-04-07,https://packagemanager.rstudio.com/cran/2023-04-07' : 'https://packagemanager.rstudio.com/cran/2023-04-07'),
         base_packages: R413base,
         jmv_packages: R413jmv,
     },
