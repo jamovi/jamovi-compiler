@@ -26,7 +26,7 @@ ControlBase:
                   - LevelSelector
                   - Output
                   - CustomControl
-                  - ContentSelector
+                  - ModeSelector
                   - Content
         name:
             type: string
@@ -104,7 +104,7 @@ Content:
         - name
         - children
 
-ContentSelector:
+ModeSelector:
     type: object
     properties:
         options:
@@ -558,11 +558,11 @@ ControlInheritance:
         - GridControl
         - OptionControl
         - ComboBox
-    ContentSelector:
+    ModeSelector:
         - ControlBase
         - GridControl
         - OptionControl
-        - ContentSelector
+        - ModeSelector
     Content:
         - ControlBase
         - Content
