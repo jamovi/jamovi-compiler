@@ -684,7 +684,7 @@ const groupConstructors = {
 
     open_ContentSelector: function(label) {
         var ctrl = {};
-        ctrl.type = 'ContentSelector';
+        ctrl.type = 'ModeSelector';
         ctrl.label = label;
         ctrl.children = [ ];
         return ctrl;
@@ -1280,7 +1280,7 @@ const uiOptionControl = {
         }
     },
 
-    ContentSelector: {
+    ModeSelector: {
         usesSingleCell: function(ctrl) {
             return true;
         },
