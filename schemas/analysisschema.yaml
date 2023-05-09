@@ -37,6 +37,11 @@ properties:
         type: boolean
     export:
         type: boolean
+    weightsSupport:
+        enum:
+          - 'auto'
+          - 'integerOnly'
+          - 'full'
     description:
         type: object
         additionalProperties: false
