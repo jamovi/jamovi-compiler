@@ -196,6 +196,9 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
             [`/Library/Frameworks/R.framework/Versions/${ rv }/Resources/lib/libquadmath.0.dylib`,
                 `@executable_path/../Frameworks/R.framework/Versions/${ rv }/Resources/lib/libquadmath.0.dylib`],
 
+            ['/opt/X11/lib/libXrender.1.dylib',
+                `@executable_path/../Frameworks/R.framework/Versions/${ rv }/Resources/lib/libXrender.1.dylib`],
+
             [`/Library/Frameworks/R.framework/Versions/${ rv }/Resources/lib/libomp.dylib`,
                 `@executable_path/../Frameworks/R.framework/Versions/${ rv }/Resources/lib/libomp.dylib`],
             [`/Library/Frameworks/R.framework/Versions/${ rv }/Resources/lib/libc++.1.dylib`,
