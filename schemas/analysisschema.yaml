@@ -42,6 +42,7 @@ properties:
           - 'auto'
           - 'integerOnly'
           - 'full'
+          - 'none'
     description:
         type: object
         additionalProperties: false

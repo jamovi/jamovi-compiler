@@ -56,7 +56,7 @@
                 pause = <%= imports.sourcifyResults(analysis.pause ? analysis.pause : null, '            ')%>,
                 completeWhenFilled = <%= analysis.completeWhenFilled ? 'TRUE' : 'FALSE' %>,
                 requiresMissings = <%= (analysis.options.length > 0 && analysis.options[0].type === 'Data' && analysis.options[0].requiresMissings) ? 'TRUE' : 'FALSE' %>,
-                weightsSupport = '<%= (analysis.weightsSupport || 'auto') %>')
+                weightsSupport = '<%= (analysis.weightsSupport || (analysis.options.map(o => o.type).includes('Data') ? undefined : 'na') || (analysis.options.map(o => o.type).includes('Output') ? 'none' : 'auto')) %>')
         }))
 <% if (analysis.export !== false) { %>
 #' <%= analysis.title %>
