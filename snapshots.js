@@ -508,7 +508,7 @@ module.exports = {
         jmv_packages: R412jmv,
     },
     '4.1.3': {
-        mran_url: ['https://repo.jamovi.org/cran-linux/2023-04-07,https://packagemanager.rstudio.com/cran/2023-04-07', 'https://repo.jamovi.org/cran/2023-04-07,https://packagemanager.rstudio.com/cran/2023-04-07', 'https://packagemanager.rstudio.com/cran/2023-04-07'][['linux', 'darwin', 'win32'].indexOf(process.platform)],
+        mran_url: ['https://repo.jamovi.org/cran-linux/2023-04-07,https://packagemanager.rstudio.com/cran/2023-04-07', 'https://repo.jamovi.org/cran/2023-04-07,https://packagemanager.rstudio.com/cran/2023-04-07', 'https://repo.jamovi.org/cran/2023-04-07,https://packagemanager.rstudio.com/cran/2023-04-07'][['linux', 'darwin', 'win32'].indexOf(process.platform)],
         base_packages: R413base,
         jmv_packages: R413jmv,
     },
