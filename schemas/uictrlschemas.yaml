@@ -79,6 +79,8 @@ GridControl:
             type: integer
         useSingleCell:
             type: bool
+        contentLink:
+            type: string
 
 ControlContainer:
     type: object
@@ -416,6 +418,8 @@ Label:
     properties:
         label:
             type: string
+        heading:
+            type: bool
 
 EmbeddedChildSupport:
     type: object
