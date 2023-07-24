@@ -829,6 +829,21 @@ const constructors = {
         }
     },
 
+    Action: {
+        create: function (item, isTemplate) {
+            let ctrl = {};
+            ctrl.type = 'ActionButton';
+            CheckTemplateState(item, ctrl, isTemplate);
+            return ctrl
+        },
+        toRaw: function (obj, key) {
+            if (key === undefined || key.length === 0)
+                return "boolean";
+
+            return null;
+        }
+    },
+
     Output: {
         create: function(item, isTemplate) {
             let ctrl = { };
@@ -1330,6 +1345,21 @@ const uiOptionControl = {
             if (ctrl.optionPart !== undefined)
                 return { type: "array", template: { type: "enum", template: "string" } };
 
+            return "boolean";
+        }
+    },
+
+    ActionButton: {
+        usesSingleCell: function (ctrl) {
+            return true;
+        },
+        isContainerControl: function (ctrl) {
+            return false;
+        },
+        isOptionControl: function (ctrl) {
+            return ctrl.isVirtual !== true;
+        },
+        toRaw: function (ctrl) {
             return "boolean";
         }
     },

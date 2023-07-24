@@ -148,6 +148,22 @@ Bool:
             type: boolean
         description: *Description
 
+Action:
+    "$schema": http://json-schema.org/draft-04/schema#
+    additionalProperties: false
+    properties:
+        name:
+            type: string
+        type:
+            type: string
+        title:
+            type: string
+        hidden:
+            type: boolean
+        default:
+            type: boolean
+        description: *Description
+
 Integer:
     "$schema": http://json-schema.org/draft-04/schema#
     additionalProperties: false

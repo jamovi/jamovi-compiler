@@ -28,6 +28,7 @@ ControlBase:
                   - CustomControl
                   - ModeSelector
                   - Content
+                  - ActionButton
         name:
             type: string
         stage:
@@ -535,6 +536,10 @@ ControlInheritance:
         - GridControl
         - CustomControl
     RMAnovaFactorsBox:
+        - ControlBase
+        - GridControl
+        - OptionControl
+    ActionButton:
         - ControlBase
         - GridControl
         - OptionControl
