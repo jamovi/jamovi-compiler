@@ -167,7 +167,27 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
         }
     }
 
-    if (process.platform === 'darwin' && fs.existsSync('/usr/bin/install_name_tool')) {
+    if (remotes.length > 0 && options.skipRemotes !== true) {
+        console.log('Installing remotes');
+        console.log(remotes.join(', '));
+
+        for (let remote of remotes) {
+
+            cmd = util.format('"%s" --vanilla --slave -e "remotes::install_github(\'%s\', lib=\'%s\', type=%s, INSTALL_opts=c(\'--no-data\', \'--no-help\', \'--no-demo\', \'--no-html\', \'--no-docs\', \'--no-multiarch\'), dependencies=FALSE, upgrade=FALSE)"', paths.rExe, remote, buildDir, installType);
+            cmd = cmd.replace(/\\/g, '/');
+            try {
+                sh(cmd, { stdio: [0, 1, 1], encoding: 'utf-8', env: env } );
+            }
+            catch(e) {
+                throw 'Failed to install remotes';
+            }
+        }
+    }
+
+    if (remotes.length + depends.length > 0
+            && process.platform === 'darwin'
+            && fs.existsSync('/usr/bin/install_name_tool')) {
+
         log.debug('fixing paths')
 
         let installed = fs.readdirSync(buildDir);
@@ -208,15 +228,22 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
         ]
 
         for (let pkg of installed) {
-            let so1 = pkg + '.so';
-            let so2 = pkg.replace(/\./g, '') + '.so';
+
+            const so1 = pkg + '.so';
+            const so2 = pkg.replace(/\./g, '') + '.so';
+            const so3 = pkg.replace(/\./g, '_') + '.so';
+
             let pkgPath;
-            let pkgPath1 = path.join(buildDir, pkg, 'libs', so1);
-            let pkgPath2 = path.join(buildDir, pkg, 'libs', so2);
+            const pkgPath1 = path.join(buildDir, pkg, 'libs', so1);
+            const pkgPath2 = path.join(buildDir, pkg, 'libs', so2);
+            const pkgPath3 = path.join(buildDir, pkg, 'libs', so3);
+
             if (fs.existsSync(pkgPath1))
                 pkgPath = pkgPath1;
             else if (fs.existsSync(pkgPath2))
                 pkgPath = pkgPath2;
+            else if (fs.existsSync(pkgPath3))
+                pkgPath = pkgPath3;
 
             if (pkgPath) {
 
@@ -235,23 +262,6 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
         }
 
         log.debug('paths fixed')
-    }
-
-    if (remotes.length > 0 && options.skipRemotes !== true) {
-        console.log('Installing remotes');
-        console.log(remotes.join(', '));
-
-        for (let remote of remotes) {
-
-            cmd = util.format('"%s" --vanilla --slave -e "remotes::install_github(\'%s\', lib=\'%s\', type=%s, INSTALL_opts=c(\'--no-data\', \'--no-help\', \'--no-demo\', \'--no-html\', \'--no-docs\', \'--no-multiarch\'), dependencies=FALSE, upgrade=FALSE)"', paths.rExe, remote, buildDir, installType);
-            cmd = cmd.replace(/\\/g, '/');
-            try {
-                sh(cmd, { stdio: [0, 1, 1], encoding: 'utf-8', env: env } );
-            }
-            catch(e) {
-                throw 'Failed to install remotes';
-            }
-        }
     }
 
     let SHLIB_EXT = '.so';
