@@ -45,6 +45,8 @@ properties:
                         - State
                         - Property
                         - Output
+                        - Notification
+                        - Action
                 clearWith:
                     type:
                       - array

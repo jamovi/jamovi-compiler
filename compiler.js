@@ -281,7 +281,9 @@ const sourcifyResults = function(object, indent) {
                 object.type === 'Html' ||
                 object.type === 'State' ||
                 object.type === 'Output' ||
-                object.type === 'Outputs')) {
+                object.type === 'Outputs' ||
+                object.type === 'Notice' ||
+                object.type === 'Action')) {
             str = resultsify(object, indent + '    ')
         }
         else {
