@@ -486,6 +486,40 @@ const R413jmv = R413base.concat([
     'qgraph', 'vcdExtra', 'pbkrtest', 'sem', 'car', 'semPlot', 'afex',
 ]);
 
+const R432base = included.concat([
+    'jmvcore',
+    'R6', 'RColorBrewer', 'base64enc', 'brio', 'cpp11', 'curl', 'farver', 'fastmap',
+    'magrittr', 'praise', 'rappdirs', 'rprojroot', 'utf8', 'viridisLite', 'yaml',
+    'Matrix', 'Rcpp', 'cli', 'colorspace', 'crayon', 'digest', 'evaluate', 'fansi',
+    'fs', 'glue', 'isoband', 'jsonlite', 'labeling', 'mime', 'pkgconfig', 'ps',
+    'remotes', 'rlang', 'stringi', 'systemfonts', 'withr', 'xfun', 'RInside',
+    'RProtoBuf', 'cachem', 'desc', 'diffobj', 'ellipsis', 'highr', 'lifecycle',
+    'munsell', 'processx', 'textshaping', 'tinytex', 'callr', 'gtable', 'htmltools',
+    'knitr', 'memoise', 'ragg', 'scales', 'vctrs', 'fontawesome', 'jquerylib',
+    'pillar', 'pkgbuild', 'sass', 'stringr', 'bslib', 'pkgload', 'tibble', 'ggplot2',
+    'rematch2', 'rmarkdown', 'waldo', 'testthat',
+]);
+
+const R432jmv = R432base.concat([
+    'BH', 'RcppParallel', 'backports', 'bit', 'bitops', 'ca', 'carData',
+    'contfrac', 'glasso', 'jpeg', 'lisrelToR', 'mnormt', 'numDeriv', 'pbivnorm',
+    'png', 'prettyunits', 'quadprog', 'qvcalc', 'rematch', 'rstudioapi', 'zip',
+    'Formula', 'GPArotation', 'MatrixModels', 'PMCMR', 'RUnit', 'RcppEigen',
+    'SparseM', 'TH.data', 'XML', 'abind', 'bit64', 'caTools', 'cellranger',
+    'checkmate', 'clipr', 'coda', 'corpcor', 'data.table', 'deSolve', 'elliptic',
+    'estimability', 'fdrtool', 'forcats', 'generics', 'ggrepel', 'ggridges',
+    'gridExtra', 'gtools', 'here', 'hms', 'htmlwidgets', 'igraph', 'lavaan',
+    'minqa', 'mvnormtest', 'mvtnorm', 'nloptr', 'openxlsx', 'patchwork', 'pbapply',
+    'plyr', 'psych', 'purrr', 'relimp', 'ssanv', 'tidyselect', 'tzdb', 'xtable',
+    'zoo', 'StanHeaders', 'dplyr', 'emmeans', 'exactci', 'gnm', 'gplots',
+    'htmlTable', 'hypergeo', 'kutils', 'lme4', 'lmtest', 'progress', 'quantreg',
+    'reshape2', 'rpf', 'sandwich', 'viridis', 'BayesFactor', 'Hmisc', 'OpenMx',
+    'ROCR', 'arm', 'exact2x2', 'lmerTest', 'multcomp', 'readxl', 'rockchalk',
+    'tidyr', 'vcd', 'vroom', 'broom', 'mi', 'qgraph', 'readr', 'vcdExtra', 'haven',
+    'pbkrtest', 'sem', 'car', 'labelled', 'semPlot', 'afex', 'broom.helpers',
+    'ggstats', 'GGally',
+]);
+
 module.exports = {
     '4.0.2': {
         mran_url: 'https://cran.microsoft.com/snapshot/2020-08-24',
@@ -511,5 +545,10 @@ module.exports = {
         mran_url: ['https://repo.jamovi.org/cran-linux/2023-04-07,https://packagemanager.rstudio.com/cran/2023-04-07', 'https://repo.jamovi.org/cran/2023-04-07,https://packagemanager.rstudio.com/cran/2023-04-07', 'https://repo.jamovi.org/cran/2023-04-07,https://packagemanager.rstudio.com/cran/2023-04-07'][['linux', 'darwin', 'win32'].indexOf(process.platform)],
         base_packages: R413base,
         jmv_packages: R413jmv,
+    },
+    '4.3.2': {
+        mran_url: ['https://repo.jamovi.org/cran-linux/2024-01-09,https://packagemanager.rstudio.com/cran/2024-01-09', 'https://repo.jamovi.org/cran/2024-01-09,https://packagemanager.rstudio.com/cran/2024-01-09', 'https://repo.jamovi.org/cran/2024-01-09,https://packagemanager.rstudio.com/cran/2024-01-09'][['linux', 'darwin', 'win32'].indexOf(process.platform)],
+        base_packages: R432base,
+        jmv_packages: R432jmv,
     },
 };
