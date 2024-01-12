@@ -73,7 +73,7 @@
         usage = usage.split('\n').map(s => s.trimRight()).join('\n');  // trim trailing whitespace
         print("\n#'\n#' @examples\n#' ");
         if (analysis.description.R.dontrun !== false)
-            print("\\dontrun{\n#' ");
+            print("\\donttest{\n#' ");
         print(usage);
         if (analysis.description.R.dontrun !== false)
             print("}");
