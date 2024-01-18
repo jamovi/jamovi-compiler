@@ -37,6 +37,7 @@ const ARGS = [
     { name: 'update', type: String },
     { name: 'verbose', type: Boolean },
     { name: 'index', type: Number },
+    { name: 'assume-app-version', type: String },
 ];
 
 const temp = require('temp');
@@ -147,7 +148,11 @@ try {
         process.exit(0);
     }
 
-    let appVersion = installer.check(args.home);
+    let appVersion;
+    if (args['assume-app-version'])
+        appVersion = args['assume-app-version'];
+    else
+        appVersion = installer.check(args.home);
 
     let paths;
     let platName;
@@ -276,7 +281,7 @@ try {
 
     if ( ! ('minApp' in packageInfo))
         packageInfo.minApp = '1.0.8';
-    
+
     if (packageInfo.name === 'jmv')
         packageInfo.index = 0;
     else if (packageInfo.name === 'scatr')
