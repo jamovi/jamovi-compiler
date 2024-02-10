@@ -335,9 +335,7 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
     log.debug('appended');
 
     try {
-        if (process.platform === 'darwin')
-            cmd = util.format('"%s" "--library=%s" --no-help --no-demo --no-html --no-docs --no-multiarch "%s"', path.join(paths.rHome, 'bin', 'INSTALL'), buildDir, tempPath);
-        else if (paths.rHome)
+        if (paths.rHome)
             cmd = util.format('"%s" CMD INSTALL "--library=%s" --no-help --no-demo --no-html --no-docs --no-multiarch "%s"', paths.rExe, buildDir, tempPath);
         else
             cmd = util.format('R CMD INSTALL "--library=%s" --no-help --no-demo --no-html --no-docs --no-multiarch "%s"', buildDir, tempPath);

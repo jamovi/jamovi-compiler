@@ -172,7 +172,7 @@ try {
         let bin  = path.dirname(exe);
         let home = path.dirname(bin);
         let rHome = path.join(home, 'Frameworks', 'R.framework', 'Versions', 'Current', 'Resources');
-        let rExe  = path.join(bin, 'R');
+        const rExe = path.join(rHome, 'bin', 'R');
         let rLibs = `${ path.join(home, 'Resources', 'modules', 'base', 'R')}`;
         paths = { home, rHome, rExe, rLibs };
         platName = 'macos';
