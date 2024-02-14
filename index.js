@@ -221,7 +221,8 @@ try {
         rVersionOutput = child_process.execSync(cmd, { encoding: 'UTF-8', env: env });
     }
 
-    let rVersion = /R version ([0-9]+\.[0-9]+\.[0-9]+)/g.exec(rVersionOutput);
+    let rVersion = /^R version ([0-9]+\.[0-9]+\.[0-9]+)/.exec(rVersionOutput);
+    let rArch = '';
 
     if (rVersion === null && process.platform === 'win32') {
         rVersion = [ undefined, '3.4.1' ];
@@ -230,6 +231,19 @@ try {
     if (rVersion === null)
         throw 'unable to determine R version';
     rVersion = rVersion[1];
+
+    const versionParts = /^([0-9]+)\.([0-9]+)/.exec(rVersion);
+    const versionAsInt = 100 * parseInt(versionParts[1]) + parseInt(versionParts[2]);
+
+    let rVersionAndArch = rVersion;
+    if (process.platform === 'darwin' && versionAsInt > 401) {  // macOS + > 4.1
+        let arch = /Platform: ([^-]+)/.exec(rVersionOutput)[1];
+        if (arch === 'aarch64')
+            rArch = 'arm64';
+        else if (arch == 'x86_64')
+            rArch = 'x64';
+        rVersionAndArch = `${ rVersion }-${ rArch }`;
+    }
 
     let mirror;
     let skipRemotes = args['skip-remotes'];
@@ -522,13 +536,13 @@ try {
 
         if (isBuilding || isInstallingTo) {
 
-            packageInfoLite.rVersion = rVersion;
+            packageInfoLite.rVersion = rVersionAndArch;
             content = '---\n' + yaml.safeDump(packageInfoLite) + '\n...\n';
 
             fs.writeFileSync(path.join(modDir, 'jamovi.yaml'), content);
             console.log('wrote: jamovi.yaml');
 
-            packageInfo.rVersion = rVersion;
+            packageInfo.rVersion = rVersionAndArch;
             content = '---\n' + yaml.safeDump(packageInfo) + '\n...\n';
 
             fs.writeFileSync(path.join(modDir, 'jamovi-full.yaml'), content);
@@ -543,7 +557,7 @@ try {
             }
 
             log.debug('compiling R package');
-            compileR(srcDir, modDir, paths, packageInfo, log, { mirror, skipRemotes, skipDeps: args['skip-deps'] });
+            compileR(srcDir, modDir, paths, packageInfo, rVersion, rArch, log, { mirror, skipRemotes, skipDeps: args['skip-deps'] });
             log.debug('compiled');
 
             if (isBuilding) {

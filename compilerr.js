@@ -12,7 +12,7 @@ const snapshots = require('./snapshots');
 const temp = require('temp');
 temp.track();
 
-const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
+const compile = function(srcDir, moduleDir, paths, packageInfo, rVersion, rArch, log, options) {
 
     options = options || {};
 
@@ -32,10 +32,9 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
         break;
     }
 
-    let rVersion = packageInfo.rVersion;
     let snapshot = snapshots[rVersion];
     let included = (packageInfo.name === 'jmv' ? snapshot.base_packages : snapshot.jmv_packages);
-    let buildDir = path.join(srcDir, 'build', `R${ rVersion }-${ platform }`);
+    let buildDir = path.join(srcDir, 'build', `R${ packageInfo.rVersion }-${ platform }`);
     let mirror = options.mirror || snapshot.mran_url;
 
     try {
@@ -193,6 +192,10 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, log, options) {
         let installed = fs.readdirSync(buildDir);
 
         let rv = rVersion.substring(0,3)
+        if (rArch === 'x64')
+            rv = `${ rv }-x86_64`;
+        else if (rArch === 'arm64')
+            rv = `${ rv }-arm64`;
 
         const subs = [
             [`/Library/Frameworks/R.framework/Versions/${ rv }/Resources/lib/libR.dylib`,
