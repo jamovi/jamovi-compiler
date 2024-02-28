@@ -236,7 +236,7 @@ try {
     const versionAsInt = 100 * parseInt(versionParts[1]) + parseInt(versionParts[2]);
 
     let rVersionAndArch = rVersion;
-    if (process.platform === 'darwin' && versionAsInt > 401) {  // macOS + > 4.1
+    if (versionAsInt > 401) {  // R > 4.1
         let arch = /Platform: ([^-]+)/.exec(rVersionOutput)[1];
         if (arch === 'aarch64')
             rArch = 'arm64';
