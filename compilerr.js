@@ -33,6 +33,10 @@ const compile = function(srcDir, moduleDir, paths, packageInfo, rVersion, rArch,
     }
 
     let snapshot = snapshots[rVersion];
+
+    if (snapshot.arch_urls)
+        snapshot = Object.assign({}, snapshot, { mran_url: snapshot.arch_urls[rArch] })
+
     let included = (packageInfo.name === 'jmv' ? snapshot.base_packages : snapshot.jmv_packages);
     let buildDir = path.join(srcDir, 'build', `R${ packageInfo.rVersion }-${ platform }`);
     let mirror = options.mirror || snapshot.mran_url;
