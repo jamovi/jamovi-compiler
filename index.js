@@ -73,11 +73,7 @@ try {
 
     const args = CLA(ARGS);
 
-    let log;
-    if (args.debug)
-        log = new Log('debug');
-    else
-        log = new Log('notice');
+    let log = require('log');
 
     let srcDir;
     let installDir;
