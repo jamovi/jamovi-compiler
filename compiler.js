@@ -14,13 +14,13 @@ const validate = require('jsonschema').validate;
 const sourcify = require('./sourcify');
 
 let analysisSchemaPath = path.join(__dirname, 'schemas', 'analysisschema.yaml');
-let analysisSchema = yaml.safeLoad(fs.readFileSync(analysisSchemaPath));
+let analysisSchema = yaml.load(fs.readFileSync(analysisSchemaPath));
 let resultsSchemaPath = path.join(__dirname, 'schemas', 'resultsschema.yaml');
-let resultsSchema = yaml.safeLoad(fs.readFileSync(resultsSchemaPath));
+let resultsSchema = yaml.load(fs.readFileSync(resultsSchemaPath));
 let optionSchemasPath = path.join(__dirname, 'schemas', 'optionschemas.yaml');
-let optionSchemas = yaml.safeLoad(fs.readFileSync(optionSchemasPath));
+let optionSchemas = yaml.load(fs.readFileSync(optionSchemasPath));
 let resultsSchemasPath = path.join(__dirname, 'schemas', 'resultelementschemas.yaml');
-let resultsSchemas = yaml.safeLoad(fs.readFileSync(resultsSchemasPath));
+let resultsSchemas = yaml.load(fs.readFileSync(resultsSchemasPath));
 
 const reject = function(filePath, message) {
     throw "Unable to compile '" + path.basename(filePath) + "':\n\t" + message;
@@ -72,7 +72,7 @@ const compile = function(packageName, analysisPath, resultsPath, templPath, outP
 
     let analysis;
     try {
-        analysis = yaml.safeLoad(content);
+        analysis = yaml.load(content);
     }
     catch (e) {
         reject(analysisPath, e.message);
@@ -100,7 +100,7 @@ const compile = function(packageName, analysisPath, resultsPath, templPath, outP
     let results;
     try {
         let content = fs.readFileSync(resultsPath, 'utf-8');
-        results = yaml.safeLoad(content);
+        results = yaml.load(content);
     }
     catch (e) {
         if (e.code === 'ENOENT') {
