@@ -4,6 +4,8 @@
 
 console.log('\njamovi compiler\n');
 
+require('log-node')();
+
 const path = require('path');
 const fs = require('fs-extra');
 const browserify = require('browserify');
