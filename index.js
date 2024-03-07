@@ -530,20 +530,20 @@ try {
             delete analysis.uijs;
         }
 
-        let content = '---\n' + yaml.safeDump(packageInfoLite) + '\n...\n';
+        let content = '---\n' + yaml.dump(packageInfoLite) + '\n...\n';
         fs.writeFileSync(indexPath, content);
         console.log('wrote: 0000.yaml');
 
         if (isBuilding || isInstallingTo) {
 
             packageInfoLite.rVersion = rVersionAndArch;
-            content = '---\n' + yaml.safeDump(packageInfoLite) + '\n...\n';
+            content = '---\n' + yaml.dump(packageInfoLite) + '\n...\n';
 
             fs.writeFileSync(path.join(modDir, 'jamovi.yaml'), content);
             console.log('wrote: jamovi.yaml');
 
             packageInfo.rVersion = rVersionAndArch;
-            content = '---\n' + yaml.safeDump(packageInfo) + '\n...\n';
+            content = '---\n' + yaml.dump(packageInfo) + '\n...\n';
 
             fs.writeFileSync(path.join(modDir, 'jamovi-full.yaml'), content);
             console.log('wrote: jamovi-full.yaml');

@@ -77,7 +77,7 @@ const uicompile = function(analysisPath, uiPath, jsPath, basename, sTemplPath, o
     checkControls(uiData.children, uiPath);
 
     if (upgradeInfo.upgraded || added.length > 0 || removed.length > 0) {
-        fs.writeFileSync(uiPath,  yaml.safeDump(uiData));
+        fs.writeFileSync(uiPath,  yaml.dump(uiData));
         console.log('wrote: ' + path.basename(uiPath));
     }
 
