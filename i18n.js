@@ -368,7 +368,7 @@ const scanAnalyses = function(defDir, srcDir) {
             //let refsPath = path.join(defDir, '00refs.yaml');
 
             let content = fs.readFileSync(packageInfoPath);
-            let packageInfo = yaml.safeLoad(content);
+            let packageInfo = yaml.load(content);
             checkItem(packageInfo, `package`);
 
         }
@@ -379,17 +379,17 @@ const scanAnalyses = function(defDir, srcDir) {
             let uiPath = path.join(defDir, basename + '.u.yaml');
 
             let content = fs.readFileSync(analysisPath, 'utf-8');
-            let analysis = yaml.safeLoad(content);
+            let analysis = yaml.load(content);
 
             checkItem(analysis, `${analysis.name}/options`);
 
             if (utils.exists(uiPath)) {
-                let uiData = yaml.safeLoad(fs.readFileSync(uiPath));
+                let uiData = yaml.load(fs.readFileSync(uiPath));
                 checkItem(uiData, `${analysis.name}/ui`);
             }
 
             if (utils.exists(resultsPath)) {
-                let results = yaml.safeLoad(fs.readFileSync(resultsPath));
+                let results = yaml.load(fs.readFileSync(resultsPath));
                 checkItem(results, `${analysis.name}/results`);
             }
         }

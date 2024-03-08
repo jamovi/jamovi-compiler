@@ -4,6 +4,8 @@
 
 console.log('\njamovi compiler\n');
 
+require('log-node')();
+
 const path = require('path');
 const fs = require('fs-extra');
 const browserify = require('browserify');
@@ -71,11 +73,7 @@ try {
 
     const args = CLA(ARGS);
 
-    let log;
-    if (args.debug)
-        log = new Log('debug');
-    else
-        log = new Log('notice');
+    let log = require('log');
 
     let srcDir;
     let installDir;
@@ -274,7 +272,7 @@ try {
 
     if (utils.exists(packageInfoPath)) {
         let content = fs.readFileSync(packageInfoPath);
-        packageInfo = yaml.safeLoad(content);
+        packageInfo = yaml.load(content);
         if ('jms' in packageInfo) {
             if (packageInfo.jms !== '1.0')
                 throw 'this module requires a newer jmc';
@@ -308,7 +306,7 @@ try {
     let refs = undefined;
     if (utils.exists(refsPath)) {
         let content = fs.readFileSync(refsPath);
-        refs = yaml.safeLoad(content).refs;
+        refs = yaml.load(content).refs;
     }
 
     if ( ! utils.exists(defDir))
@@ -419,7 +417,7 @@ try {
             }
 
             let content = fs.readFileSync(analysisPath, 'utf-8');
-            let analysis = yaml.safeLoad(content);
+            let analysis = yaml.load(content);
 
             let uijs = '';
             if (utils.exists(uOutPath))
@@ -530,20 +528,20 @@ try {
             delete analysis.uijs;
         }
 
-        let content = '---\n' + yaml.safeDump(packageInfoLite) + '\n...\n';
+        let content = '---\n' + yaml.dump(packageInfoLite) + '\n...\n';
         fs.writeFileSync(indexPath, content);
         console.log('wrote: 0000.yaml');
 
         if (isBuilding || isInstallingTo) {
 
             packageInfoLite.rVersion = rVersionAndArch;
-            content = '---\n' + yaml.safeDump(packageInfoLite) + '\n...\n';
+            content = '---\n' + yaml.dump(packageInfoLite) + '\n...\n';
 
             fs.writeFileSync(path.join(modDir, 'jamovi.yaml'), content);
             console.log('wrote: jamovi.yaml');
 
             packageInfo.rVersion = rVersionAndArch;
-            content = '---\n' + yaml.safeDump(packageInfo) + '\n...\n';
+            content = '---\n' + yaml.dump(packageInfo) + '\n...\n';
 
             fs.writeFileSync(path.join(modDir, 'jamovi-full.yaml'), content);
             console.log('wrote: jamovi-full.yaml');

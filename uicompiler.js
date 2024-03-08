@@ -10,9 +10,9 @@ const util = require('util')
 const uiUpdateCheck = require('./layoutupdatecheck');
 
 let uiSchemaPath = path.join(__dirname, 'schemas', 'uischema.yaml');
-let uiSchema = yaml.safeLoad(fs.readFileSync(uiSchemaPath));
+let uiSchema = yaml.load(fs.readFileSync(uiSchemaPath));
 let uiCtrlSchemasPath = path.join(__dirname, 'schemas', 'uictrlschemas.yaml');
-let uiCtrlSchemas = yaml.safeLoad(fs.readFileSync(uiCtrlSchemasPath));
+let uiCtrlSchemas = yaml.load(fs.readFileSync(uiCtrlSchemasPath));
 let currentBasename = '';
 let magicHandlers = false;
 
@@ -21,13 +21,13 @@ const uicompile = function(analysisPath, uiPath, jsPath, basename, sTemplPath, o
     currentBasename = basename;
 
     let content = fs.readFileSync(analysisPath, 'utf-8');
-    let analysis = yaml.safeLoad(content);
+    let analysis = yaml.load(content);
 
     let uiData = null;
 
     if (fs.existsSync(uiPath)) {
         try {
-            uiData = yaml.safeLoad(fs.readFileSync(uiPath, 'utf-8'));
+            uiData = yaml.load(fs.readFileSync(uiPath, 'utf-8'));
         }
         catch (e) {
             reject(uiPath, e.message);
@@ -77,7 +77,7 @@ const uicompile = function(analysisPath, uiPath, jsPath, basename, sTemplPath, o
     checkControls(uiData.children, uiPath);
 
     if (upgradeInfo.upgraded || added.length > 0 || removed.length > 0) {
-        fs.writeFileSync(uiPath,  yaml.safeDump(uiData));
+        fs.writeFileSync(uiPath,  yaml.dump(uiData));
         console.log('wrote: ' + path.basename(uiPath));
     }
 
