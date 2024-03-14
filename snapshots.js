@@ -537,20 +537,20 @@ module.exports = {
         jmv_packages: R405jmv,
     },
     '4.1.2': {
-        mran_url: (process.platform === 'linux' ? 'https://packagemanager.rstudio.com/cran/2021-12-29' : 'https://cran.microsoft.com/snapshot/2022-01-01'),
+        mran_url: (process.platform === 'linux' ? 'https://packagemanager.posit.co/cran/2021-12-29' : 'https://cran.microsoft.com/snapshot/2022-01-01'),
         base_packages: R412base,
         jmv_packages: R412jmv,
     },
     '4.1.3': {
-        mran_url: ['https://repo.jamovi.org/cran-linux/2023-04-07,https://packagemanager.rstudio.com/cran/2023-04-07', 'https://repo.jamovi.org/cran/2023-04-07,https://packagemanager.rstudio.com/cran/2023-04-07', 'https://repo.jamovi.org/cran/2023-04-07,https://packagemanager.rstudio.com/cran/2023-04-07'][['linux', 'darwin', 'win32'].indexOf(process.platform)],
+        mran_url: ['https://repo.jamovi.org/cran-linux/2023-04-07,https://packagemanager.posit.co/cran/2023-04-07', 'https://repo.jamovi.org/cran/2023-04-07,https://packagemanager.posit.co/cran/2023-04-07', 'https://repo.jamovi.org/cran/2023-04-07,https://packagemanager.posit.co/cran/2023-04-07'][['linux', 'darwin', 'win32'].indexOf(process.platform)],
         base_packages: R413base,
         jmv_packages: R413jmv,
     },
     '4.3.2': {
-        mran_url: [undefined, 'https://repo.jamovi.org/cran/2024-01-09,https://packagemanager.rstudio.com/cran/2024-01-09', 'https://packagemanager.rstudio.com/cran/2024-01-09'][['linux', 'darwin', 'win32'].indexOf(process.platform)],
+        mran_url: [undefined, 'https://packagemanager.posit.co/cran/2024-01-09,https://repo.jamovi.org/cran/2024-01-09', 'https://packagemanager.posit.co/cran/2024-01-09'][['linux', 'darwin', 'win32'].indexOf(process.platform)],
         arch_urls : (process.platform !== 'linux' ? undefined : {
-            arm64: 'https://repo.jamovi.org/cran-linux/2024-01-09/arm64,https://packagemanager.rstudio.com/cran/2024-01-09',
-            x64:   'https://repo.jamovi.org/cran-linux/2024-01-09/x64,https://packagemanager.rstudio.com/cran/2024-01-09',
+            arm64: 'https://repo.jamovi.org/cran-linux/2024-01-09/arm64,https://packagemanager.posit.co/cran/2024-01-09',
+            x64:   'https://repo.jamovi.org/cran-linux/2024-01-09/x64,https://packagemanager.posit.co/cran/2024-01-09',
         }),
         base_packages: R432base,
         jmv_packages: R432jmv,
