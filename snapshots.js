@@ -547,7 +547,7 @@ module.exports = {
         jmv_packages: R413jmv,
     },
     '4.3.2': {
-        mran_url: ['https://repo.jamovi.org/cran-linux/2024-01-09,https://packagemanager.rstudio.com/cran/2024-01-09', 'https://repo.jamovi.org/cran/2024-01-09,https://packagemanager.rstudio.com/cran/2024-01-09', 'https://repo.jamovi.org/cran/2024-01-09,https://packagemanager.rstudio.com/cran/2024-01-09'][['linux', 'darwin', 'win32'].indexOf(process.platform)],
+        mran_url: [undefined, 'https://repo.jamovi.org/cran/2024-01-09,https://packagemanager.rstudio.com/cran/2024-01-09', 'https://packagemanager.rstudio.com/cran/2024-01-09'][['linux', 'darwin', 'win32'].indexOf(process.platform)],
         arch_urls : (process.platform !== 'linux' ? undefined : {
             arm64: 'https://repo.jamovi.org/cran-linux/2024-01-09/arm64,https://packagemanager.rstudio.com/cran/2024-01-09',
             x64:   'https://repo.jamovi.org/cran-linux/2024-01-09/x64,https://packagemanager.rstudio.com/cran/2024-01-09',
