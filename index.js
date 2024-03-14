@@ -40,6 +40,7 @@ const ARGS = [
     { name: 'verbose', type: Boolean },
     { name: 'index', type: Number },
     { name: 'assume-app-version', type: String },
+    { name: 'build-hash', type: String },
 ];
 
 const temp = require('temp');
@@ -293,6 +294,9 @@ try {
 
     if ( ! ('minApp' in packageInfo))
         packageInfo.minApp = '1.0.8';
+
+    if (args['build-hash'])
+        packageInfo['build-hash'] = args['build-hash'];
 
     if (packageInfo.name === 'jmv')
         packageInfo.index = 0;
