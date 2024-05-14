@@ -295,6 +295,15 @@ try {
     if ( ! ('minApp' in packageInfo))
         packageInfo.minApp = '1.0.8';
 
+    const minAppAsArray = packageInfo.minApp.split('.').map(x => parseInt(x))
+    const minAppAsInt = (10000 * minAppAsArray[0]) + 100 * (minAppAsArray[1] || 0) + (minAppAsArray[2] || 0)
+
+    const appVersionAsArray = appVersion.split('.').map(x => parseInt(x))
+    const appVersionAsInt = (10000 * appVersionAsArray[0]) + 100 * (appVersionAsArray[1] || 0) + (appVersionAsArray[2] || 0)
+
+    if (minAppAsInt > appVersionAsInt)
+        throw `This module requires a newer version of jamovi (minApp: ${ packageInfo.minApp } > ${ appVersion })`;
+    
     if (args['build-hash'])
         packageInfo['build-hash'] = args['build-hash'];
 
