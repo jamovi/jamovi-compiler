@@ -522,22 +522,22 @@ const R432jmv = R432base.concat([
 
 module.exports = {
     '4.0.2': {
-        mran_url: 'https://cran.microsoft.com/snapshot/2020-08-24',
+        mran_url: 'https://packagemanager.posit.co/cran/2020-08-24',
         base_packages: R402base,
         jmv_packages: R402jmv,
     },
     '4.0.5': {
-        mran_url: 'https://cran.microsoft.com/snapshot/2021-04-01',
+        mran_url: 'https://packagemanager.posit.co/cran/2021-04-01',
         base_packages: R405base,
         jmv_packages: R405jmv,
     },
     '4.1.1': {  // same as 405 (as you can see)
-        mran_url: 'https://cran.microsoft.com/snapshot/2021-04-01',
+        mran_url: 'https://packagemanager.posit.co/cran/2021-04-01',
         base_packages: R405base,
         jmv_packages: R405jmv,
     },
     '4.1.2': {
-        mran_url: (process.platform === 'linux' ? 'https://packagemanager.posit.co/cran/2021-12-29' : 'https://cran.microsoft.com/snapshot/2022-01-01'),
+        mran_url: 'https://packagemanager.posit.co/cran/2021-12-29',
         base_packages: R412base,
         jmv_packages: R412jmv,
     },
