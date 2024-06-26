@@ -95,6 +95,8 @@ ControlContainer:
             type: array
         targetArea:
             type: bool
+        labelSource:
+            type: string
     required:
         - children
 
