@@ -591,7 +591,7 @@ module.exports = {
         jmv_packages: R432jmv,
     },
     '4.4.1': {
-        mran_url: [undefined, 'https://packagemanager.posit.co/cran/2024-08-07,https://repo.jamovi.org/cran/2024-08-07', 'https://packagemanager.posit.co/cran/2024-08-07'][['linux', 'darwin', 'win32'].indexOf(process.platform)],
+        mran_url: (process.platform === 'linux' ? undefined : 'https://packagemanager.posit.co/cran/2024-08-07,https://repo.jamovi.org/cran/2024-08-07'),
         arch_urls : (process.platform !== 'linux' ? undefined : {
             arm64: 'https://repo.jamovi.org/cran-linux/2024-08-07/arm64,https://packagemanager.posit.co/cran/2024-08-07',
             x64:   'https://repo.jamovi.org/cran-linux/2024-08-07/x64,https://packagemanager.posit.co/cran/2024-08-07',
