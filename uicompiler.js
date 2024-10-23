@@ -752,8 +752,11 @@ const compareTypeObjects = function(subType, fullType) {
     if (typeof subType !== 'object')
         return subType === fullType;
 
-    if (typeof fullType !== 'object')
+    if (typeof fullType !== 'object') {
+        if (subType.type === 'enum' && subType.template === fullType)
+            return true;
         return false;
+    }
 
     if (subType.type !== fullType.type)
         return false;
