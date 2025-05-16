@@ -126,10 +126,10 @@ const parseContext = function(value) {
     return data;
 }
 
-const extract = function(obj, address, filter) {
+const extract = function(obj, address, filter, exclude=[]) {
 
     for (let property in obj) {
-        let include = !filter || filter.includes(property);
+        let include = ( ! filter || filter.includes(property)) && ! exclude.includes(property);
         if (include) {
             let value = obj[property];
             if (typeof value === 'string') {
@@ -142,8 +142,9 @@ const extract = function(obj, address, filter) {
                         updateEntry(value.key, value.context, `${address}.${property}`);
                 }
             }
-            else if (Array.isArray(value) || typeof value === 'object')
-                extract(value, `${address}.${property}`);
+            else if (Array.isArray(value) || typeof value === 'object') {
+                extract(value, `${address}.${property}`, undefined, exclude);
+            }
         }
     }
 }
@@ -168,7 +169,7 @@ const extractDefaultValueStrings = function(item, itemAddress, defaultValue, bas
     }
 }
 
-const checkItem = function(item, address, customFilter) {
+const checkItem = function(item, address, customFilter, exclude=['usage']) {
 
     if (customFilter === undefined)
         customFilter = [];
@@ -182,7 +183,7 @@ const checkItem = function(item, address, customFilter) {
             else
                 childAddress = `${address}[${i}]`;
 
-            checkItem(child, childAddress, customFilter);
+            checkItem(child, childAddress, customFilter, exclude);
         }
     }
     else if (typeof item === 'object') {
@@ -190,7 +191,7 @@ const checkItem = function(item, address, customFilter) {
             'ghostText', 'suffix', 'menuTitle', 'menuGroup',
             'menuSubgroup', 'menuSubtitle', 'superTitle', 'content', 'notes', ...customFilter];
 
-        extract(item, address, filter);
+        extract(item, address, filter, exclude);
 
         extractDefaultValueStrings(item, address, item.default, 'default');
 
@@ -212,7 +213,7 @@ const checkItem = function(item, address, customFilter) {
             checkItem(item.elements, address);
 
         if (item.options)
-            checkItem(item.options, address);
+            checkItem(item.options, address, undefined, ['R']);
 
         if (item.analyses)
             checkItem(item.analyses, `${address}/analyses`);
