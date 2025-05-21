@@ -17,6 +17,10 @@ properties:
     version:
         type: string
         pattern: "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    ribbon:
+        enum:
+          - 'analyses'
+          - 'plots'
     menuGroup:
         type: string
     menuSubgroup:

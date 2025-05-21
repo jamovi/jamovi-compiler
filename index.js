@@ -303,7 +303,7 @@ try {
 
     if (minAppAsInt > appVersionAsInt)
         throw `This module requires a newer version of jamovi (minApp: ${ packageInfo.minApp } > ${ appVersion })`;
-    
+
     if (args['build-hash'])
         packageInfo['build-hash'] = args['build-hash'];
 
@@ -444,6 +444,11 @@ try {
                 options: analysis.options,
                 uijs: uijs,
             };
+
+            if ('ribbon' in analysis)
+                aObj.ribbon = analysis.ribbon;
+            else
+                aObj.ribbon = 'analyses';
 
             if ('menuGroup' in analysis)
                 aObj.menuGroup = analysis.menuGroup;
