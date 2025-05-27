@@ -277,7 +277,7 @@ const load = function(defDir, code, create) {
 
         let langPath = path.join(transDir, file);
 
-        let translation = po2json.parseFileSync(langPath, { format: 'jed1.x' });
+        let translation = po2json.parseFileSync(langPath, { format: 'jed1.x', fuzzy: true });
         if (translation.locale_data.messages[""].lang !== '') {
             if (! code || code === translation.locale_data.messages[""].lang) {
                 translation.code = translation.locale_data.messages[""].lang.toLowerCase();
