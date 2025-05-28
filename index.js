@@ -445,10 +445,10 @@ try {
                 uijs: uijs,
             };
 
-            if ('ribbon' in analysis)
-                aObj.ribbon = analysis.ribbon;
+            if ('category' in analysis)
+                aObj.category = analysis.category;
             else
-                aObj.ribbon = 'analyses';
+                aObj.category = 'analyses';
 
             if ('menuGroup' in analysis)
                 aObj.menuGroup = analysis.menuGroup;
