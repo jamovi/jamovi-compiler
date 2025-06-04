@@ -572,7 +572,7 @@ const R450base = included.concat([
     'ggplot2', 'officer', 'testthat', 'flextable', 'rvg', 'tidyr', 'broom', 'export'
 ]);
 
-const R450jmv = R441base.concat([
+const R450jmv = R450base.concat([
     'BH', 'RcppParallel', 'bitops', 'ca', 'carData', 'contfrac', 'glasso', 'jpeg',
     'lisrelToR', 'matrixStats', 'mnormt', 'nloptr', 'numDeriv', 'pbivnorm', 'png',
     'prettyunits', 'quadprog', 'qvcalc', 'rematch', 'rstudioapi', 'Deriv',
