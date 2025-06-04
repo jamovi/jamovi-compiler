@@ -569,8 +569,8 @@ const R450base = included.concat([
     'gtable', 'jquerylib', 'knitr', 'memoise', 'sass', 'scales', 'systemfonts',
     'vctrs', 'waldo', 'bslib', 'gdtools', 'pillar', 'pkgbuild', 'purrr', 'stringr',
     'textshaping', 'tidyselect', 'pkgload', 'ragg', 'rmarkdown', 'tibble', 'dplyr',
-    'ggplot2', 'htmlwidgets', 'officer', 'testthat', 'flextable', 'rgl', 'rvg',
-    'tidyr', 'broom', 'export'
+    'ggplot2', 'htmlwidgets', 'officer', 'testthat', 'flextable', 'rvg', 'tidyr',
+    'broom', 'export'
 ]);
 
 const R450jmv = R441base.concat([
@@ -636,10 +636,10 @@ module.exports = {
         jmv_packages: R441jmv,
     },
     '4.5.0': {
-        mran_url: (process.platform === 'linux' ? undefined : 'https://packagemanager.posit.co/cran/2025-05-25,https://repo.jamovi.org/cran/2025-05-25'),
+        mran_url: (process.platform === 'linux' ? undefined : 'https://repo.jamovi.org/cran/2025-05-25,https://packagemanager.posit.co/cran/2025-05-25'),
         arch_urls : (process.platform !== 'linux' ? undefined : {
-            arm64: 'https://repo.jamovi.org/cran-linux/2024-08-07/arm64,https://packagemanager.posit.co/cran/2025-05-25',
-            x64:   'https://repo.jamovi.org/cran-linux/2024-08-07/x64,https://packagemanager.posit.co/cran/2025-05-25',
+            arm64: 'https://repo.jamovi.org/cran-linux/2025-05-25/arm64,https://packagemanager.posit.co/cran/2025-05-25',
+            x64:   'https://repo.jamovi.org/cran-linux/2025-05-25/x64,https://packagemanager.posit.co/cran/2025-05-25',
         }),
         base_packages: R450base,
         jmv_packages: R450jmv,
