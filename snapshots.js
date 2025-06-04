@@ -569,8 +569,7 @@ const R450base = included.concat([
     'gtable', 'jquerylib', 'knitr', 'memoise', 'sass', 'scales', 'systemfonts',
     'vctrs', 'waldo', 'bslib', 'gdtools', 'pillar', 'pkgbuild', 'purrr', 'stringr',
     'textshaping', 'tidyselect', 'pkgload', 'ragg', 'rmarkdown', 'tibble', 'dplyr',
-    'ggplot2', 'htmlwidgets', 'officer', 'testthat', 'flextable', 'rvg', 'tidyr',
-    'broom', 'export'
+    'ggplot2', 'officer', 'testthat', 'flextable', 'rvg', 'tidyr', 'broom', 'export'
 ]);
 
 const R450jmv = R441base.concat([
@@ -581,14 +580,15 @@ const R450jmv = R441base.concat([
     'TH.data', 'XML', 'abind', 'caTools', 'cellranger', 'checkmate', 'coda',
     'colorspace', 'corpcor', 'cowplot', 'deSolve', 'elliptic', 'estimability',
     'fdrtool', 'forcats', 'ggrepel', 'ggridges', 'gridExtra', 'gtools', 'here',
-    'hms', 'lavaan', 'microbenchmark', 'minqa', 'modelr', 'mvnormtest', 'mvtnorm',
-    'patchwork', 'pbapply', 'plyr', 'rbibutils', 'relimp', 'ssanv', 'zoo',
-    'MatrixModels', 'Rdpack', 'StanHeaders', 'doBy', 'emmeans', 'exactci',
-    'ggstats', 'gnm', 'gplots', 'htmlTable', 'hypergeo', 'igraph', 'kutils',
-    'lmtest', 'progress', 'psych', 'reshape2', 'rpf', 'sandwich', 'viridis',
-    'BayesFactor', 'GGally', 'Hmisc', 'OpenMx', 'ROCR', 'exact2x2', 'multcomp',
-    'quantreg', 'readxl', 'reformulas', 'vcd', 'lme4', 'qgraph', 'vcdExtra', 'arm',
-    'lmerTest', 'pbkrtest', 'rockchalk', 'car', 'mi', 'afex', 'sem', 'semPlot'
+    'hms', 'htmlwidgets', 'lavaan', 'microbenchmark', 'minqa', 'modelr',
+    'mvnormtest', 'mvtnorm', 'patchwork', 'pbapply', 'plyr', 'rbibutils', 'relimp',
+    'ssanv', 'zoo', 'MatrixModels', 'Rdpack', 'StanHeaders', 'doBy', 'emmeans',
+    'exactci', 'ggstats', 'gnm', 'gplots', 'htmlTable', 'hypergeo', 'igraph',
+    'kutils', 'lmtest', 'progress', 'psych', 'reshape2', 'rpf', 'sandwich',
+    'viridis', 'BayesFactor', 'GGally', 'Hmisc', 'OpenMx', 'ROCR', 'exact2x2',
+    'multcomp', 'quantreg', 'readxl', 'reformulas', 'vcd', 'lme4', 'qgraph',
+    'vcdExtra', 'arm', 'lmerTest', 'pbkrtest', 'rockchalk', 'car', 'mi', 'afex',
+    'sem', 'semPlot'
 ]);
 
 module.exports = {
