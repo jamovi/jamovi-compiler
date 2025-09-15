@@ -377,6 +377,8 @@ try {
                 console.log(`wrote: ${i18nFile}`);
 
             }
+            if ( ! codes.includes('en'))
+                codes.unshift('en')
             packageInfo.languages = codes;
         }
     }
