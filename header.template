@@ -245,7 +245,7 @@ if (results.items) {
     }).join('')
 %><% } %>
 
-    options <- <%= analysis.name %>Options$new(<%=analysis.options.filter(o => o.type !== 'Data' && ! o.type.startsWith('Output')).map(option => {
+    options <- <%= analysis.name %>Options$new(<%=analysis.options.filter(o => o.type !== 'Data' && ! o.type.startsWith('Output') && o.type !== 'Action').map(option => {
         return '\n        ' + option.name + ' = ' + option.name;
     }).join()
     %>)
